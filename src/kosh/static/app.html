@@ -21,6 +21,7 @@
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
   --r1:8px; --r2:12px; --pill:40px;
   --shadow:0 1px 2px rgba(19,38,68,.06), 0 8px 24px rgba(19,38,68,.06);
+  --lift:0 4px 14px rgba(19,38,68,.10);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#0b1424; --panel:#101c30; --panel-2:#132038; --panel-3:#16253c;
@@ -30,6 +31,7 @@
   --brand-ink:#0b1424;
   --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  --lift:0 4px 14px rgba(0,0,0,.45);
 }}
 :root[data-theme="dark"]{
   --paper:#0b1424; --panel:#101c30; --panel-2:#132038; --panel-3:#16253c;
@@ -39,6 +41,7 @@
   --brand-ink:#0b1424;
   --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  --lift:0 4px 14px rgba(0,0,0,.45);
 }
 
 *{box-sizing:border-box}
@@ -55,8 +58,12 @@ body{
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* ---------- header ---------- */
+/* The bar was already pinned, but with nothing but a hairline under it the rows
+   scrolling beneath appeared to bleed into it. Elevation only once the page has
+   actually moved, so a page at rest keeps a flat edge. */
 header{border-bottom:1px solid var(--line);background:var(--panel);
-  position:sticky;top:0;z-index:30}
+  position:sticky;top:0;z-index:30;transition:box-shadow .16s ease}
+header.lifted{box-shadow:var(--lift)}
 .bar{max-width:1200px;margin:0 auto;padding:0 var(--s5);height:60px;
   display:flex;align-items:center;gap:var(--s3)}
 .iconbtn{width:34px;height:34px;display:grid;place-items:center;padding:0;flex:none;
@@ -71,6 +78,10 @@ header{border-bottom:1px solid var(--line);background:var(--panel);
 .rule{width:1px;height:22px;background:var(--line);flex:none}
 .unit{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.005em;
   white-space:nowrap}
+/* Once the page title has scrolled past, the bar names the section instead, so
+   the top of the screen never stops saying where you are. */
+.crumb{font-size:13px;font-weight:650;color:var(--ink);white-space:nowrap;
+  letter-spacing:-.01em}
 .controls{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;
   margin-left:auto}
 label.field{display:flex;align-items:center;gap:var(--s2);font-size:11px;
@@ -241,7 +252,7 @@ footer{max-width:1200px;margin:0 auto;padding:0 var(--s5) var(--s6);
   .scrim{display:none !important}
   .drawer{position:fixed;top:60px;bottom:0;left:0;width:248px;max-width:none;
     z-index:20;box-shadow:none;animation:none;background:var(--panel-2);
-    border-right:1px solid var(--line)}
+    border-right:1px solid var(--line);overflow-y:auto}
   .drawerhead{display:none}
   #tabs{padding:var(--s4) var(--s3)}
   #tabs button[aria-current=page]{background:var(--panel)}
@@ -277,7 +288,8 @@ footer{max-width:1200px;margin:0 auto;padding:0 var(--s5) var(--s6);
       <!--RAZORPAY_LOGO--><span class="mark" id="fallbackmark">K</span>
     </a>
     <span class="rule" aria-hidden="true"></span>
-    <span class="unit">AI Finance Controller</span>
+    <span class="unit" id="unit">AI Finance Controller</span>
+    <span class="crumb" id="crumb" hidden></span>
     <div class="controls">
       <label class="field">Seed
         <input type="number" id="seed" value="20260824" min="1" step="1">
@@ -684,8 +696,18 @@ function selectTab(name) {
                            : x.removeAttribute("aria-current"));
   Object.keys(TITLES).forEach(t => $("tab-" + t).hidden = t !== name);
   $("pageTitle").textContent = TITLES[name];
+  $("crumb").textContent = TITLES[name];
   document.title = TITLES[name] + " — AI Finance Controller";
 }
+
+const onScroll = () => {
+  const moved = window.scrollY > 4;
+  document.querySelector("header").classList.toggle("lifted", moved);
+  $("crumb").hidden = !moved;
+  $("unit").hidden = moved && innerWidth < 1100;   // keep the bar from crowding
+};
+addEventListener("scroll", onScroll, { passive: true });
+addEventListener("resize", onScroll);
 
 $("menu").addEventListener("click", () => $("drawer").hidden ? openMenu() : closeMenu());
 $("closeMenu").addEventListener("click", closeMenu);
@@ -699,6 +721,7 @@ $("tabs").addEventListener("click", e => {
   closeMenu();                        // no-op while docked
 });
 syncNav();
+onScroll();
 $("dispFilters").addEventListener("click", e => {
   const b = e.target.closest("[data-disp]"); if (!b) return;
   filters.disposition = b.dataset.disp; renderFilters(); renderFindings();

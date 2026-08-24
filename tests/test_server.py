@@ -288,3 +288,19 @@ def test_navigation_docks_on_wide_screens_and_collapses_below(live):
     assert "margin:0 0 0 248px" in page
     # A pinned sidebar must ignore both dismiss paths.
     assert "if (DOCKED.matches) return;" in page
+
+
+def test_the_top_bar_is_pinned_and_lifts_off_the_content(live):
+    """Pinned was never the problem — separation was. With only a hairline
+    beneath it, rows scrolling past appeared to bleed into the bar, so it takes
+    elevation once the page has actually moved and stays flat at rest."""
+    base, _ = live
+    _, body, _ = get(base, "/")
+    page = body.decode()
+    assert "position:sticky;top:0" in page.replace(" ", "")
+    assert "header.lifted{box-shadow:var(--lift)}" in page
+    assert 'classList.toggle("lifted", moved)' in page
+    assert "window.scrollY > 4" in page          # a hair of travel, not one pixel
+    assert 'addEventListener("scroll", onScroll, { passive: true })' in page
+    # The bar names the section once the page heading has scrolled away.
+    assert 'id="crumb"' in page and '$("crumb").hidden = !moved' in page
