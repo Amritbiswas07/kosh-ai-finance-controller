@@ -1,9 +1,9 @@
 {
   "meta": {
     "seed": "data",
-    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 4.1s)",
+    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 5.5s)",
     "period": "synthetic",
-    "llm_seconds": 10.8
+    "llm_seconds": 10.1
   },
   "counts": {
     "erp_invoices": 135,
@@ -16,11 +16,11 @@
     "unresolved": 42
   },
   "timings": {
-    "erp_to_gateway_s": 0.0006,
+    "erp_to_gateway_s": 0.0007,
     "integrity_s": 0.0001,
     "settlement_to_bank_s": 0.0003,
-    "direct_receipts_s": 10.7739,
-    "total_s": 10.7749
+    "direct_receipts_s": 10.1062,
+    "total_s": 10.1073
   },
   "position": {
     "captured": "726213.94",
@@ -3290,7 +3290,7 @@
         "shortfall": "-129.76",
         "customer": "Frontier Optics"
       },
-      "proposed_action": "Reconfirm the HSN rate on INV-2627-1112; if 18% applies, a revised invoice for -129.76 of GST is due.",
+      "proposed_action": "Reconfirm the HSN rate on INV-2627-1112; if 18% applies, 129.76 of GST was over-collected and needs a credit note.",
       "narrative": ""
     },
     {
@@ -3306,7 +3306,7 @@
         "shortfall": "-575.96",
         "customer": "Vindhya Ceramics"
       },
-      "proposed_action": "Reconfirm the HSN rate on INV-2627-1084; if 18% applies, a revised invoice for -575.96 of GST is due.",
+      "proposed_action": "Reconfirm the HSN rate on INV-2627-1084; if 18% applies, 575.96 of GST was over-collected and needs a credit note.",
       "narrative": ""
     },
     {
@@ -3322,7 +3322,7 @@
         "shortfall": "-778.05",
         "customer": "Indus Motors"
       },
-      "proposed_action": "Reconfirm the HSN rate on INV-2627-1044; if 18% applies, a revised invoice for -778.05 of GST is due.",
+      "proposed_action": "Reconfirm the HSN rate on INV-2627-1044; if 18% applies, 778.05 of GST was over-collected and needs a credit note.",
       "narrative": ""
     },
     {
@@ -3764,9 +3764,9 @@
   ],
   "metrics": {
     "records": 345,
-    "wall_seconds": 10.7818,
-    "records_per_second": 32,
-    "engine_seconds": 10.7749,
+    "wall_seconds": 10.1149,
+    "records_per_second": 34,
+    "engine_seconds": 10.1073,
     "auto_clear_rate": 0.8609,
     "auto_cleared_records": 297,
     "links": {

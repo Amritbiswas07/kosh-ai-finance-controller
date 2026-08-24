@@ -367,8 +367,12 @@ def check_integrity(ds: Dataset, res: ReconResult) -> None:
                           "gst_expected_18pct": str(to_rupees(due)),
                           "shortfall": str(to_rupees(due - inv.tax_paise)),
                           "customer": inv.customer},
-                proposed_action=f"Reconfirm the HSN rate on {inv.invoice_no}; if 18% applies, "
-                                f"a revised invoice for {to_rupees(due - inv.tax_paise)} of GST is due."))
+                proposed_action=(
+                    f"Reconfirm the HSN rate on {inv.invoice_no}; if 18% applies, "
+                    + (f"a revised invoice for {to_rupees(due - inv.tax_paise)} of GST is due."
+                       if due > inv.tax_paise else
+                       f"{to_rupees(inv.tax_paise - due)} of GST was over-collected and "
+                       "needs a credit note."))))
 
 
 # --------------------------------------------------------------------------- #

@@ -145,3 +145,19 @@ def test_timings_cover_all_four_legs(run):
     for key in ("erp_to_gateway_s", "integrity_s", "settlement_to_bank_s",
                 "direct_receipts_s", "total_s"):
         assert key in res.timings
+
+
+def test_over_collected_gst_asks_for_a_credit_note_not_an_invoice(run):
+    """Both directions of a tax break need the right remedy, and no negative amounts."""
+    _ds, _gt, _b, res = run
+    tax = [f for f in res.findings if f.code is ExceptionCode.TAX_LINE_MISMATCH]
+    assert tax
+    assert any(f.value_at_risk_paise < 0 for f in tax), "no over-collection in this corpus"
+    import re
+    for f in tax:
+        # No negative rupee amount should ever reach the controller's action text.
+        assert not re.search(r"-\d+\.\d{2}", f.proposed_action), f.proposed_action
+        if f.value_at_risk_paise < 0:
+            assert "credit note" in f.proposed_action
+        else:
+            assert "revised invoice" in f.proposed_action

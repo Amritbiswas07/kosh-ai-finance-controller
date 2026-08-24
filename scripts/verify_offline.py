@@ -71,10 +71,12 @@ def main() -> int:
     print(f"  [ok] evaluated       link F1 {m['link_f1_macro']:.4f}, "
           f"exception F1 {e['f1']:.4f}")
 
+    meta = {"model": adj.name, "seed": 20260824,
+            "llm_seconds": round(adj.seconds, 1)}
     out = ROOT / "outputs"
     out.mkdir(exist_ok=True)
-    (out / "recon.html").write_text(html_report(res, ds, pos, m, {"model": adj.name}))
-    (out / "recon.md").write_text(markdown_report(res, ds, pos, m, {"model": adj.name}))
+    (out / "recon.html").write_text(html_report(res, ds, pos, m, meta))
+    (out / "recon.md").write_text(markdown_report(res, ds, pos, m, meta))
     print("  [ok] rendered        recon.md and recon.html\n")
     print("PASS: the full pipeline ran with no network access.")
     return 0
