@@ -69,6 +69,10 @@ live, then work the queue.
 - **Run it from the header** — change the seed, toggle model adjudication, press
   Reconcile. A model-enabled run takes ~10 s, so the pipeline **streams stage by
   stage** over Server-Sent Events rather than showing an indefinite spinner.
+- **The top bar is pinned and lifts off the content** — it takes a shadow once
+  the page has actually moved and stays flat at rest, so rows pass visibly
+  beneath it rather than appearing to bleed into it. Once the page heading has
+  scrolled away the bar names the current section in its place.
 - **Navigation is a pinned sidebar above 1000px**, and the same panel collapses
   to a menu-button drawer below it — dismissable by the close button, the scrim
   or Escape, returning focus where it came from. Docking is expressed in JS
