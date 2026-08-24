@@ -230,6 +230,27 @@ footer{max-width:1200px;margin:0 auto;padding:0 var(--s5) var(--s6);
   color:var(--faint);font-size:11.5px}
 [hidden]{display:none!important}
 
+/* Wide screens dock the drawer as a permanent sidebar: navigation is worth the
+   248px when there is room, and a menu button that hides a four-item list from
+   a 1400px display is a mobile pattern wearing a desktop suit. Below 1000px it
+   reverts to the overlay drawer. The `hidden` attribute is never set while
+   docked — a visible element marked hidden lies to a screen reader — so the
+   state lives in JS (syncNav) rather than in a CSS override. */
+@media (min-width:1000px){
+  #menu{display:none}
+  .scrim{display:none !important}
+  .drawer{position:fixed;top:60px;bottom:0;left:0;width:248px;max-width:none;
+    z-index:20;box-shadow:none;animation:none;background:var(--panel-2);
+    border-right:1px solid var(--line)}
+  .drawerhead{display:none}
+  #tabs{padding:var(--s4) var(--s3)}
+  #tabs button[aria-current=page]{background:var(--panel)}
+  main{margin:0 0 0 248px;max-width:1160px;padding-left:var(--s6);
+    padding-right:var(--s6)}
+  footer{margin:0 0 0 248px;max-width:1160px;padding-left:var(--s6);
+    padding-right:var(--s6)}
+}
+
 @media (max-width:720px){
   .bar{height:auto;padding:var(--s3) var(--s4);flex-wrap:wrap}
   .controls{margin-left:0;width:100%}
@@ -625,6 +646,22 @@ const TITLES = { overview: "Overview", exceptions: "Exceptions",
                  model: "Model adjudications", ask: "Settlement Q&A" };
 let lastFocus = null;
 
+//: Above this width the sidebar is permanent and the menu button is gone.
+const DOCKED = matchMedia("(min-width: 1000px)");
+
+function syncNav() {
+  if (DOCKED.matches) {
+    $("drawer").hidden = false;      // docked: always present, never "hidden"
+    $("scrim").hidden = true;
+    $("menu").setAttribute("aria-expanded", "true");
+  } else {
+    $("drawer").hidden = true;
+    $("scrim").hidden = true;
+    $("menu").setAttribute("aria-expanded", "false");
+  }
+}
+DOCKED.addEventListener("change", syncNav);
+
 function openMenu() {
   lastFocus = document.activeElement;
   $("drawer").hidden = false; $("scrim").hidden = false;
@@ -632,6 +669,7 @@ function openMenu() {
   ($("tabs").querySelector("[aria-current=page]") || $("tabs").firstElementChild).focus();
 }
 function closeMenu() {
+  if (DOCKED.matches) return;        // nothing to close; the sidebar is pinned
   $("drawer").hidden = true; $("scrim").hidden = true;
   $("menu").setAttribute("aria-expanded", "false");
   // Send focus back where it came from, so keyboard users are not dropped at
@@ -658,8 +696,9 @@ document.addEventListener("keydown", e => {
 $("tabs").addEventListener("click", e => {
   const b = e.target.closest("button[data-tab]"); if (!b) return;
   selectTab(b.dataset.tab);
-  closeMenu();
+  closeMenu();                        // no-op while docked
 });
+syncNav();
 $("dispFilters").addEventListener("click", e => {
   const b = e.target.closest("[data-disp]"); if (!b) return;
   filters.disposition = b.dataset.disp; renderFilters(); renderFindings();

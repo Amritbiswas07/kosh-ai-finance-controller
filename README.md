@@ -69,10 +69,13 @@ live, then work the queue.
 - **Run it from the header** — change the seed, toggle model adjudication, press
   Reconcile. A model-enabled run takes ~10 s, so the pipeline **streams stage by
   stage** over Server-Sent Events rather than showing an indefinite spinner.
-- **Sections live behind the menu button** — a navigation drawer, dismissable by
-  the close button, the scrim or Escape, returning focus where it came from. The
-  current section is the page's `<h1>` and its document title, so the header
-  still says where you are once the tabs are out of sight.
+- **Navigation is a pinned sidebar above 1000px**, and the same panel collapses
+  to a menu-button drawer below it — dismissable by the close button, the scrim
+  or Escape, returning focus where it came from. Docking is expressed in JS
+  rather than by overriding the `hidden` attribute in CSS, because a visible
+  element marked `hidden` lies to a screen reader. Resizing across the
+  breakpoint re-docks without a reload. The current section is the page's
+  `<h1>` and its document title.
 - **Overview** — the cash bridge with its residual, the tier breakdown, and the
   scores against held-out ground truth.
 - **Exceptions** — every finding, filterable by code and by whether it needs a
