@@ -66,7 +66,7 @@ def cmd_recon(a) -> int:
         metrics = evaluate(res, ds, gt, wall)
 
     meta = {"seed": a.data.name, "model": label, "period": "synthetic",
-            "llm_seconds": round(getattr(adj, "seconds", 0.0), 1) if adj else 0.0}
+            "llm_seconds": round(getattr(adj, "seconds", 0.0), 3) if adj else 0.0}
 
     print(f"\n{label}")
     print(f"{res.counts['total_records']:,} records · engine "
@@ -114,6 +114,12 @@ def cmd_evaluate(a) -> int:
     return 0
 
 
+def cmd_serve(a) -> int:
+    from .server import serve
+    serve(a.data, host=a.host, port=a.port, preload=not a.no_preload)
+    return 0
+
+
 def cmd_ask(a) -> int:
     ds, batches, res, pos, wall, errs, adj, label = _run(a.data, a.llm)
     out = answer(" ".join(a.question), res, pos, adj)
@@ -138,7 +144,8 @@ def main(argv: list[str] | None = None) -> int:
 
     for name, fn, helptext in (("recon", cmd_recon, "reconcile and write the pack"),
                                ("evaluate", cmd_evaluate, "print metrics as JSON"),
-                               ("ask", cmd_ask, "ask a question about the run")):
+                               ("ask", cmd_ask, "ask a question about the run"),
+                               ("serve", cmd_serve, "browse the run in a local web UI")):
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--data", type=Path, default=DATA)
         p.add_argument("--out", type=Path, default=OUT)
@@ -151,6 +158,11 @@ def main(argv: list[str] | None = None) -> int:
         if name == "ask":
             p.add_argument("question", nargs="+")
             p.add_argument("--show-facts", action="store_true")
+        if name == "serve":
+            p.add_argument("--host", default="127.0.0.1")
+            p.add_argument("--port", type=int, default=8000)
+            p.add_argument("--no-preload", action="store_true",
+                           help="start with no run loaded instead of a deterministic one")
 
     a = ap.parse_args(argv)
     return a.fn(a)

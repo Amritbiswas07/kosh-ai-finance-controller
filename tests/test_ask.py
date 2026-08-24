@@ -84,3 +84,42 @@ def test_aggregation_language_is_rejected(run):
     assert out["numeric_check"] == "failed"
     assert out["rejected_phrase"] is not None
     assert out["rejected_phrase"].lower() in {"totalling", "$"}
+
+
+def test_records_outrank_glossary_entries(run):
+    """Definitions are context, not evidence — they must not crowd out records."""
+    res, pos = _ctx(run)
+    facts = retrieve("which settlements have not reached the bank?", res, pos)
+    records = [f for f in facts if not f.startswith("[DEFINITION]")]
+    assert records, facts
+    assert not facts[0].startswith("[DEFINITION]")
+    assert any("MISSING_IN_BANK" in f and not f.startswith("[DEFINITION]")
+               for f in facts), facts
+
+
+def test_netbanking_does_not_count_as_the_word_bank(run):
+    """Regression: substring matching made every netbanking payment a hit for
+    'bank', outranking the settlements that had genuinely not arrived."""
+    from kosh.ask import _haystack
+    assert "bank" in _haystack("MISSING_IN_BANK utr=KKBKN1 with the bank")
+    assert "bank" not in _haystack("method=netbanking amount=10818.10")
+    res, pos = _ctx(run)
+    for fact in retrieve("which settlements have not reached the bank?", res, pos):
+        assert "method=netbanking" not in fact or "BANK" in fact, fact
+
+
+def test_definitions_still_appear_when_there_is_room(run):
+    """UNCLASSIFIED never fires, so nothing competes for the slots."""
+    res, pos = _ctx(run)
+    facts = retrieve("what does an unclassified residual mean?", res, pos)
+    assert facts and all(f.startswith("[DEFINITION]") for f in facts), facts
+
+
+def test_equal_relevance_is_ranked_by_money_at_stake(run):
+    res, pos = _ctx(run)
+    facts = retrieve("which settlements have not reached the bank?", res, pos)
+    records = [f for f in facts if f.startswith("[")
+               and not f.startswith(("[DEFINITION]", "[POSITION]"))]
+    assert records
+    # A zero-exposure split settlement must not outrank a batch that is missing.
+    assert "SPLIT_SETTLEMENT" not in records[0], records[0]

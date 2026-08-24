@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kosh — settlement reconciliation</title>
+<style>
+/* Light is the base. Both dark paths redefine tokens only, never components.
+   No webfont: a local-first tool should render with the network unplugged, so
+   the identity is carried by a deliberately chosen system stack instead. */
+:root{
+  --paper:#fafaf7; --panel:#fff; --panel-2:#f4f5f2; --panel-3:#eef0ec;
+  --ink:#16211d; --muted:#5f6b66; --line:#e1e5e1; --line-2:#eceee9;
+  --accent:#0b5d4e; --accent-soft:#e4efeb; --accent-ink:#fff;
+  --good:#1a7f5a; --warn:#a5620a; --bad:#a32e22;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f1512; --panel:#161d1a; --panel-2:#1c2422; --panel-3:#232c29;
+  --ink:#e6ebe7; --muted:#93a099; --line:#26302c; --line-2:#1f2825;
+  --accent:#4fd1a5; --accent-soft:#17302a; --accent-ink:#0f1512;
+  --good:#4ade9b; --warn:#e8a33d; --bad:#f08a7c;
+}}
+:root[data-theme="dark"]{
+  --paper:#0f1512; --panel:#161d1a; --panel-2:#1c2422; --panel-3:#232c29;
+  --ink:#e6ebe7; --muted:#93a099; --line:#26302c; --line-2:#1f2825;
+  --accent:#4fd1a5; --accent-soft:#17302a; --accent-ink:#0f1512;
+  --good:#4ade9b; --warn:#e8a33d; --bad:#f08a7c;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:ui-serif,Georgia,"Times New Roman",serif}
+.mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- header ---------- */
+header{border-bottom:2px solid var(--ink);background:var(--panel);
+  position:sticky;top:0;z-index:20}
+.bar{max-width:1180px;margin:0 auto;padding:16px 22px;
+  display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.brand{flex:1 1 260px;min-width:220px}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 4px}
+h1{font-family:ui-serif,Georgia,serif;font-weight:500;font-size:27px;letter-spacing:-.015em;
+  margin:0;line-height:1.1}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label.field{display:flex;flex-direction:column;gap:3px;font-size:10.5px;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+input[type=number],input[type=text]{
+  font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);
+  border-radius:3px;background:var(--panel-2);color:var(--ink);width:130px;
+  font-variant-numeric:tabular-nums}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  padding:8px 12px;border:1px solid var(--line);border-radius:3px;background:var(--panel-2);
+  cursor:pointer;user-select:none;text-transform:none;letter-spacing:0;font-weight:500}
+.toggle input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
+button{font:inherit;cursor:pointer;border-radius:3px;border:1px solid transparent;
+  padding:9px 18px;font-weight:600;font-size:14px}
+button.primary{background:var(--accent);color:var(--accent-ink)}
+button.primary:disabled{opacity:.5;cursor:not-allowed}
+button.ghost{background:var(--panel-2);color:var(--ink);border-color:var(--line);
+  padding:7px 12px;font-size:13px}
+.status{font-size:12.5px;color:var(--muted);width:100%;
+  font-variant-numeric:tabular-nums}
+
+/* ---------- tabs ---------- */
+nav{max-width:1180px;margin:0 auto;padding:0 22px;display:flex;gap:2px;flex-wrap:wrap}
+nav button{background:none;border:none;border-bottom:2px solid transparent;
+  padding:11px 14px;color:var(--muted);font-weight:600;font-size:13.5px;border-radius:0}
+nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+nav button .n{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+main{max-width:1180px;margin:0 auto;padding:26px 22px 90px}
+h2{font-family:ui-serif,Georgia,serif;font-weight:500;font-size:21px;
+  letter-spacing:-.01em;margin:34px 0 12px}
+h2:first-child{margin-top:0}
+.hint{color:var(--muted);font-size:13px;margin:0 0 12px;max-width:70ch}
+
+/* ---------- progress ---------- */
+#progress{border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:3px;background:var(--panel);padding:14px 18px;margin-bottom:22px}
+#progress ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+#progress li{font-size:13.5px;color:var(--muted);display:flex;gap:9px;align-items:baseline}
+#progress li .tick{width:14px;color:var(--good);font-weight:700}
+#progress li.active{color:var(--ink);font-weight:600}
+#progress li.active .tick{color:var(--accent)}
+
+/* ---------- tiles ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:15px 17px;display:flex;flex-direction:column;gap:4px}
+.card.flag{border-left:3px solid var(--warn)}
+.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.11em;
+  color:var(--muted);font-weight:700}
+.card .v{font-family:ui-serif,Georgia,serif;font-size:28px;font-weight:500;
+  letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.card .n{font-size:12px;color:var(--muted)}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line-2);vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  font-weight:700;white-space:nowrap;background:var(--panel-2);border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sub-row td{font-weight:700;background:var(--accent-soft)}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+
+/* ---------- exception queue ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:2px;
+  font-size:11px;font-weight:700;letter-spacing:.05em;border:1px solid var(--line);
+  background:var(--panel-2);color:var(--muted);cursor:pointer;font-family:inherit}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip .c{font-variant-numeric:tabular-nums;opacity:.8}
+.tag{display:inline-block;padding:2px 7px;border-radius:2px;font-size:10px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase}
+.tag.review{background:var(--warn);color:var(--paper)}
+.tag.auto{background:var(--good);color:var(--paper)}
+.finding{border:1px solid var(--line);border-left:3px solid var(--good);border-radius:3px;
+  background:var(--panel);margin-bottom:8px;overflow:hidden}
+.finding.review{border-left-color:var(--warn)}
+.finding summary{padding:11px 15px;cursor:pointer;display:flex;flex-wrap:wrap;gap:11px;
+  align-items:center;list-style:none}
+.finding summary::-webkit-details-marker{display:none}
+.finding summary::before{content:"▸";color:var(--muted);font-size:11px;width:10px}
+.finding[open] summary::before{content:"▾"}
+.finding .key{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;font-weight:600;
+  min-width:150px}
+.finding .code{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--muted)}
+.finding .amt{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px}
+.finding .body{padding:0 15px 14px 40px;border-top:1px solid var(--line-2);padding-top:12px}
+.finding dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0 0 11px;
+  font-size:12.5px}
+.finding dt{color:var(--muted);white-space:nowrap}
+.finding dd{margin:0;font-family:ui-monospace,Menlo,monospace;font-size:12px;
+  word-break:break-word}
+.action{font-size:13px;background:var(--panel-2);border-left:2px solid var(--accent);
+  padding:9px 13px;border-radius:2px}
+.empty{color:var(--muted);font-size:13.5px;padding:24px;text-align:center;
+  border:1px dashed var(--line);border-radius:3px}
+
+/* ---------- ask ---------- */
+.askrow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+.askrow input{flex:1 1 380px;width:auto}
+.answer{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:3px;padding:15px 18px;white-space:pre-wrap;font-size:14px;margin-bottom:14px}
+.answer.rejected{border-left-color:var(--bad)}
+.facts{font-size:12.5px;color:var(--muted)}
+.facts li{margin-bottom:5px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+.samples{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);font-size:12px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">
+      <p class="eyebrow">Kosh &middot; AI finance controller</p>
+      <h1>Settlement reconciliation</h1>
+    </div>
+    <div class="controls">
+      <label class="field">Seed
+        <input type="number" id="seed" value="20260824" min="1" step="1">
+      </label>
+      <label class="toggle" title="Enable the T4 adjudication tier (~10s, runs locally)">
+        <input type="checkbox" id="llm"> Model adjudication
+      </label>
+      <button class="primary" id="run">Reconcile</button>
+    </div>
+    <div class="status" id="status">Loading…</div>
+  </div>
+  <nav id="tabs">
+    <button data-tab="overview" aria-selected="true">Overview</button>
+    <button data-tab="exceptions" aria-selected="false">Exceptions <span class="n" id="tabExc"></span></button>
+    <button data-tab="model" aria-selected="false">Model <span class="n" id="tabModel"></span></button>
+    <button data-tab="ask" aria-selected="false">Ask</button>
+  </nav>
+</header>
+
+<main>
+  <div id="progress" hidden><ol id="stages"></ol></div>
+
+  <section id="tab-overview">
+    <div class="cards" id="tiles"></div>
+    <h2>Where the money is</h2>
+    <p class="hint">The identity that must hold: gross entering settlement, less refunds,
+      fees, GST and disputes, equals the sum of the batch nets. The residual stays on the
+      face of the report rather than being folded into a subtotal.</p>
+    <div class="scroll"><table id="bridge"></table></div>
+    <h2>What reconciled</h2>
+    <div class="scroll"><table id="tiers"></table></div>
+    <h2>Measured against ground truth</h2>
+    <p class="hint">The engine never opens the ground-truth file; only the evaluator does.</p>
+    <div class="scroll"><table id="metrics"></table></div>
+  </section>
+
+  <section id="tab-exceptions" hidden>
+    <h2>Exception queue</h2>
+    <p class="hint">Every finding, nothing truncated. Filter by code, or narrow to the items
+      that actually need a person. Click any row for its evidence and proposed action.</p>
+    <div class="filters" id="dispFilters"></div>
+    <div class="filters" id="codeFilters"></div>
+    <div class="askrow">
+      <input type="text" id="search" placeholder="Search record ids, narrations, customers…">
+      <button class="ghost" id="clearFilters">Clear filters</button>
+    </div>
+    <div id="findings"></div>
+  </section>
+
+  <section id="tab-model" hidden>
+    <h2>Model adjudications</h2>
+    <p class="hint">What the deterministic tiers could not settle, what the model proposed,
+      and whether the arithmetic accepted it. A pick whose amount cannot be reconciled is
+      discarded however confident the model was.</p>
+    <div id="adjudications"></div>
+  </section>
+
+  <section id="tab-ask" hidden>
+    <h2>Settlement Q&amp;A</h2>
+    <p class="hint">Answers are assembled from this run's own matches, findings and cash
+      position. With the model on, every amount in the answer must already appear in those
+      facts, and aggregation wording is rejected outright.</p>
+    <div class="samples" id="samples"></div>
+    <div class="askrow">
+      <input type="text" id="question" placeholder="e.g. which settlements have not reached the bank?">
+      <button class="primary" id="askBtn">Ask</button>
+    </div>
+    <div id="answer"></div>
+  </section>
+</main>
+
+<footer id="foot"></footer>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let STATE = null;
+const filters = { disposition: "all", codes: new Set(), q: "" };
+
+const STAGES = [
+  ["generate","Generating corpus"], ["model","Loading local model"],
+  ["ingest","Reading the three sources"], ["match","Reconciling four legs"],
+  ["position","Building the cash position"], ["evaluate","Scoring against ground truth"],
+];
+
+/* ------------------------------------------------------------------ running */
+function showStages(active, seen) {
+  $("progress").hidden = false;
+  $("stages").innerHTML = STAGES
+    .filter(([k]) => seen.has(k) || k === active)
+    .map(([k, label]) => {
+      const done = seen.has(k) && k !== active;
+      return `<li class="${k === active ? "active" : ""}">
+        <span class="tick">${done ? "✓" : "◌"}</span><span>${esc(label)}</span></li>`;
+    }).join("");
+}
+
+async function runRecon() {
+  const btn = $("run"); btn.disabled = true;
+  const seed = $("seed").value, llm = $("llm").checked ? "1" : "0";
+  const seen = new Set();
+  $("status").textContent = "Running…";
+  showStages(null, seen);
+
+  let res;
+  try {
+    res = await fetch(`/api/run?seed=${encodeURIComponent(seed)}&llm=${llm}`,
+                      { method: "POST" });
+  } catch (e) { fail(e.message); return; }
+
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n\n")) >= 0) {
+      const line = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
+      if (!line.startsWith("data:")) continue;
+      let msg; try { msg = JSON.parse(line.slice(5)); } catch { continue; }
+      if (msg.stage === "done") {
+        STATE = msg.result; render();
+        $("progress").hidden = true; btn.disabled = false;
+        return;
+      }
+      if (msg.stage === "error") { fail(msg.message); return; }
+      showStages(msg.stage, seen); seen.add(msg.stage);
+      $("status").textContent = msg.message;
+    }
+  }
+  btn.disabled = false;
+
+  function fail(m) {
+    $("status").innerHTML = `<span class="bad">Failed: ${esc(m)}</span>`;
+    $("progress").hidden = true; btn.disabled = false;
+  }
+}
+
+/* ----------------------------------------------------------------- rendering */
+function render() {
+  if (!STATE) return;
+  const m = STATE.metrics, meta = STATE.meta, c = STATE.counts;
+  const unresolved = STATE.findings.filter(f => f.disposition === "needs_review");
+  const exposure = unresolved.reduce((a, f) => a + Math.abs(parseFloat(f.value_at_risk)), 0);
+
+  const engineMs = Math.max(0, (STATE.timings.total_s - (meta.llm_seconds || 0)) * 1000);
+  $("status").innerHTML =
+    `${c.total_records.toLocaleString()} records &middot; seed <span class="mono">${esc(meta.seed)}</span>`
+    + ` &middot; engine ${engineMs < 1 ? engineMs.toFixed(2) : engineMs.toFixed(1)} ms`
+    + (meta.llm_seconds ? ` &middot; model ${meta.llm_seconds.toFixed(1)} s` : "")
+    + ` &middot; ${esc(meta.model)}`;
+
+  // Tile values arrive already formatted. An earlier version ran every
+  // non-number through the currency formatter, which turned "84.4%" into
+  // "84.40" and an F1 of 0.922 into 0.92.
+  const tiles = [
+    ["Net settled", inr(STATE.position.settled_net), "into gateway batches", false],
+    ["Landed in bank", inr(STATE.position.landed_in_bank), "traced to a credit", false],
+    ["In transit", inr(STATE.position.in_transit), "settled, not yet received", false],
+    ["Needs review", String(unresolved.length), inr(exposure) + " of exposure", true],
+  ];
+  if (m) {
+    tiles.push(["Auto-clear", (m.auto_clear_rate * 100).toFixed(1) + "%",
+                m.auto_cleared_records + " of " + m.records + " records", false]);
+    tiles.push(["Exception F1", m.exceptions.overall.f1.toFixed(4),
+                "vs held-out ground truth", false]);
+  }
+  $("tiles").innerHTML = tiles.map(([k, v, n, flag]) =>
+    `<div class="card${flag ? " flag" : ""}"><div class="k">${esc(k)}</div>
+     <div class="v">${esc(v)}</div>
+     <div class="n">${esc(n)}</div></div>`).join("");
+
+  $("bridge").innerHTML =
+    `<tr><th>Line</th><th class="n">Amount (INR)</th></tr>` +
+    STATE.bridge.map(r => {
+      const sub = r.kind === "subtotal" || r.kind === "check";
+      const cls = r.kind === "warn" && r.amount ? "n bad" : r.kind === "ok" ? "n good" : "n";
+      return `<tr class="${sub ? "sub-row" : ""}"><td>${esc(r.label)}</td>
+        <td class="${cls}">${esc(inr(r.amount / 100, !sub))}</td></tr>`;
+    }).join("");
+
+  const tierCounts = {};
+  STATE.matches.forEach(x => tierCounts[x.tier] = (tierCounts[x.tier] || 0) + 1);
+  $("tiers").innerHTML =
+    `<tr><th>Tier</th><th>How</th><th class="n">Matches</th></tr>` +
+    Object.keys(tierCounts).sort().map(t =>
+      `<tr><td><code>${esc(t)}</code></td><td>${esc(STATE.tier_meaning[t] || "")}</td>
+       <td class="n">${tierCounts[t]}</td></tr>`).join("") +
+    `<tr class="sub-row"><td>total</td><td></td><td class="n">${STATE.matches.length}</td></tr>`;
+
+  $("metrics").innerHTML = !m
+    ? `<tr><td>No ground truth alongside this corpus, so nothing was scored.</td></tr>`
+    : `<tr><th>Leg</th><th class="n">Precision</th><th class="n">Recall</th>
+        <th class="n">F1</th><th class="n">True links</th></tr>` +
+      Object.entries(m.links).map(([leg, s]) =>
+        `<tr><td><code>${esc(leg)}</code></td><td class="n">${s.precision.toFixed(4)}</td>
+         <td class="n">${s.recall.toFixed(4)}</td><td class="n">${s.f1.toFixed(4)}</td>
+         <td class="n">${s.support}</td></tr>`).join("") +
+      `<tr class="sub-row"><td>exception classification</td>
+        <td class="n">${m.exceptions.overall.precision.toFixed(4)}</td>
+        <td class="n">${m.exceptions.overall.recall.toFixed(4)}</td>
+        <td class="n">${m.exceptions.overall.f1.toFixed(4)}</td>
+        <td class="n">${m.exceptions.overall.support}</td></tr>`;
+
+  renderFilters(); renderFindings(); renderAdjudications();
+  $("tabExc").textContent = STATE.findings.length;
+  $("tabModel").textContent = STATE.adjudications.length || "";
+  $("foot").innerHTML =
+    `Deterministic tiers T0–T3, plus verified model adjudication at T4. `
+    + `${STATE.matches.length} matches, ${STATE.findings.length} findings, `
+    + `${unresolved.length} needing a person. `
+    + (meta.ingest_errors && meta.ingest_errors.length
+        ? `<span class="bad">${meta.ingest_errors.length} unparseable row(s) surfaced.</span>`
+        : `No unparseable rows.`);
+}
+
+function inr(v, signed) {
+  const n = typeof v === "string" ? parseFloat(v) : v;
+  const neg = n < 0, abs = Math.abs(n).toFixed(2);
+  let [w, f] = abs.split(".");
+  if (w.length > 3) {
+    let head = w.slice(0, -3), tail = w.slice(-3), g = [];
+    while (head.length > 2) { g.unshift(head.slice(-2)); head = head.slice(0, -2); }
+    if (head) g.unshift(head);
+    w = g.concat([tail]).join(",");
+  }
+  return (neg ? "-" : signed ? "+" : "") + w + "." + f;
+}
+
+function renderFilters() {
+  const counts = {};
+  STATE.findings.forEach(f => counts[f.code] = (counts[f.code] || 0) + 1);
+  const need = STATE.findings.filter(f => f.disposition === "needs_review").length;
+  $("dispFilters").innerHTML = [
+    ["all", "All", STATE.findings.length],
+    ["needs_review", "Needs review", need],
+    ["auto_resolved", "Auto-resolved", STATE.findings.length - need],
+  ].map(([k, label, n]) =>
+    `<button class="chip" data-disp="${k}" aria-pressed="${filters.disposition === k}">
+      ${esc(label)} <span class="c">${n}</span></button>`).join("");
+  $("codeFilters").innerHTML = Object.keys(counts).sort((a, b) => counts[b] - counts[a])
+    .map(code =>
+      `<button class="chip" data-code="${esc(code)}" aria-pressed="${filters.codes.has(code)}">
+        ${esc(code)} <span class="c">${counts[code]}</span></button>`).join("");
+}
+
+function visibleFindings() {
+  const q = filters.q.toLowerCase();
+  return STATE.findings.filter(f => {
+    if (filters.disposition !== "all" && f.disposition !== filters.disposition) return false;
+    if (filters.codes.size && !filters.codes.has(f.code)) return false;
+    if (!q) return true;
+    return (f.key + " " + f.code + " " + f.proposed_action + " " +
+            Object.values(f.evidence).join(" ")).toLowerCase().includes(q);
+  }).sort((a, b) => Math.abs(parseFloat(b.value_at_risk)) - Math.abs(parseFloat(a.value_at_risk)));
+}
+
+function renderFindings() {
+  const rows = visibleFindings();
+  if (!rows.length) { $("findings").innerHTML =
+    `<div class="empty">Nothing matches these filters.</div>`; return; }
+  $("findings").innerHTML = rows.map(f => {
+    const review = f.disposition === "needs_review";
+    return `<details class="finding${review ? " review" : ""}">
+      <summary>
+        <span class="key">${esc(f.key)}</span>
+        <span class="code">${esc(f.code)}</span>
+        <span class="tag ${review ? "review" : "auto"}">${review ? "needs review" : "auto"}</span>
+        <span class="amt">${esc(inr(f.value_at_risk))}</span>
+      </summary>
+      <div class="body">
+        <p class="hint">${esc(STATE.exception_meaning[f.code] || "")}</p>
+        <dl>${Object.entries(f.evidence).map(([k, v]) =>
+          `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+        <div class="action">${esc(f.proposed_action)}</div>
+      </div></details>`;
+  }).join("");
+}
+
+function renderAdjudications() {
+  const a = STATE.adjudications;
+  if (!a.length) {
+    $("adjudications").innerHTML =
+      `<div class="empty">No adjudications in this run. Turn on
+       <strong>Model adjudication</strong> in the header and reconcile again —
+       the deterministic tiers settled everything they could on their own.</div>`;
+    return;
+  }
+  $("adjudications").innerHTML = `<div class="scroll"><table>
+    <tr><th>Item</th><th>Narration</th><th class="n">Candidates</th><th>Chose</th>
+        <th>Verdict</th><th>Model's reason</th></tr>` +
+    a.map(x => {
+      const v = x.verdict || (x.chose ? "accepted" : "declined");
+      const cls = v === "accepted" ? "good" : v.includes("rejected") ? "bad" : "warn";
+      return `<tr>
+        <td><code>${esc(x.bank_line || x.invoice || x.batch || "?")}</code></td>
+        <td class="mono" style="font-size:11.5px">${esc(x.narration || "")}</td>
+        <td class="n">${(x.candidates || []).length}</td>
+        <td><code>${esc(x.chose || "—")}</code></td>
+        <td class="${cls}">${esc(v)}</td>
+        <td style="color:var(--muted);font-size:12.5px">${esc(x.reason || "")}</td>
+      </tr>`;
+    }).join("") + `</table></div>`;
+}
+
+/* ---------------------------------------------------------------------- ask */
+const SAMPLES = [
+  "which settlements have not reached the bank?",
+  "how much is on hold?",
+  "what unexplained credits are in the bank?",
+  "which invoices were paid net of TDS?",
+];
+
+async function ask(q) {
+  $("question").value = q;
+  $("answer").innerHTML = `<div class="answer">Thinking…</div>`;
+  const r = await fetch("/api/ask", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: q, llm: $("llm").checked }),
+  });
+  const out = await r.json();
+  if (out.error) { $("answer").innerHTML =
+    `<div class="answer rejected">${esc(out.error)}</div>`; return; }
+  const rejected = out.numeric_check === "failed";
+  $("answer").innerHTML =
+    `<div class="answer${rejected ? " rejected" : ""}">${esc(out.answer)}</div>`
+    + (out.facts && out.facts.length
+        ? `<div class="facts"><strong>Grounded in ${out.facts.length} record(s):</strong>
+           <ul>${out.facts.map(f => `<li>${esc(f)}</li>`).join("")}</ul></div>` : "");
+}
+
+/* -------------------------------------------------------------------- wiring */
+$("run").addEventListener("click", runRecon);
+$("tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  [...$("tabs").children].forEach(x => x.setAttribute("aria-selected", x === b));
+  ["overview", "exceptions", "model", "ask"].forEach(t =>
+    $("tab-" + t).hidden = t !== b.dataset.tab);
+});
+$("dispFilters").addEventListener("click", e => {
+  const b = e.target.closest("[data-disp]"); if (!b) return;
+  filters.disposition = b.dataset.disp; renderFilters(); renderFindings();
+});
+$("codeFilters").addEventListener("click", e => {
+  const b = e.target.closest("[data-code]"); if (!b) return;
+  const c = b.dataset.code;
+  filters.codes.has(c) ? filters.codes.delete(c) : filters.codes.add(c);
+  renderFilters(); renderFindings();
+});
+$("search").addEventListener("input", e => { filters.q = e.target.value; renderFindings(); });
+$("clearFilters").addEventListener("click", () => {
+  filters.disposition = "all"; filters.codes.clear(); filters.q = "";
+  $("search").value = ""; renderFilters(); renderFindings();
+});
+$("askBtn").addEventListener("click", () => {
+  const q = $("question").value.trim(); if (q) ask(q);
+});
+$("question").addEventListener("keydown", e => {
+  if (e.key === "Enter") { const q = e.target.value.trim(); if (q) ask(q); }
+});
+$("samples").innerHTML = SAMPLES.map(s =>
+  `<button class="chip" data-q="${esc(s)}">${esc(s)}</button>`).join("");
+$("samples").addEventListener("click", e => {
+  const b = e.target.closest("[data-q]"); if (b) ask(b.dataset.q);
+});
+
+fetch("/api/state").then(r => r.json()).then(s => {
+  if (s.ready) { STATE = s; $("seed").value = s.meta.seed; render(); }
+  else $("status").textContent = "No run yet — press Reconcile.";
+}).catch(e => $("status").textContent = "Could not reach the server: " + e.message);
+</script>
+</body>
+</html>
