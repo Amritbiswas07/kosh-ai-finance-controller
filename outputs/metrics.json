@@ -1,0 +1,249 @@
+{
+  "records": 341,
+  "wall_seconds": 8.1767,
+  "records_per_second": 42,
+  "engine_seconds": 8.1679,
+  "auto_clear_rate": 0.8592,
+  "auto_cleared_records": 293,
+  "links": {
+    "invoice_to_payment": {
+      "tp": 123,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 123
+    },
+    "settlement_to_bank": {
+      "tp": 38,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 38
+    },
+    "invoice_to_bank": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 6
+    }
+  },
+  "link_f1_macro": 1.0,
+  "legs_scored": 3,
+  "exceptions": {
+    "overall": {
+      "tp": 56,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 56
+    },
+    "macro_f1": 1.0,
+    "per_code": {
+      "CHARGEBACK_ADJUSTMENT": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "DUPLICATE_PAYMENT": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4
+      },
+      "FEE_VARIANCE": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 5
+      },
+      "FUNDS_ON_HOLD": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4
+      },
+      "MERGED_PAYOUT": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4
+      },
+      "MISSING_IN_BANK": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "ORPHAN_REFUND": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "SETTLEMENT_AMOUNT_MISMATCH": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "SPLIT_SETTLEMENT": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "TAX_LINE_MISMATCH": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4
+      },
+      "TDS_WITHHELD": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "UNBILLED_PAYMENT": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 5
+      },
+      "UNEXPECTED_BANK_CREDIT": {
+        "tp": 7,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 7
+      },
+      "UNPAID_INVOICE": {
+        "tp": 6,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 6
+      }
+    }
+  },
+  "confusion": {
+    "CHARGEBACK_ADJUSTMENT": {
+      "CHARGEBACK_ADJUSTMENT": 3
+    },
+    "DUPLICATE_PAYMENT": {
+      "DUPLICATE_PAYMENT": 4
+    },
+    "FEE_VARIANCE": {
+      "FEE_VARIANCE": 5
+    },
+    "FUNDS_ON_HOLD": {
+      "FUNDS_ON_HOLD": 4
+    },
+    "MERGED_PAYOUT": {
+      "MERGED_PAYOUT": 4
+    },
+    "MISSING_IN_BANK": {
+      "MISSING_IN_BANK": 3
+    },
+    "ORPHAN_REFUND": {
+      "ORPHAN_REFUND": 3
+    },
+    "SETTLEMENT_AMOUNT_MISMATCH": {
+      "SETTLEMENT_AMOUNT_MISMATCH": 3
+    },
+    "SPLIT_SETTLEMENT": {
+      "SPLIT_SETTLEMENT": 2
+    },
+    "TAX_LINE_MISMATCH": {
+      "TAX_LINE_MISMATCH": 4
+    },
+    "TDS_WITHHELD": {
+      "TDS_WITHHELD": 3
+    },
+    "UNBILLED_PAYMENT": {
+      "UNBILLED_PAYMENT": 5
+    },
+    "UNEXPECTED_BANK_CREDIT": {
+      "UNEXPECTED_BANK_CREDIT": 7
+    },
+    "UNPAID_INVOICE": {
+      "UNPAID_INVOICE": 6
+    }
+  },
+  "unresolved": {
+    "count": 42,
+    "value_at_risk": "211662.92",
+    "by_code": {
+      "UNEXPECTED_BANK_CREDIT": 7,
+      "UNPAID_INVOICE": 6,
+      "UNBILLED_PAYMENT": 5,
+      "DUPLICATE_PAYMENT": 4,
+      "FUNDS_ON_HOLD": 4,
+      "TAX_LINE_MISMATCH": 4,
+      "ORPHAN_REFUND": 3,
+      "CHARGEBACK_ADJUSTMENT": 3,
+      "SETTLEMENT_AMOUNT_MISMATCH": 3,
+      "MISSING_IN_BANK": 3
+    }
+  },
+  "auto_resolved": {
+    "count": 14
+  },
+  "tiers": {
+    "T0_EXACT_ID": 145,
+    "T1_NORMALIZED_ID": 3,
+    "T2_AMOUNT_DATE": 8,
+    "T3_AGGREGATE": 4,
+    "T4_ADJUDICATED": 3
+  }
+}

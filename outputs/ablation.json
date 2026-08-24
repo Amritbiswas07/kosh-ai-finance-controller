@@ -1,17 +1,17 @@
 {
   "model": "Qwen/Qwen2.5-1.5B-Instruct",
   "device": "mps",
-  "load_seconds": 7.0,
+  "load_seconds": 5.8,
   "rows": [
     {
       "label": "deterministic only (no model)",
       "metrics": {
-        "records": 345,
-        "wall_seconds": 0.0017,
-        "records_per_second": 199947,
-        "engine_seconds": 0.0017,
-        "auto_clear_rate": 0.8435,
-        "auto_cleared_records": 291,
+        "records": 341,
+        "wall_seconds": 0.0012,
+        "records_per_second": 274391,
+        "engine_seconds": 0.0012,
+        "auto_clear_rate": 0.8416,
+        "auto_cleared_records": 287,
         "links": {
           "invoice_to_payment": {
             "tp": 123,
@@ -23,13 +23,13 @@
             "support": 123
           },
           "settlement_to_bank": {
-            "tp": 42,
+            "tp": 38,
             "fp": 0,
             "fn": 0,
             "precision": 1.0,
             "recall": 1.0,
             "f1": 1.0,
-            "support": 42
+            "support": 38
           },
           "invoice_to_bank": {
             "tp": 3,
@@ -232,7 +232,7 @@
         },
         "unresolved": {
           "count": 48,
-          "value_at_risk": "279224.67",
+          "value_at_risk": "231549.41",
           "by_code": {
             "UNEXPECTED_BANK_CREDIT": 10,
             "UNPAID_INVOICE": 9,
@@ -250,7 +250,7 @@
           "count": 11
         },
         "tiers": {
-          "T0_EXACT_ID": 149,
+          "T0_EXACT_ID": 145,
           "T1_NORMALIZED_ID": 3,
           "T2_AMOUNT_DATE": 8,
           "T3_AGGREGATE": 4
@@ -263,12 +263,12 @@
     {
       "label": "model on every leg",
       "metrics": {
-        "records": 345,
-        "wall_seconds": 46.4398,
+        "records": 341,
+        "wall_seconds": 51.3769,
         "records_per_second": 7,
-        "engine_seconds": 46.4398,
-        "auto_clear_rate": 0.8609,
-        "auto_cleared_records": 297,
+        "engine_seconds": 51.3769,
+        "auto_clear_rate": 0.8592,
+        "auto_cleared_records": 293,
         "links": {
           "invoice_to_payment": {
             "tp": 123,
@@ -280,13 +280,13 @@
             "support": 123
           },
           "settlement_to_bank": {
-            "tp": 42,
+            "tp": 38,
             "fp": 0,
             "fn": 0,
             "precision": 1.0,
             "recall": 1.0,
             "f1": 1.0,
-            "support": 42
+            "support": 38
           },
           "invoice_to_bank": {
             "tp": 6,
@@ -486,7 +486,7 @@
         },
         "unresolved": {
           "count": 42,
-          "value_at_risk": "243717.18",
+          "value_at_risk": "211662.92",
           "by_code": {
             "UNEXPECTED_BANK_CREDIT": 7,
             "UNPAID_INVOICE": 6,
@@ -504,7 +504,7 @@
           "count": 14
         },
         "tiers": {
-          "T0_EXACT_ID": 149,
+          "T0_EXACT_ID": 145,
           "T1_NORMALIZED_ID": 3,
           "T2_AMOUNT_DATE": 8,
           "T3_AGGREGATE": 4,
@@ -512,22 +512,22 @@
         }
       },
       "llm_calls": 18,
-      "llm_seconds": 46.4,
+      "llm_seconds": 51.3,
       "verdicts": {
-        "declined": 13,
-        "rejected_by_arithmetic": 2,
+        "declined": 9,
+        "rejected_by_arithmetic": 6,
         "accepted": 3
       }
     },
     {
       "label": "model on invoice\u2192bank only (default)",
       "metrics": {
-        "records": 345,
-        "wall_seconds": 9.2962,
-        "records_per_second": 37,
-        "engine_seconds": 9.2962,
-        "auto_clear_rate": 0.8609,
-        "auto_cleared_records": 297,
+        "records": 341,
+        "wall_seconds": 7.3708,
+        "records_per_second": 46,
+        "engine_seconds": 7.3708,
+        "auto_clear_rate": 0.8592,
+        "auto_cleared_records": 293,
         "links": {
           "invoice_to_payment": {
             "tp": 123,
@@ -539,13 +539,13 @@
             "support": 123
           },
           "settlement_to_bank": {
-            "tp": 42,
+            "tp": 38,
             "fp": 0,
             "fn": 0,
             "precision": 1.0,
             "recall": 1.0,
             "f1": 1.0,
-            "support": 42
+            "support": 38
           },
           "invoice_to_bank": {
             "tp": 6,
@@ -745,7 +745,7 @@
         },
         "unresolved": {
           "count": 42,
-          "value_at_risk": "243717.18",
+          "value_at_risk": "211662.92",
           "by_code": {
             "UNEXPECTED_BANK_CREDIT": 7,
             "UNPAID_INVOICE": 6,
@@ -763,7 +763,7 @@
           "count": 14
         },
         "tiers": {
-          "T0_EXACT_ID": 149,
+          "T0_EXACT_ID": 145,
           "T1_NORMALIZED_ID": 3,
           "T2_AMOUNT_DATE": 8,
           "T3_AGGREGATE": 4,
@@ -771,7 +771,7 @@
         }
       },
       "llm_calls": 3,
-      "llm_seconds": 9.3,
+      "llm_seconds": 7.4,
       "verdicts": {
         "accepted": 3
       }
