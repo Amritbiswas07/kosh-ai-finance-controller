@@ -1,0 +1,7 @@
+# Kosh — optional local-LLM layer (adjudication + narratives + Q&A).
+# Only needed for `--llm on`. The engine and all metrics run without it.
+-r requirements.txt
+torch==2.8.0
+transformers==4.56.1
+sentence-transformers==5.1.0
+accelerate==1.10.1

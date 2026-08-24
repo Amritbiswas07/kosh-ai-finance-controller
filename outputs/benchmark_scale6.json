@@ -1,0 +1,222 @@
+{
+  "seeds": 12,
+  "start": 1,
+  "configuration": "deterministic only",
+  "defect_scale": 6.0,
+  "total_records": 3921,
+  "summary": {
+    "link_f1": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "stdev": 0.0
+    },
+    "exc_p": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "stdev": 0.0
+    },
+    "exc_r": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "stdev": 0.0
+    },
+    "exc_f1": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "stdev": 0.0
+    },
+    "macro_f1": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "stdev": 0.0
+    },
+    "clear": {
+      "mean": 0.395,
+      "min": 0.2848,
+      "max": 0.55,
+      "stdev": 0.0705
+    },
+    "rps": {
+      "mean": 57638.9167,
+      "min": 47522,
+      "max": 63726,
+      "stdev": 4489.2854
+    }
+  },
+  "imperfect_seeds": [],
+  "rows": [
+    {
+      "seed": 1,
+      "records": 334,
+      "defects": 249,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.3473,
+      "rps": 47522,
+      "unresolved": 247
+    },
+    {
+      "seed": 2,
+      "records": 367,
+      "defects": 255,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.4496,
+      "rps": 62407,
+      "unresolved": 227
+    },
+    {
+      "seed": 3,
+      "records": 360,
+      "defects": 236,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.55,
+      "rps": 63726,
+      "unresolved": 188
+    },
+    {
+      "seed": 4,
+      "records": 309,
+      "defects": 247,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.2848,
+      "rps": 51817,
+      "unresolved": 249
+    },
+    {
+      "seed": 5,
+      "records": 317,
+      "defects": 244,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.3502,
+      "rps": 57251,
+      "unresolved": 235
+    },
+    {
+      "seed": 6,
+      "records": 328,
+      "defects": 238,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.4268,
+      "rps": 60741,
+      "unresolved": 211
+    },
+    {
+      "seed": 7,
+      "records": 319,
+      "defects": 227,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.4514,
+      "rps": 60724,
+      "unresolved": 207
+    },
+    {
+      "seed": 8,
+      "records": 343,
+      "defects": 237,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.3907,
+      "rps": 58225,
+      "unresolved": 234
+    },
+    {
+      "seed": 9,
+      "records": 309,
+      "defects": 237,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.4078,
+      "rps": 58360,
+      "unresolved": 211
+    },
+    {
+      "seed": 10,
+      "records": 294,
+      "defects": 231,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.3265,
+      "rps": 55307,
+      "unresolved": 227
+    },
+    {
+      "seed": 11,
+      "records": 321,
+      "defects": 255,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.3489,
+      "rps": 57703,
+      "unresolved": 235
+    },
+    {
+      "seed": 12,
+      "records": 320,
+      "defects": 231,
+      "ingest_errors": 0,
+      "link_f1": 1.0,
+      "exc_p": 1.0,
+      "exc_r": 1.0,
+      "exc_f1": 1.0,
+      "macro_f1": 1.0,
+      "clear": 0.4062,
+      "rps": 57884,
+      "unresolved": 219
+    }
+  ]
+}
