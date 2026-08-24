@@ -1,6 +1,6 @@
 # Reconciliation pack — synthetic
 
-Generated 2026-08-24 18:46. 345 source records across three systems, reconciled in 10774.9 ms plus 10.8 s of model adjudication.
+Generated 2026-08-24 18:51. 345 source records across three systems, reconciled in 7.3 ms of engine time plus 10.1 s of model adjudication.
 
 ## Where the money is
 
@@ -45,7 +45,7 @@ The engine never reads `ground_truth.json`; only the evaluator does.
 
 Exception classification, scored strictly over (record, code) pairs: **precision 1.0000, recall 1.0000, F1 1.0000** on 56 true exceptions (56 correct, 0 false positives, 0 missed).
 
-Throughput: **32 records/second** end to end including CSV parsing. Auto-clear rate **86.1%** (297 of 345 records correctly linked and carrying nothing that needs a human).
+Throughput: **34 records/second** end to end including CSV parsing. Auto-clear rate **86.1%** (297 of 345 records correctly linked and carrying nothing that needs a human).
 
 ## Exceptions
 
@@ -149,9 +149,9 @@ Throughput: **32 records/second** end to end including CSV parsing. Auto-clear r
 | Record | Value (INR) | Evidence | Proposed action |
 |---|---:|---|---|
 | `INV-2627-1128` | 1,197.63 | taxable=9212.53; gst_charged=460.63; gst_expected_18pct=1658.26; shortfall=1197.63 | Reconfirm the HSN rate on INV-2627-1128; if 18% applies, a revised invoice for 1197.63 of GST is due. |
-| `INV-2627-1044` | -778.05 | taxable=7780.46; gst_charged=2178.53; gst_expected_18pct=1400.48; shortfall=-778.05 | Reconfirm the HSN rate on INV-2627-1044; if 18% applies, a revised invoice for -778.05 of GST is due. |
-| `INV-2627-1084` | -575.96 | taxable=5759.56; gst_charged=1612.68; gst_expected_18pct=1036.72; shortfall=-575.96 | Reconfirm the HSN rate on INV-2627-1084; if 18% applies, a revised invoice for -575.96 of GST is due. |
-| `INV-2627-1112` | -129.76 | taxable=1297.65; gst_charged=363.34; gst_expected_18pct=233.58; shortfall=-129.76 | Reconfirm the HSN rate on INV-2627-1112; if 18% applies, a revised invoice for -129.76 of GST is due. |
+| `INV-2627-1044` | -778.05 | taxable=7780.46; gst_charged=2178.53; gst_expected_18pct=1400.48; shortfall=-778.05 | Reconfirm the HSN rate on INV-2627-1044; if 18% applies, 778.05 of GST was over-collected and needs a credit note. |
+| `INV-2627-1084` | -575.96 | taxable=5759.56; gst_charged=1612.68; gst_expected_18pct=1036.72; shortfall=-575.96 | Reconfirm the HSN rate on INV-2627-1084; if 18% applies, 575.96 of GST was over-collected and needs a credit note. |
+| `INV-2627-1112` | -129.76 | taxable=1297.65; gst_charged=363.34; gst_expected_18pct=233.58; shortfall=-129.76 | Reconfirm the HSN rate on INV-2627-1112; if 18% applies, 129.76 of GST was over-collected and needs a credit note. |
 
 ### TDS_WITHHELD — 3 item(s), 358.65 (auto-resolved)
 

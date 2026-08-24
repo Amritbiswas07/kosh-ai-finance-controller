@@ -30,6 +30,13 @@ TIER_MEANING = {
 }
 
 
+def _engine_ms(res: ReconResult, meta: dict) -> float:
+    """Deterministic time only. `total_s` spans all four legs including the
+    adjudication calls, so quoting it as 'engine' next to a separate 'model'
+    figure double-counts the model and overstates the engine by ~1000x."""
+    return max(0.0, res.timings["total_s"] - meta.get("llm_seconds", 0.0)) * 1000
+
+
 def _grouped(res: ReconResult) -> dict[ExceptionCode, list]:
     out: dict[ExceptionCode, list] = {}
     for f in res.findings:
@@ -48,7 +55,7 @@ def markdown_report(res: ReconResult, ds: Dataset, pos: Position,
     add("")
     add(f"Generated {datetime.now():%Y-%m-%d %H:%M}. "
         f"{res.counts['total_records']:,} source records across three systems, "
-        f"reconciled in {res.timings['total_s'] * 1000:.1f} ms"
+        f"reconciled in {_engine_ms(res, meta):.1f} ms of engine time"
         + (f" plus {meta['llm_seconds']:.1f} s of model adjudication."
            if meta.get("llm_seconds") else "."))
     add("")
@@ -144,44 +151,100 @@ def markdown_report(res: ReconResult, ds: Dataset, pos: Position,
 
 # ---------------------------------------------------------------------- html
 
+_FONTS = ("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;"
+          "6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&"
+          "family=JetBrains+Mono:wght@400;500&display=swap")
+
 _CSS = """
-:root{--bg:#fbfaf8;--panel:#fff;--ink:#1b1a18;--muted:#6a6560;--line:#e5e0d8;
---accent:#1f6feb;--good:#0f7b45;--warn:#b45309;--bad:#b42318;--chip:#f2efe9;}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141312;
---panel:#1c1b19;--ink:#eceae6;--muted:#9d968d;--line:#2e2c29;--accent:#6ea8fe;
---good:#4ade80;--warn:#fbbf24;--bad:#f87171;--chip:#26241f;}}
-:root[data-theme=dark]{--bg:#141312;--panel:#1c1b19;--ink:#eceae6;--muted:#9d968d;
---line:#2e2c29;--accent:#6ea8fe;--good:#4ade80;--warn:#fbbf24;--bad:#f87171;--chip:#26241f;}
+/* Light is the base; both dark paths redefine tokens only, never components. */
+:root{
+  --paper:#fafaf7; --panel:#ffffff; --panel-2:#f4f5f2;
+  --ink:#16211d; --muted:#5f6b66; --line:#e1e5e1; --line-2:#eceee9;
+  --accent:#0b5d4e; --accent-soft:#e4efeb;
+  --good:#1a7f5a; --warn:#a5620a; --bad:#a32e22;
+  --stripe-review:#a5620a; --stripe-auto:#1a7f5a;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f1512; --panel:#161d1a; --panel-2:#1c2422;
+  --ink:#e6ebe7; --muted:#93a099; --line:#26302c; --line-2:#1f2825;
+  --accent:#4fd1a5; --accent-soft:#17302a;
+  --good:#4ade9b; --warn:#e8a33d; --bad:#f08a7c;
+  --stripe-review:#e8a33d; --stripe-auto:#4ade9b;
+}}
+:root[data-theme="dark"]{
+  --paper:#0f1512; --panel:#161d1a; --panel-2:#1c2422;
+  --ink:#e6ebe7; --muted:#93a099; --line:#26302c; --line-2:#1f2825;
+  --accent:#4fd1a5; --accent-soft:#17302a;
+  --good:#4ade9b; --warn:#e8a33d; --bad:#f08a7c;
+  --stripe-review:#e8a33d; --stripe-auto:#4ade9b;
+}
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
-font:15px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;}
-.wrap{max-width:1120px;margin:0 auto;padding:40px 24px 80px}
-h1{font-size:30px;margin:0 0 6px;letter-spacing:-.02em}
-h2{font-size:19px;margin:44px 0 14px;letter-spacing:-.01em}
-h3{font-size:14px;margin:26px 0 8px;font-family:ui-monospace,SFMono-Regular,monospace}
-.sub{color:var(--muted);margin:0 0 4px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:22px 0}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
-.card .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.card .v{font-size:25px;font-weight:600;margin-top:5px;letter-spacing:-.02em;
-font-variant-numeric:tabular-nums}
-.card .n{font-size:12px;color:var(--muted);margin-top:3px}
-.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Public Sans",ui-sans-serif,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1140px;margin:0 auto;padding:52px 24px 96px;
+  display:flex;flex-direction:column;gap:0}
+
+/* ---- masthead ---- */
+.mast{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:26px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 10px}
+h1{font-family:"Newsreader",Georgia,serif;font-weight:500;font-size:44px;line-height:1.05;
+  letter-spacing:-.015em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:10px 0 0;font-size:13.5px;
+  font-variant-numeric:tabular-nums}
+
+h2{font-family:"Newsreader",Georgia,serif;font-weight:500;font-size:25px;
+  letter-spacing:-.01em;margin:46px 0 14px;text-wrap:balance}
+h3{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px;font-weight:500;
+  margin:30px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+
+/* ---- summary tiles ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+  gap:12px;margin:0 0 8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.11em;
+  color:var(--muted);font-weight:600}
+.card .v{font-family:"Newsreader",Georgia,serif;font-size:30px;font-weight:500;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.card .n{font-size:12px;color:var(--muted)}
+.card.flag{border-left:3px solid var(--stripe-review)}
+
+/* ---- tables ---- */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;
+  background:var(--panel)}
 table{border-collapse:collapse;width:100%;font-size:13.5px}
-th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
-font-weight:600;white-space:nowrap}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line-2);
+  vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  font-weight:700;white-space:nowrap;background:var(--panel-2);
+  border-bottom:1px solid var(--line)}
 tr:last-child td{border-bottom:none}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
-.chip{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--chip);
-font-size:11px;font-weight:600;letter-spacing:.03em}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:12px}
+.sub-row td{font-weight:700;background:var(--accent-soft)}
+.sub-row td.n{font-variant-numeric:tabular-nums}
+
+/* ---- severity ---- */
+.chip{display:inline-block;padding:3px 9px;border-radius:2px;font-size:10.5px;
+  font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  font-family:"Public Sans",sans-serif}
+.chip.review{background:var(--warn);color:var(--paper)}
+.chip.auto{background:var(--good);color:var(--paper)}
+.chip.count{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.block{border-left:3px solid var(--stripe-auto)}
+.block.review{border-left-color:var(--stripe-review)}
 .good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
-.sub-row td{font-weight:650;background:var(--chip)}
-.meaning{color:var(--muted);font-size:13px;margin:0 0 10px}
-.ev{color:var(--muted);font-size:12px;max-width:340px}
-footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);
-color:var(--muted);font-size:12.5px}
+.meaning{color:var(--muted);font-size:13.5px;margin:0 0 10px;max-width:68ch}
+.ev{color:var(--muted);font-size:12px;max-width:330px;line-height:1.5}
+
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:12.5px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 """
 
 
@@ -195,13 +258,15 @@ def html_report(res: ReconResult, ds: Dataset, pos: Position,
     exposure = sum(abs(f.value_at_risk_paise) for f in unresolved)
     H: list[str] = []
     add = H.append
-    add("<title>Kosh Reconciliation Pack</title>")
+    add("<title>Settlement Reconciliation Pack</title>")
+    add(f'<link rel="stylesheet" href="{_FONTS}">')
     add(f"<style>{_CSS}</style><div class=wrap>")
-    add(f"<h1>Reconciliation pack</h1><p class=sub>"
-        f"{res.counts['total_records']:,} records · three sources · "
-        f"engine {res.timings['total_s'] * 1000:.1f} ms"
-        + (f" · model {meta['llm_seconds']:.1f} s" if meta.get("llm_seconds") else "")
-        + f" · {datetime.now():%d %b %Y %H:%M}</p>")
+    add("<div class=mast><p class=eyebrow>Kosh &middot; month-end close</p>"
+        "<h1>Settlement reconciliation pack</h1>"
+        f"<p class=sub>{res.counts['total_records']:,} records across ERP, gateway and "
+        f"bank &middot; engine {_engine_ms(res, meta):.1f} ms"
+        + (f" &middot; model {meta['llm_seconds']:.1f} s" if meta.get("llm_seconds") else "")
+        + f" &middot; {datetime.now():%d %b %Y %H:%M}</p></div>")
 
     cards = [("Net settled", fmt(pos.settled_net), "into gateway batches"),
              ("Landed in bank", fmt(pos.landed_in_bank), "traced to a credit"),
@@ -213,7 +278,8 @@ def html_report(res: ReconResult, ds: Dataset, pos: Position,
         cards.append(("Exception F1", f"{metrics['exceptions']['overall']['f1']:.3f}",
                       "vs held-out ground truth"))
     add("<div class=cards>" + "".join(
-        f"<div class=card><div class=k>{_esc(k)}</div><div class=v>{_esc(v)}</div>"
+        f"<div class='card{' flag' if k == 'Needs review' else ''}'>"
+        f"<div class=k>{_esc(k)}</div><div class=v>{_esc(v)}</div>"
         f"<div class=n>{_esc(n)}</div></div>" for k, v, n in cards) + "</div>")
 
     add("<h2>Where the money is</h2><div class=scroll><table>")
@@ -260,10 +326,13 @@ def html_report(res: ReconResult, ds: Dataset, pos: Position,
     for code, items in _grouped(res).items():
         need = any(f.disposition is Disposition.NEEDS_REVIEW for f in items)
         total = sum(abs(f.value_at_risk_paise) for f in items)
-        add(f"<h3>{_esc(code.value)} <span class=chip>{len(items)} · {fmt(total)} · "
-            f"{'needs review' if need else 'auto-resolved'}</span></h3>")
+        add(f"<h3>{_esc(code.value)}"
+            f"<span class='chip {'review' if need else 'auto'}'>"
+            f"{'needs review' if need else 'auto-resolved'}</span>"
+            f"<span class='chip count'>{len(items)} &middot; {fmt(total)}</span></h3>")
         add(f"<p class=meaning>{_esc(EXCEPTION_MEANING[code])}</p>")
-        add("<div class=scroll><table><tr><th>Record</th><th class=n>Value</th>"
+        add(f"<div class='scroll block{' review' if need else ''}'><table>"
+            "<tr><th>Record</th><th class=n>Value</th>"
             "<th>Evidence</th><th>Proposed action</th></tr>")
         for f in sorted(items, key=lambda f: -abs(f.value_at_risk_paise)):
             ev = "<br>".join(f"{_esc(k)}=<span class=mono>{_esc(v)}</span>"
