@@ -62,16 +62,47 @@ def test_serves_the_page(live):
     status, body, ctype = get(base, "/")
     assert status == 200 and "text/html" in ctype
     assert b"<title>Kosh" in body
-    assert b"Settlement reconciliation" in body
+    assert b"Kosh" in body and b"AI Finance Controller" in body
+    # Exactly one h1, so the page keeps a single document landmark.
+    assert body.count(b"<h1") == 1
 
 
-def test_the_page_pulls_in_nothing_from_the_network(live):
-    """Local-first means the UI renders with the machine unplugged."""
+def test_the_page_fetches_nothing_from_the_network(live):
+    """Local-first means the UI renders with the machine unplugged.
+
+    A hyperlink is fine — clicking it is the user's choice and costs nothing at
+    render time. What must not exist is a *fetched* resource: a stylesheet, a
+    webfont, a script or an image pulled from another host.
+    """
+    import re
     _, _ = live
     page = (Path(__file__).resolve().parents[1]
             / "src/kosh/static/app.html").read_text()
-    for scheme in ("http://", "https://", "//fonts.", "cdn."):
-        assert scheme not in page, f"page reaches out to {scheme}"
+
+    for m in re.finditer(r"""\bsrc\s*=\s*["\']([^"\']+)""", page):
+        assert not m.group(1).startswith(("http://", "https://", "//")), m.group(1)
+    for m in re.finditer(r"url\(\s*['\"]?([^)'\"]+)", page):
+        assert not m.group(1).startswith(("http://", "https://", "//")), m.group(1)
+    assert "@import" not in page
+    assert not re.search(r"<link[^>]+rel=[\"\']?stylesheet", page, re.I)
+    assert "fonts.googleapis" not in page and "fonts.gstatic" not in page
+
+    # Every href that does leave the machine must be a real navigation, not a fetch.
+    for m in re.finditer(r"""\bhref\s*=\s*["\']([^"\']+)""", page):
+        url = m.group(1)
+        if url.startswith(("http://", "https://")):
+            assert "razorpay.com" in url, url
+
+
+def test_static_files_are_served_and_traversal_is_refused(live):
+    base, _ = live
+    # The logo slot is optional: absent, it 404s and the page drops the <img>.
+    status, _, _ = get(base, "/static/razorpay-logo.svg")
+    assert status in (200, 404)
+    status, _, _ = get(base, "/static/../server.py")
+    assert status == 404
+    status, body, ctype = get(base, "/static/app.html")
+    assert status == 404 or b"<title>" in body
 
 
 def test_state_carries_a_complete_run(live):

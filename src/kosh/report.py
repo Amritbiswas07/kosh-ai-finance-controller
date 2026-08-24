@@ -151,90 +151,87 @@ def markdown_report(res: ReconResult, ds: Dataset, pos: Position,
 
 # ---------------------------------------------------------------------- html
 
-_FONTS = ("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;"
-          "6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&"
-          "family=JetBrains+Mono:wght@400;500&display=swap")
-
 _CSS = """
-/* Light is the base; both dark paths redefine tokens only, never components. */
+/* Razorpay's live palette, sampled from razorpay.com: #305EFF primary, #132644
+   navy ink, #F0F4F6 surface, #ED2939 red, and their fully-rounded pills. Same
+   tokens as the web UI, so the pack and the app read as one product. */
 :root{
-  --paper:#fafaf7; --panel:#ffffff; --panel-2:#f4f5f2;
-  --ink:#16211d; --muted:#5f6b66; --line:#e1e5e1; --line-2:#eceee9;
-  --accent:#0b5d4e; --accent-soft:#e4efeb;
-  --good:#1a7f5a; --warn:#a5620a; --bad:#a32e22;
-  --stripe-review:#a5620a; --stripe-auto:#1a7f5a;
+  --paper:#fff; --panel:#fff; --panel-2:#f0f4f6;
+  --ink:#132644; --muted:#5a6b84; --line:#e3e9ef; --line-2:#eef2f6;
+  --brand:#305eff; --brand-tint:rgba(48,94,255,.09); --brand-ink:#fff;
+  --good:#12855c; --warn:#b26a00; --bad:#ed2939;
+  --stripe-review:#b26a00; --stripe-auto:#12855c; --pill:40px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#0f1512; --panel:#161d1a; --panel-2:#1c2422;
-  --ink:#e6ebe7; --muted:#93a099; --line:#26302c; --line-2:#1f2825;
-  --accent:#4fd1a5; --accent-soft:#17302a;
-  --good:#4ade9b; --warn:#e8a33d; --bad:#f08a7c;
-  --stripe-review:#e8a33d; --stripe-auto:#4ade9b;
+  --paper:#0b1424; --panel:#101c30; --panel-2:#16253c;
+  --ink:#e8eef7; --muted:#8ea3c0; --line:#22344f; --line-2:#1a2a41;
+  --brand:#6e9bff; --brand-tint:rgba(110,155,255,.14); --brand-ink:#0b1424;
+  --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
+  --stripe-review:#e8a33d; --stripe-auto:#3fcf8e;
 }}
 :root[data-theme="dark"]{
-  --paper:#0f1512; --panel:#161d1a; --panel-2:#1c2422;
-  --ink:#e6ebe7; --muted:#93a099; --line:#26302c; --line-2:#1f2825;
-  --accent:#4fd1a5; --accent-soft:#17302a;
-  --good:#4ade9b; --warn:#e8a33d; --bad:#f08a7c;
-  --stripe-review:#e8a33d; --stripe-auto:#4ade9b;
+  --paper:#0b1424; --panel:#101c30; --panel-2:#16253c;
+  --ink:#e8eef7; --muted:#8ea3c0; --line:#22344f; --line-2:#1a2a41;
+  --brand:#6e9bff; --brand-tint:rgba(110,155,255,.14); --brand-ink:#0b1424;
+  --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
+  --stripe-review:#e8a33d; --stripe-auto:#3fcf8e;
 }
 
 *{box-sizing:border-box}
 body{
   margin:0; background:var(--paper); color:var(--ink);
-  font-family:"Public Sans",ui-sans-serif,-apple-system,"Segoe UI",sans-serif;
-  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  font-family:"Mona Sans",ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,
+    Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.55; letter-spacing:-.005em;
+  -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:1140px;margin:0 auto;padding:52px 24px 96px;
-  display:flex;flex-direction:column;gap:0}
+.wrap{max-width:1140px;margin:0 auto;padding:48px 24px 96px}
 
-/* ---- masthead ---- */
-.mast{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:26px}
-.eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--accent);margin:0 0 10px}
-h1{font-family:"Newsreader",Georgia,serif;font-weight:500;font-size:44px;line-height:1.05;
-  letter-spacing:-.015em;margin:0;text-wrap:balance}
-.sub{color:var(--muted);margin:10px 0 0;font-size:13.5px;
-  font-variant-numeric:tabular-nums}
+.mast{display:flex;align-items:center;gap:13px;border-bottom:1px solid var(--line);
+  padding-bottom:20px;margin-bottom:26px;flex-wrap:wrap}
+.mark{width:34px;height:34px;border-radius:9px;background:var(--brand);
+  color:var(--brand-ink);display:grid;place-items:center;font-weight:800;
+  font-size:17px;letter-spacing:-.03em;flex:none}
+.masthead{flex:1 1 320px}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--brand);margin:0 0 5px}
+h1{font-weight:700;font-size:33px;line-height:1.08;letter-spacing:-.03em;margin:0;
+  text-wrap:balance}
+.sub{color:var(--muted);margin:9px 0 0;font-size:13px;font-variant-numeric:tabular-nums}
 
-h2{font-family:"Newsreader",Georgia,serif;font-weight:500;font-size:25px;
-  letter-spacing:-.01em;margin:46px 0 14px;text-wrap:balance}
-h3{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px;font-weight:500;
-  margin:30px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+h2{font-weight:700;font-size:21px;letter-spacing:-.02em;margin:44px 0 13px;
+  text-wrap:balance}
+h3{font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px;font-weight:600;
+  margin:28px 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:9px}
 
-/* ---- summary tiles ---- */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
   gap:12px;margin:0 0 8px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
   padding:16px 18px;display:flex;flex-direction:column;gap:5px}
-.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.11em;
-  color:var(--muted);font-weight:600}
-.card .v{font-family:"Newsreader",Georgia,serif;font-size:30px;font-weight:500;
-  letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.card.flag{background:var(--brand-tint);border-color:transparent}
+.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);font-weight:700}
+.card .v{font-size:28px;font-weight:700;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;line-height:1.05}
 .card .n{font-size:12px;color:var(--muted)}
-.card.flag{border-left:3px solid var(--stripe-review)}
 
-/* ---- tables ---- */
-.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;
   background:var(--panel)}
 table{border-collapse:collapse;width:100%;font-size:13.5px}
-th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line-2);
+th,td{text-align:left;padding:10px 15px;border-bottom:1px solid var(--line-2);
   vertical-align:top}
-th{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
   font-weight:700;white-space:nowrap;background:var(--panel-2);
   border-bottom:1px solid var(--line)}
 tr:last-child td{border-bottom:none}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:12px}
-.sub-row td{font-weight:700;background:var(--accent-soft)}
-.sub-row td.n{font-variant-numeric:tabular-nums}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.sub-row td{font-weight:700;background:var(--brand-tint)}
 
-/* ---- severity ---- */
-.chip{display:inline-block;padding:3px 9px;border-radius:2px;font-size:10.5px;
-  font-weight:700;letter-spacing:.07em;text-transform:uppercase;
-  font-family:"Public Sans",sans-serif}
-.chip.review{background:var(--warn);color:var(--paper)}
-.chip.auto{background:var(--good);color:var(--paper)}
+.chip{display:inline-block;padding:3px 11px;border-radius:var(--pill);font-size:10.5px;
+  font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.chip.review{background:var(--warn);color:#fff}
+.chip.auto{background:var(--good);color:#fff}
 .chip.count{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
 .block{border-left:3px solid var(--stripe-auto)}
 .block.review{border-left-color:var(--stripe-review)}
@@ -242,7 +239,7 @@ code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:1
 .meaning{color:var(--muted);font-size:13.5px;margin:0 0 10px;max-width:68ch}
 .ev{color:var(--muted);font-size:12px;max-width:330px;line-height:1.5}
 
-footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);
+footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
   color:var(--muted);font-size:12.5px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 """
@@ -259,14 +256,14 @@ def html_report(res: ReconResult, ds: Dataset, pos: Position,
     H: list[str] = []
     add = H.append
     add("<title>Settlement Reconciliation Pack</title>")
-    add(f'<link rel="stylesheet" href="{_FONTS}">')
     add(f"<style>{_CSS}</style><div class=wrap>")
-    add("<div class=mast><p class=eyebrow>Kosh &middot; month-end close</p>"
+    add("<div class=mast><span class=mark>K</span><div class=masthead>"
+        "<p class=eyebrow>Kosh &middot; Razorpay AI Buildathon &middot; Track 4</p>"
         "<h1>Settlement reconciliation pack</h1>"
         f"<p class=sub>{res.counts['total_records']:,} records across ERP, gateway and "
         f"bank &middot; engine {_engine_ms(res, meta):.1f} ms"
         + (f" &middot; model {meta['llm_seconds']:.1f} s" if meta.get("llm_seconds") else "")
-        + f" &middot; {datetime.now():%d %b %Y %H:%M}</p></div>")
+        + f" &middot; {datetime.now():%d %b %Y %H:%M}</p></div></div>")
 
     cards = [("Net settled", fmt(pos.settled_net), "into gateway batches"),
              ("Landed in bank", fmt(pos.landed_in_bank), "traced to a credit"),

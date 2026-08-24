@@ -1,6 +1,6 @@
 
-Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 6.5s)
-345 records · engine 10210.1 ms · wall 10.22 s · model 10.2 s
+Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 6.7s)
+345 records · engine 10088.0 ms · wall 10.10 s · model 10.1 s
 
 Where the money is
   Captured at the gateway                  +7,26,213.94

@@ -78,11 +78,28 @@ live, then work the queue.
   whether the arithmetic accepted or rejected it.
 - **Ask** — settlement Q&A against the run that is loaded.
 
+**Styled to Razorpay.** The palette is sampled from the live razorpay.com — 
+`#305EFF` primary, `#132644` navy ink, `#F0F4F6` surface, `#ED2939` red, and
+their signature fully-rounded 40px pills — rather than recalled from memory. The
+static pack in `outputs/recon.html` uses the same tokens, so the report and the
+app read as one product. Both themes are token-defined for all three viewer
+states, and dark mode clears WCAG AA comfortably (ink 15.8:1, muted 7.15:1).
+
+**About the logo.** The header has a slot for it: drop the official mark at
+`src/kosh/static/razorpay-logo.svg` and it replaces the placeholder tile
+automatically; absent, the `onerror` removes the `<img>` and nothing breaks. I
+did not redraw the Razorpay mark from memory — it would be both inaccurate and
+would make a payments tool look like an official Razorpay product, which it is
+not. Grab the real asset from Razorpay's brand assets page.
+
 **Standard library only.** [`server.py`](src/kosh/server.py) is a
 `ThreadingHTTPServer`, not FastAPI — the web UI adds **zero dependencies**. It
 binds to localhost and serves one self-contained page with no CDN links and no
-webfonts, so it renders with the machine unplugged. A test asserts the page
-contains no `http://`, `https://` or `cdn.` reference at all.
+webfonts, so it renders with the machine unplugged. (Mona Sans, Razorpay's own
+face, is not on a permitted font host, so the type is a system stack tuned to
+sit close to it.) A test asserts the page *fetches* nothing external — every
+`src`, `url()` and stylesheet link stays local, while a plain hyperlink to the
+buildathon page is allowed, since clicking it is the reader's choice.
 
 Three bugs worth recording, since two of them only appear under use:
 
