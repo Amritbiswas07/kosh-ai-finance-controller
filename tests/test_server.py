@@ -214,3 +214,34 @@ def test_the_model_is_loaded_at_most_once_under_contention(live):
     assert len(calls) == 1, f"loaded {len(calls)} times"
     session._adjudicator = None
     assert real is not None
+
+
+def test_the_brand_mark_is_inlined_not_referenced(live):
+    """Only an SVG inside the document can inherit currentColor, which is what
+    lets the mark's dark half invert instead of vanishing into a navy header."""
+    base, _ = live
+    from kosh.server import LOGO
+    status, body, _ = get(base, "/")
+    page = body.decode()
+    if not LOGO.is_file():
+        pytest.skip("no brand mark supplied")
+    assert "<svg" in page and 'aria-label="Razorpay"' in page
+    assert "currentColor" in page
+    assert "#3395ff" in page              # the supplied blue is left untouched
+    assert 'id="fallbackmark"' not in page
+    assert "<!--RAZORPAY_LOGO-->" not in page
+    # Inlined means no extra request for it.
+    assert 'img src="/static/razorpay-logo.svg"' not in page
+
+
+def test_the_mark_is_cropped_to_its_artwork(live):
+    """As supplied the mark sits in a 960-square canvas and renders ~5px tall
+    at header size; the stored asset is tightened to the measured bounds."""
+    from kosh.server import LOGO
+    if not LOGO.is_file():
+        pytest.skip("no brand mark supplied")
+    import re as _re
+    vb = _re.search(r'viewBox="([^"]+)"', LOGO.read_text()).group(1)
+    x, y, w, h = (float(v) for v in vb.split())
+    assert w / h > 3.5, f"viewBox {vb} is not cropped to the artwork band"
+    assert h < 400, f"viewBox {vb} still carries the square canvas"
