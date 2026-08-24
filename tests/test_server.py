@@ -269,3 +269,22 @@ def test_the_product_name_is_not_in_the_header(live):
     _, body, _ = get(base, "/")
     header = body.decode().split("</header>")[0]
     assert "Kosh" not in header
+
+
+def test_navigation_docks_on_wide_screens_and_collapses_below(live):
+    """The sidebar is pinned above 1000px and reverts to the overlay drawer
+    below it. `hidden` is never used to express the docked state — a visible
+    element marked hidden lies to a screen reader — so the page carries both a
+    media query and the JS that keeps the attribute in step with it."""
+    base, _ = live
+    _, body, _ = get(base, "/")
+    page = body.decode()
+    assert "@media (min-width:1000px)" in page
+    assert 'matchMedia("(min-width: 1000px)")' in page
+    assert "function syncNav()" in page
+    assert 'DOCKED.addEventListener("change", syncNav)' in page
+    # Docked: no menu button, no scrim, and content offset by the sidebar.
+    assert "#menu{display:none}" in page
+    assert "margin:0 0 0 248px" in page
+    # A pinned sidebar must ignore both dismiss paths.
+    assert "if (DOCKED.matches) return;" in page
