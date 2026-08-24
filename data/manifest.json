@@ -1,0 +1,36 @@
+{
+  "seed": 20260824,
+  "generated_at": "2026-08-25T04:04:40",
+  "counts": {
+    "erp_invoices": 135,
+    "pg_transactions": 148,
+    "bank_lines": 62,
+    "total_records": 345
+  },
+  "injected": {
+    "unpaid_invoice": 6,
+    "unbilled_payment": 5,
+    "duplicate_payment": 4,
+    "orphan_refund": 3,
+    "funds_on_hold": 4,
+    "fee_variance": 5,
+    "tax_line_mismatch": 4,
+    "chargeback_adjustment": 3,
+    "missing_in_bank": 3,
+    "settlement_amount_mismatch": 3,
+    "split_settlement": 2,
+    "unexpected_bank_credit": 4,
+    "merged_payout": 2,
+    "missing_order_id": 5,
+    "direct_bank_payment": 3,
+    "tds_deduction": 3
+  },
+  "injected_total": 59,
+  "ground_truth_exceptions": 56,
+  "true_links": {
+    "invoice_to_payment": 123,
+    "payment_to_batch": 141,
+    "batch_to_bank": 42,
+    "invoice_to_bank": 6
+  }
+}

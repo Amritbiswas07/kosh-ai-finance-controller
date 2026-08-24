@@ -1,0 +1,46 @@
+loading Qwen/Qwen2.5-1.5B-Instruct …
+loaded in 7.0s on mps
+  seed 1     link_f1=1.0000 exc_f1=1.0000 clear=82.7% 341 recs @ 23/s
+  seed 2     link_f1=1.0000 exc_f1=1.0000 clear=85.6% 348 recs @ 69/s
+  seed 3     link_f1=1.0000 exc_f1=1.0000 clear=88.0% 342 recs @ 28/s
+  seed 4     link_f1=1.0000 exc_f1=1.0000 clear=84.7% 340 recs @ 31/s
+  seed 5     link_f1=1.0000 exc_f1=1.0000 clear=84.6% 337 recs @ 42/s
+  seed 6     link_f1=1.0000 exc_f1=1.0000 clear=86.8% 342 recs @ 28/s
+  seed 7     link_f1=1.0000 exc_f1=1.0000 clear=87.6% 340 recs @ 34/s
+  seed 8     link_f1=1.0000 exc_f1=1.0000 clear=84.5% 342 recs @ 34/s
+  seed 9     link_f1=1.0000 exc_f1=1.0000 clear=86.4% 338 recs @ 24/s
+  seed 10    link_f1=1.0000 exc_f1=1.0000 clear=84.8% 336 recs @ 37/s
+  seed 11    link_f1=1.0000 exc_f1=1.0000 clear=84.5% 341 recs @ 52/s
+  seed 12    link_f1=1.0000 exc_f1=1.0000 clear=86.4% 339 recs @ 221/s
+  seed 13    link_f1=1.0000 exc_f1=1.0000 clear=84.5% 342 recs @ 62/s
+  seed 14    link_f1=1.0000 exc_f1=1.0000 clear=85.9% 341 recs @ 72/s
+  seed 15    link_f1=1.0000 exc_f1=1.0000 clear=87.2% 344 recs @ 52/s
+  seed 16    link_f1=1.0000 exc_f1=1.0000 clear=84.1% 345 recs @ 37/s
+  seed 17    link_f1=1.0000 exc_f1=1.0000 clear=86.7% 339 recs @ 30/s
+  seed 18    link_f1=1.0000 exc_f1=1.0000 clear=84.9% 338 recs @ 29/s
+  seed 19    link_f1=1.0000 exc_f1=1.0000 clear=83.6% 341 recs @ 49/s
+  seed 20    link_f1=1.0000 exc_f1=1.0000 clear=86.2% 348 recs @ 49/s
+  seed 21    link_f1=1.0000 exc_f1=1.0000 clear=86.8% 341 recs @ 30/s
+  seed 22    link_f1=1.0000 exc_f1=1.0000 clear=87.7% 350 recs @ 32/s
+  seed 23    link_f1=1.0000 exc_f1=1.0000 clear=85.2% 339 recs @ 49/s
+  seed 24    link_f1=1.0000 exc_f1=1.0000 clear=88.3% 351 recs @ 30/s
+  seed 25    link_f1=1.0000 exc_f1=1.0000 clear=85.3% 354 recs @ 44/s
+  seed 26    link_f1=1.0000 exc_f1=1.0000 clear=84.4% 339 recs @ 28/s
+  seed 27    link_f1=1.0000 exc_f1=1.0000 clear=83.7% 338 recs @ 32/s
+  seed 28    link_f1=1.0000 exc_f1=1.0000 clear=86.8% 348 recs @ 33/s
+  seed 29    link_f1=1.0000 exc_f1=1.0000 clear=88.6% 351 recs @ 87/s
+  seed 30    link_f1=1.0000 exc_f1=1.0000 clear=84.5% 342 recs @ 24/s
+
+30 seeds, 10,277 records, Qwen/Qwen2.5-1.5B-Instruct on invoice→bank
+metric          mean       min       max     stdev
+link_f1       1.0000    1.0000    1.0000    0.0000
+exc_p         1.0000    1.0000    1.0000    0.0000
+exc_r         1.0000    1.0000    1.0000    0.0000
+exc_f1        1.0000    1.0000    1.0000    0.0000
+macro_f1      1.0000    1.0000    1.0000    0.0000
+clear         0.8571    0.8270    0.8860    0.0154
+rps          46.4000   23.0000  221.0000   36.5038
+
+seeds scoring below a perfect run: 0 of 30
+
+wrote /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/benchmark_llm.json

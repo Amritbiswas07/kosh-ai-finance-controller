@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Settlement Reconciliation — AI Finance Controller</title>
+<style>
+/* Razorpay's live palette, sampled from razorpay.com: #305EFF primary, #132644
+   navy ink, #F0F4F6 surface, #ED2939 red, and their 40px pills.
+
+   Sizes come off one scale rather than being chosen per component:
+   type 11/12/13/14/15/17/20/26, space 4/8/12/16/24/32/48, radius 8/12/40.
+   No webfont — a local-first tool must render with the network unplugged. */
+:root{
+  --paper:#fff; --panel:#fff; --panel-2:#f7f9fb; --panel-3:#f0f4f6;
+  --ink:#132644; --muted:#5a6b84; --faint:#8496ad;
+  --line:#e5eaf0; --line-2:#eef2f6;
+  --brand:#305eff; --brand-2:#4d7fff; --brand-tint:rgba(48,94,255,.08);
+  --brand-ink:#fff;
+  --good:#12855c; --warn:#b26a00; --bad:#ed2939;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --r1:8px; --r2:12px; --pill:40px;
+  --shadow:0 1px 2px rgba(19,38,68,.06), 0 8px 24px rgba(19,38,68,.06);
+  --lift:0 4px 14px rgba(19,38,68,.10);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0b1424; --panel:#101c30; --panel-2:#132038; --panel-3:#16253c;
+  --ink:#e8eef7; --muted:#95a9c4; --faint:#728aa8;
+  --line:#20324c; --line-2:#1a2a41;
+  --brand:#6e9bff; --brand-2:#8fb2ff; --brand-tint:rgba(110,155,255,.12);
+  --brand-ink:#0b1424;
+  --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  --lift:0 4px 14px rgba(0,0,0,.45);
+}}
+:root[data-theme="dark"]{
+  --paper:#0b1424; --panel:#101c30; --panel-2:#132038; --panel-3:#16253c;
+  --ink:#e8eef7; --muted:#95a9c4; --faint:#728aa8;
+  --line:#20324c; --line-2:#1a2a41;
+  --brand:#6e9bff; --brand-2:#8fb2ff; --brand-tint:rgba(110,155,255,.12);
+  --brand-ink:#0b1424;
+  --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  --lift:0 4px 14px rgba(0,0,0,.45);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"Mona Sans",ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,
+    Helvetica,Arial,sans-serif;
+  font-size:14px; line-height:1.5; letter-spacing:-.004em;
+  -webkit-font-smoothing:antialiased;
+}
+.mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:var(--r1)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- header ---------- */
+/* The bar was already pinned, but with nothing but a hairline under it the rows
+   scrolling beneath appeared to bleed into it. Elevation only once the page has
+   actually moved, so a page at rest keeps a flat edge. */
+header{border-bottom:1px solid var(--line);background:var(--panel);
+  position:sticky;top:0;z-index:30;transition:box-shadow .16s ease}
+header.lifted{box-shadow:var(--lift)}
+.bar{max-width:1200px;margin:0 auto;padding:0 var(--s5);height:60px;
+  display:flex;align-items:center;gap:var(--s3)}
+.iconbtn{width:34px;height:34px;display:grid;place-items:center;padding:0;flex:none;
+  border:1px solid var(--line);border-radius:var(--r1);background:var(--panel-2);
+  color:var(--ink);cursor:pointer}
+.iconbtn:hover{background:var(--panel-3)}
+.logo{display:flex;align-items:center;text-decoration:none;color:inherit;flex:none}
+.logo .rzp{height:21px;width:auto;display:block;color:var(--ink)}
+.mark{width:28px;height:28px;border-radius:var(--r1);background:var(--brand);
+  color:var(--brand-ink);display:grid;place-items:center;font-weight:700;
+  font-size:14px;flex:none}
+.rule{width:1px;height:22px;background:var(--line);flex:none}
+.unit{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.005em;
+  white-space:nowrap}
+/* Once the page title has scrolled past, the bar names the section instead, so
+   the top of the screen never stops saying where you are. */
+.crumb{font-size:13px;font-weight:650;color:var(--ink);white-space:nowrap;
+  letter-spacing:-.01em}
+.controls{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;
+  margin-left:auto}
+label.field{display:flex;align-items:center;gap:var(--s2);font-size:11px;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600}
+input[type=number],input[type=text]{
+  font:inherit;font-size:13px;padding:7px 14px;border:1px solid var(--line);
+  border-radius:var(--pill);background:var(--panel-2);color:var(--ink);width:118px;
+  font-variant-numeric:tabular-nums}
+input:hover{border-color:var(--faint)}
+.toggle{display:flex;align-items:center;gap:var(--s2);font-size:13px;color:var(--ink);
+  padding:7px 14px;border:1px solid var(--line);border-radius:var(--pill);
+  background:var(--panel-2);cursor:pointer;user-select:none;font-weight:500;
+  white-space:nowrap}
+.toggle:hover{border-color:var(--faint)}
+.toggle input{accent-color:var(--brand);width:14px;height:14px;cursor:pointer}
+button{font:inherit;cursor:pointer;border-radius:var(--pill);
+  border:1px solid transparent;padding:8px 18px;font-weight:600;font-size:13px}
+button.primary{background:var(--brand);color:var(--brand-ink)}
+button.primary:hover:not(:disabled){background:var(--brand-2)}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:var(--panel-2);color:var(--ink);border-color:var(--line);
+  padding:7px 14px}
+button.ghost:hover{border-color:var(--faint)}
+
+/* ---------- navigation drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(19,38,68,.34);z-index:40;
+  animation:fade .14s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:288px;max-width:86vw;z-index:50;
+  background:var(--panel);border-right:1px solid var(--line);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;animation:slide .16s ease-out}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:none}}
+.drawerhead{display:flex;align-items:center;gap:var(--s3);height:60px;flex:none;
+  padding:0 var(--s4) 0 var(--s5);border-bottom:1px solid var(--line)}
+.drawerhead .unit{margin-right:auto;text-transform:uppercase;letter-spacing:.1em;
+  font-size:10.5px;color:var(--faint)}
+#tabs{display:flex;flex-direction:column;gap:2px;padding:var(--s3);overflow-y:auto}
+#tabs button{display:flex;align-items:center;gap:var(--s3);width:100%;
+  text-align:left;background:none;border:none;border-radius:var(--r1);
+  padding:10px var(--s3);color:var(--muted);font-weight:600;font-size:13.5px}
+#tabs button:hover{background:var(--panel-2);color:var(--ink)}
+#tabs button[aria-current=page]{background:var(--brand-tint);color:var(--brand)}
+#tabs .lbl{display:flex;flex-direction:column;gap:1px;min-width:0}
+#tabs em{font-style:normal;font-size:11.5px;font-weight:500;color:var(--faint);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tabs button[aria-current=page] em{color:var(--brand)}
+#tabs .n{margin-left:auto;font-size:11px;font-weight:700;color:var(--faint);
+  font-variant-numeric:tabular-nums;background:var(--panel-3);
+  border-radius:var(--pill);padding:2px 8px;flex:none}
+#tabs button[aria-current=page] .n{background:var(--brand);color:var(--brand-ink)}
+
+/* ---------- page ---------- */
+main{max-width:1200px;margin:0 auto;padding:var(--s5) var(--s5) 80px}
+.pagehead{margin-bottom:var(--s5)}
+h1{font-size:26px;font-weight:700;letter-spacing:-.025em;margin:0;line-height:1.15}
+.status{font-size:12.5px;color:var(--muted);margin:6px 0 0;
+  font-variant-numeric:tabular-nums}
+h2{font-size:17px;font-weight:700;letter-spacing:-.015em;margin:var(--s6) 0 var(--s3)}
+h2:first-child{margin-top:0}
+.hint{color:var(--muted);font-size:12.5px;margin:0 0 var(--s3);max-width:72ch;
+  line-height:1.55}
+
+/* ---------- progress ---------- */
+#progress{border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--panel-2);padding:var(--s4) var(--s5);margin-bottom:var(--s5)}
+#progress ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;
+  gap:var(--s1)}
+#progress li{font-size:13px;color:var(--muted);display:flex;gap:var(--s2);
+  align-items:baseline}
+#progress li .tick{width:13px;color:var(--good);font-weight:700}
+#progress li.active{color:var(--ink);font-weight:600}
+#progress li.active .tick{color:var(--brand)}
+
+/* ---------- tiles ---------- */
+/* Six tiles. auto-fit alone wraps them 4+2 at laptop widths, which reads as an
+   unfinished row; explicit stops keep every wrap balanced. */
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--s3)}
+@media (max-width:1140px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:660px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);
+  padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)}
+.card.flag{background:var(--brand-tint);border-color:transparent}
+.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--faint);font-weight:700}
+.card .v{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1.1;
+  font-variant-numeric:tabular-nums;margin-top:2px}
+.card .n{font-size:11.5px;color:var(--muted)}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:9px var(--s4);border-bottom:1px solid var(--line-2);
+  vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);
+  font-weight:700;white-space:nowrap;background:var(--panel-2);
+  border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sub-row td{font-weight:700;background:var(--brand-tint)}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+
+/* ---------- exception queue ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--s3);
+  align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:var(--pill);font-size:11.5px;font-weight:600;
+  border:1px solid var(--line);background:var(--panel-2);color:var(--muted);
+  cursor:pointer;font-family:inherit;white-space:nowrap}
+.chip:hover{color:var(--ink);border-color:var(--faint)}
+.chip[aria-pressed=true]{background:var(--brand);color:var(--brand-ink);
+  border-color:var(--brand)}
+.chip .c{font-variant-numeric:tabular-nums;opacity:.72}
+.tag{display:inline-block;padding:2px 9px;border-radius:var(--pill);font-size:10px;
+  font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.tag.review{background:var(--warn);color:#fff}
+.tag.auto{background:var(--good);color:#fff}
+.finding{border:1px solid var(--line);border-radius:var(--r2);background:var(--panel);
+  margin-bottom:6px;overflow:hidden}
+.finding.review{border-left:3px solid var(--warn)}
+.finding summary{padding:11px var(--s4);cursor:pointer;display:flex;flex-wrap:wrap;
+  gap:var(--s3);align-items:center;list-style:none}
+.finding summary::-webkit-details-marker{display:none}
+.finding summary::before{content:"›";color:var(--faint);font-size:15px;width:9px;
+  line-height:1}
+.finding[open] summary::before{content:"⌄";font-size:13px}
+.finding[open]{border-color:var(--brand)}
+.finding .key{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;
+  min-width:144px}
+.finding .code{font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--faint)}
+.finding .amt{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;
+  font-size:14px;letter-spacing:-.02em}
+.finding .body{padding:var(--s3) var(--s4) var(--s4) 38px;
+  border-top:1px solid var(--line-2)}
+.finding dl{display:grid;grid-template-columns:auto 1fr;gap:3px var(--s4);
+  margin:0 0 var(--s3);font-size:12px}
+.finding dt{color:var(--faint);white-space:nowrap}
+.finding dd{margin:0;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;
+  word-break:break-word}
+.action{font-size:12.5px;background:var(--brand-tint);padding:10px var(--s3);
+  border-radius:var(--r1);line-height:1.55}
+.empty{color:var(--muted);font-size:13px;padding:var(--s6);text-align:center;
+  border:1px dashed var(--line);border-radius:var(--r2)}
+
+/* ---------- ask ---------- */
+.askrow{display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)}
+.askrow input{flex:1 1 360px;width:auto}
+.answer{background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--brand);border-radius:var(--r2);padding:var(--s4);
+  white-space:pre-wrap;font-size:13.5px;margin-bottom:var(--s3);line-height:1.6}
+.answer.rejected{border-left-color:var(--bad)}
+.facts{font-size:12px;color:var(--muted)}
+.facts ul{margin:6px 0 0;padding-left:18px}
+.facts li{margin-bottom:4px;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.samples{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--s4)}
+footer{max-width:1200px;margin:0 auto;padding:0 var(--s5) var(--s6);
+  color:var(--faint);font-size:11.5px}
+[hidden]{display:none!important}
+
+/* Wide screens dock the drawer as a permanent sidebar: navigation is worth the
+   248px when there is room, and a menu button that hides a four-item list from
+   a 1400px display is a mobile pattern wearing a desktop suit. Below 1000px it
+   reverts to the overlay drawer. The `hidden` attribute is never set while
+   docked — a visible element marked hidden lies to a screen reader — so the
+   state lives in JS (syncNav) rather than in a CSS override. */
+@media (min-width:1000px){
+  #menu{display:none}
+  .scrim{display:none !important}
+  .drawer{position:fixed;top:60px;bottom:0;left:0;width:248px;max-width:none;
+    z-index:20;box-shadow:none;animation:none;background:var(--panel-2);
+    border-right:1px solid var(--line);overflow-y:auto}
+  .drawerhead{display:none}
+  #tabs{padding:var(--s4) var(--s3)}
+  #tabs button[aria-current=page]{background:var(--panel)}
+  main{margin:0 0 0 248px;max-width:1160px;padding-left:var(--s6);
+    padding-right:var(--s6)}
+  footer{margin:0 0 0 248px;max-width:1160px;padding-left:var(--s6);
+    padding-right:var(--s6)}
+}
+
+@media (max-width:720px){
+  .bar{height:auto;padding:var(--s3) var(--s4);flex-wrap:wrap}
+  .controls{margin-left:0;width:100%}
+  .unit,.rule{display:none}
+  main{padding:var(--s4) var(--s4) 64px}
+  h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <button class="iconbtn" id="menu" aria-label="Open sections" aria-expanded="false"
+            aria-controls="drawer">
+      <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="none"
+           stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <path d="M3 5.5h14M3 10h14M3 14.5h14"/>
+      </svg>
+    </button>
+    <a class="logo" href="https://razorpay.com/buildathon/" target="_blank"
+       rel="noreferrer noopener">
+      <!-- Server inlines src/kosh/static/razorpay-logo.svg here. See page_html(). -->
+      <!--RAZORPAY_LOGO--><span class="mark" id="fallbackmark">K</span>
+    </a>
+    <span class="rule" aria-hidden="true"></span>
+    <span class="unit" id="unit">AI Finance Controller</span>
+    <span class="crumb" id="crumb" hidden></span>
+    <div class="controls">
+      <label class="field">Seed
+        <input type="number" id="seed" value="20260824" min="1" step="1">
+      </label>
+      <label class="toggle" title="Enable the T4 adjudication tier (~10s, runs locally)">
+        <input type="checkbox" id="llm"> Model adjudication
+      </label>
+      <button class="primary" id="run">Reconcile</button>
+    </div>
+  </div>
+</header>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Sections">
+  <div class="drawerhead">
+    <span class="unit">Sections</span>
+    <button class="iconbtn" id="closeMenu" aria-label="Close sections">
+      <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none"
+           stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M5 5l10 10M15 5L5 15"/>
+      </svg>
+    </button>
+  </div>
+  <nav id="tabs">
+    <button data-tab="overview" aria-current="page">
+      <span class="lbl">Overview<em>Cash position, tiers, scores</em></span>
+    </button>
+    <button data-tab="exceptions">
+      <span class="lbl">Exceptions<em>Everything needing a decision</em></span>
+      <span class="n" id="tabExc"></span>
+    </button>
+    <button data-tab="model">
+      <span class="lbl">Model<em>Adjudications and verdicts</em></span>
+      <span class="n" id="tabModel"></span>
+    </button>
+    <button data-tab="ask">
+      <span class="lbl">Ask<em>Question this run</em></span>
+    </button>
+  </nav>
+</aside>
+
+<main>
+  <div class="pagehead">
+    <h1 id="pageTitle">Overview</h1>
+    <p class="status" id="status">Loading&hellip;</p>
+  </div>
+
+  <div id="progress" hidden><ol id="stages"></ol></div>
+
+  <section id="tab-overview">
+    <div class="cards" id="tiles"></div>
+    <h2>Where the money is</h2>
+    <p class="hint">The identity that must hold: gross entering settlement, less refunds,
+      fees, GST and disputes, equals the sum of the batch nets. The residual stays on the
+      face of the report rather than being folded into a subtotal.</p>
+    <div class="scroll"><table id="bridge"></table></div>
+    <h2>What reconciled</h2>
+    <div class="scroll"><table id="tiers"></table></div>
+    <h2>Measured against ground truth</h2>
+    <p class="hint">The engine never opens the ground-truth file; only the evaluator does.</p>
+    <div class="scroll"><table id="metrics"></table></div>
+  </section>
+
+  <section id="tab-exceptions" hidden>
+    <p class="hint">Every finding, nothing truncated. Filter by code, or narrow to the items
+      that actually need a person. Click any row for its evidence and proposed action.</p>
+    <div class="filters" id="dispFilters"></div>
+    <div class="filters" id="codeFilters"></div>
+    <div class="askrow">
+      <input type="text" id="search" placeholder="Search record ids, narrations, customers…">
+      <button class="ghost" id="clearFilters">Clear filters</button>
+    </div>
+    <div id="findings"></div>
+  </section>
+
+  <section id="tab-model" hidden>
+    <p class="hint">What the deterministic tiers could not settle, what the model proposed,
+      and whether the arithmetic accepted it. A pick whose amount cannot be reconciled is
+      discarded however confident the model was.</p>
+    <div id="adjudications"></div>
+  </section>
+
+  <section id="tab-ask" hidden>
+    <p class="hint">Answers are assembled from this run's own matches, findings and cash
+      position. With the model on, every amount in the answer must already appear in those
+      facts, and aggregation wording is rejected outright.</p>
+    <div class="samples" id="samples"></div>
+    <div class="askrow">
+      <input type="text" id="question" placeholder="e.g. which settlements have not reached the bank?">
+      <button class="primary" id="askBtn">Ask</button>
+    </div>
+    <div id="answer"></div>
+  </section>
+</main>
+
+<footer id="foot"></footer>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let STATE = null;
+const filters = { disposition: "all", codes: new Set(), q: "" };
+
+const STAGES = [
+  ["generate","Generating corpus"], ["model","Loading local model"],
+  ["ingest","Reading the three sources"], ["match","Reconciling four legs"],
+  ["position","Building the cash position"], ["evaluate","Scoring against ground truth"],
+];
+
+/* ------------------------------------------------------------------ running */
+function showStages(active, seen) {
+  $("progress").hidden = false;
+  $("stages").innerHTML = STAGES
+    .filter(([k]) => seen.has(k) || k === active)
+    .map(([k, label]) => {
+      const done = seen.has(k) && k !== active;
+      return `<li class="${k === active ? "active" : ""}">
+        <span class="tick">${done ? "✓" : "◌"}</span><span>${esc(label)}</span></li>`;
+    }).join("");
+}
+
+async function runRecon() {
+  const btn = $("run"); btn.disabled = true;
+  const seed = $("seed").value, llm = $("llm").checked ? "1" : "0";
+  const seen = new Set();
+  $("status").textContent = "Running…";
+  showStages(null, seen);
+
+  let res;
+  try {
+    res = await fetch(`/api/run?seed=${encodeURIComponent(seed)}&llm=${llm}`,
+                      { method: "POST" });
+  } catch (e) { fail(e.message); return; }
+
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n\n")) >= 0) {
+      const line = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
+      if (!line.startsWith("data:")) continue;
+      let msg; try { msg = JSON.parse(line.slice(5)); } catch { continue; }
+      if (msg.stage === "done") {
+        STATE = msg.result; render();
+        $("progress").hidden = true; btn.disabled = false;
+        return;
+      }
+      if (msg.stage === "error") { fail(msg.message); return; }
+      showStages(msg.stage, seen); seen.add(msg.stage);
+      $("status").textContent = msg.message;
+    }
+  }
+  btn.disabled = false;
+
+  function fail(m) {
+    $("status").innerHTML = `<span class="bad">Failed: ${esc(m)}</span>`;
+    $("progress").hidden = true; btn.disabled = false;
+  }
+}
+
+/* ----------------------------------------------------------------- rendering */
+function render() {
+  if (!STATE) return;
+  const m = STATE.metrics, meta = STATE.meta, c = STATE.counts;
+  const unresolved = STATE.findings.filter(f => f.disposition === "needs_review");
+  const exposure = unresolved.reduce((a, f) => a + Math.abs(parseFloat(f.value_at_risk)), 0);
+
+  const engineMs = Math.max(0, (STATE.timings.total_s - (meta.llm_seconds || 0)) * 1000);
+  $("status").innerHTML =
+    `${c.total_records.toLocaleString()} records &middot; seed <span class="mono">${esc(meta.seed)}</span>`
+    + ` &middot; engine ${engineMs < 1 ? engineMs.toFixed(2) : engineMs.toFixed(1)} ms`
+    + (meta.llm_seconds ? ` &middot; model ${meta.llm_seconds.toFixed(1)} s` : "")
+    + ` &middot; ${esc(meta.model)}`;
+
+  // Tile values arrive already formatted. An earlier version ran every
+  // non-number through the currency formatter, which turned "84.4%" into
+  // "84.40" and an F1 of 0.922 into 0.92.
+  const tiles = [
+    ["Net settled", inr(STATE.position.settled_net), "into gateway batches", false],
+    ["Landed in bank", inr(STATE.position.landed_in_bank), "traced to a credit", false],
+    ["In transit", inr(STATE.position.in_transit), "settled, not yet received", false],
+    ["Needs review", String(unresolved.length), inr(exposure) + " of exposure", true],
+  ];
+  if (m) {
+    tiles.push(["Auto-clear", (m.auto_clear_rate * 100).toFixed(1) + "%",
+                m.auto_cleared_records + " of " + m.records + " records", false]);
+    tiles.push(["Exception F1", m.exceptions.overall.f1.toFixed(4),
+                "vs held-out ground truth", false]);
+  }
+  $("tiles").innerHTML = tiles.map(([k, v, n, flag]) =>
+    `<div class="card${flag ? " flag" : ""}"><div class="k">${esc(k)}</div>
+     <div class="v">${esc(v)}</div>
+     <div class="n">${esc(n)}</div></div>`).join("");
+
+  $("bridge").innerHTML =
+    `<tr><th>Line</th><th class="n">Amount (INR)</th></tr>` +
+    STATE.bridge.map(r => {
+      const sub = r.kind === "subtotal" || r.kind === "check";
+      const cls = r.kind === "warn" && r.amount ? "n bad" : r.kind === "ok" ? "n good" : "n";
+      return `<tr class="${sub ? "sub-row" : ""}"><td>${esc(r.label)}</td>
+        <td class="${cls}">${esc(inr(r.amount / 100, !sub))}</td></tr>`;
+    }).join("");
+
+  const tierCounts = {};
+  STATE.matches.forEach(x => tierCounts[x.tier] = (tierCounts[x.tier] || 0) + 1);
+  $("tiers").innerHTML =
+    `<tr><th>Tier</th><th>How</th><th class="n">Matches</th></tr>` +
+    Object.keys(tierCounts).sort().map(t =>
+      `<tr><td><code>${esc(t)}</code></td><td>${esc(STATE.tier_meaning[t] || "")}</td>
+       <td class="n">${tierCounts[t]}</td></tr>`).join("") +
+    `<tr class="sub-row"><td>total</td><td></td><td class="n">${STATE.matches.length}</td></tr>`;
+
+  $("metrics").innerHTML = !m
+    ? `<tr><td>No ground truth alongside this corpus, so nothing was scored.</td></tr>`
+    : `<tr><th>Leg</th><th class="n">Precision</th><th class="n">Recall</th>
+        <th class="n">F1</th><th class="n">True links</th></tr>` +
+      Object.entries(m.links).map(([leg, s]) =>
+        `<tr><td><code>${esc(leg)}</code></td><td class="n">${s.precision.toFixed(4)}</td>
+         <td class="n">${s.recall.toFixed(4)}</td><td class="n">${s.f1.toFixed(4)}</td>
+         <td class="n">${s.support}</td></tr>`).join("") +
+      `<tr class="sub-row"><td>exception classification</td>
+        <td class="n">${m.exceptions.overall.precision.toFixed(4)}</td>
+        <td class="n">${m.exceptions.overall.recall.toFixed(4)}</td>
+        <td class="n">${m.exceptions.overall.f1.toFixed(4)}</td>
+        <td class="n">${m.exceptions.overall.support}</td></tr>`;
+
+  renderFilters(); renderFindings(); renderAdjudications();
+  $("tabExc").textContent = STATE.findings.length;
+  $("tabModel").textContent = STATE.adjudications.length || "";
+  $("tabModel").hidden = !STATE.adjudications.length;
+  $("foot").innerHTML =
+    `Deterministic tiers T0–T3, plus verified model adjudication at T4. `
+    + `${STATE.matches.length} matches, ${STATE.findings.length} findings, `
+    + `${unresolved.length} needing a person. `
+    + (meta.ingest_errors && meta.ingest_errors.length
+        ? `<span class="bad">${meta.ingest_errors.length} unparseable row(s) surfaced.</span>`
+        : `No unparseable rows.`);
+}
+
+function inr(v, signed) {
+  const n = typeof v === "string" ? parseFloat(v) : v;
+  const neg = n < 0, abs = Math.abs(n).toFixed(2);
+  let [w, f] = abs.split(".");
+  if (w.length > 3) {
+    let head = w.slice(0, -3), tail = w.slice(-3), g = [];
+    while (head.length > 2) { g.unshift(head.slice(-2)); head = head.slice(0, -2); }
+    if (head) g.unshift(head);
+    w = g.concat([tail]).join(",");
+  }
+  return (neg ? "-" : signed ? "+" : "") + w + "." + f;
+}
+
+function renderFilters() {
+  const counts = {};
+  STATE.findings.forEach(f => counts[f.code] = (counts[f.code] || 0) + 1);
+  const need = STATE.findings.filter(f => f.disposition === "needs_review").length;
+  $("dispFilters").innerHTML = [
+    ["all", "All", STATE.findings.length],
+    ["needs_review", "Needs review", need],
+    ["auto_resolved", "Auto-resolved", STATE.findings.length - need],
+  ].map(([k, label, n]) =>
+    `<button class="chip" data-disp="${k}" aria-pressed="${filters.disposition === k}">
+      ${esc(label)} <span class="c">${n}</span></button>`).join("");
+  $("codeFilters").innerHTML = Object.keys(counts).sort((a, b) => counts[b] - counts[a])
+    .map(code =>
+      `<button class="chip" data-code="${esc(code)}" aria-pressed="${filters.codes.has(code)}">
+        ${esc(code)} <span class="c">${counts[code]}</span></button>`).join("");
+}
+
+function visibleFindings() {
+  const q = filters.q.toLowerCase();
+  return STATE.findings.filter(f => {
+    if (filters.disposition !== "all" && f.disposition !== filters.disposition) return false;
+    if (filters.codes.size && !filters.codes.has(f.code)) return false;
+    if (!q) return true;
+    return (f.key + " " + f.code + " " + f.proposed_action + " " +
+            Object.values(f.evidence).join(" ")).toLowerCase().includes(q);
+  }).sort((a, b) => Math.abs(parseFloat(b.value_at_risk)) - Math.abs(parseFloat(a.value_at_risk)));
+}
+
+function renderFindings() {
+  const rows = visibleFindings();
+  if (!rows.length) { $("findings").innerHTML =
+    `<div class="empty">Nothing matches these filters.</div>`; return; }
+  $("findings").innerHTML = rows.map(f => {
+    const review = f.disposition === "needs_review";
+    return `<details class="finding${review ? " review" : ""}">
+      <summary>
+        <span class="key">${esc(f.key)}</span>
+        <span class="code">${esc(f.code)}</span>
+        <span class="tag ${review ? "review" : "auto"}">${review ? "needs review" : "auto"}</span>
+        <span class="amt">${esc(inr(f.value_at_risk))}</span>
+      </summary>
+      <div class="body">
+        <p class="hint">${esc(STATE.exception_meaning[f.code] || "")}</p>
+        <dl>${Object.entries(f.evidence).map(([k, v]) =>
+          `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+        <div class="action">${esc(f.proposed_action)}</div>
+      </div></details>`;
+  }).join("");
+}
+
+function renderAdjudications() {
+  const a = STATE.adjudications;
+  if (!a.length) {
+    $("adjudications").innerHTML =
+      `<div class="empty">No adjudications in this run. Turn on
+       <strong>Model adjudication</strong> in the header and reconcile again —
+       the deterministic tiers settled everything they could on their own.</div>`;
+    return;
+  }
+  $("adjudications").innerHTML = `<div class="scroll"><table>
+    <tr><th>Item</th><th>Narration</th><th class="n">Candidates</th><th>Chose</th>
+        <th>Verdict</th><th>Model's reason</th></tr>` +
+    a.map(x => {
+      const v = x.verdict || (x.chose ? "accepted" : "declined");
+      const cls = v === "accepted" ? "good" : v.includes("rejected") ? "bad" : "warn";
+      return `<tr>
+        <td><code>${esc(x.bank_line || x.invoice || x.batch || "?")}</code></td>
+        <td class="mono" style="font-size:11.5px">${esc(x.narration || "")}</td>
+        <td class="n">${(x.candidates || []).length}</td>
+        <td><code>${esc(x.chose || "—")}</code></td>
+        <td class="${cls}">${esc(v)}</td>
+        <td style="color:var(--muted);font-size:12.5px">${esc(x.reason || "")}</td>
+      </tr>`;
+    }).join("") + `</table></div>`;
+}
+
+/* ---------------------------------------------------------------------- ask */
+const SAMPLES = [
+  "which settlements have not reached the bank?",
+  "how much is on hold?",
+  "what unexplained credits are in the bank?",
+  "which invoices were paid net of TDS?",
+];
+
+async function ask(q) {
+  $("question").value = q;
+  $("answer").innerHTML = `<div class="answer">Thinking…</div>`;
+  const r = await fetch("/api/ask", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: q, llm: $("llm").checked }),
+  });
+  const out = await r.json();
+  if (out.error) { $("answer").innerHTML =
+    `<div class="answer rejected">${esc(out.error)}</div>`; return; }
+  const rejected = out.numeric_check === "failed";
+  $("answer").innerHTML =
+    `<div class="answer${rejected ? " rejected" : ""}">${esc(out.answer)}</div>`
+    + (out.facts && out.facts.length
+        ? `<div class="facts"><strong>Grounded in ${out.facts.length} record(s):</strong>
+           <ul>${out.facts.map(f => `<li>${esc(f)}</li>`).join("")}</ul></div>` : "");
+}
+
+/* -------------------------------------------------------------------- wiring */
+$("run").addEventListener("click", runRecon);
+
+/* ---- navigation drawer ---- */
+const TITLES = { overview: "Overview", exceptions: "Exceptions",
+                 model: "Model adjudications", ask: "Settlement Q&A" };
+let lastFocus = null;
+
+//: Above this width the sidebar is permanent and the menu button is gone.
+const DOCKED = matchMedia("(min-width: 1000px)");
+
+function syncNav() {
+  if (DOCKED.matches) {
+    $("drawer").hidden = false;      // docked: always present, never "hidden"
+    $("scrim").hidden = true;
+    $("menu").setAttribute("aria-expanded", "true");
+  } else {
+    $("drawer").hidden = true;
+    $("scrim").hidden = true;
+    $("menu").setAttribute("aria-expanded", "false");
+  }
+}
+DOCKED.addEventListener("change", syncNav);
+
+function openMenu() {
+  lastFocus = document.activeElement;
+  $("drawer").hidden = false; $("scrim").hidden = false;
+  $("menu").setAttribute("aria-expanded", "true");
+  ($("tabs").querySelector("[aria-current=page]") || $("tabs").firstElementChild).focus();
+}
+function closeMenu() {
+  if (DOCKED.matches) return;        // nothing to close; the sidebar is pinned
+  $("drawer").hidden = true; $("scrim").hidden = true;
+  $("menu").setAttribute("aria-expanded", "false");
+  // Send focus back where it came from, so keyboard users are not dropped at
+  // the top of the document every time they pick a section.
+  const back = (lastFocus && lastFocus !== document.body && document.contains(lastFocus))
+    ? lastFocus : $("menu");
+  back.focus();
+}
+function selectTab(name) {
+  [...$("tabs").children].forEach(x =>
+    x.dataset.tab === name ? x.setAttribute("aria-current", "page")
+                           : x.removeAttribute("aria-current"));
+  Object.keys(TITLES).forEach(t => $("tab-" + t).hidden = t !== name);
+  $("pageTitle").textContent = TITLES[name];
+  $("crumb").textContent = TITLES[name];
+  document.title = TITLES[name] + " — AI Finance Controller";
+}
+
+const onScroll = () => {
+  const moved = window.scrollY > 4;
+  document.querySelector("header").classList.toggle("lifted", moved);
+  $("crumb").hidden = !moved;
+  $("unit").hidden = moved && innerWidth < 1100;   // keep the bar from crowding
+};
+addEventListener("scroll", onScroll, { passive: true });
+addEventListener("resize", onScroll);
+
+$("menu").addEventListener("click", () => $("drawer").hidden ? openMenu() : closeMenu());
+$("closeMenu").addEventListener("click", closeMenu);
+$("scrim").addEventListener("click", closeMenu);
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("drawer").hidden) closeMenu();
+});
+$("tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  selectTab(b.dataset.tab);
+  closeMenu();                        // no-op while docked
+});
+syncNav();
+onScroll();
+$("dispFilters").addEventListener("click", e => {
+  const b = e.target.closest("[data-disp]"); if (!b) return;
+  filters.disposition = b.dataset.disp; renderFilters(); renderFindings();
+});
+$("codeFilters").addEventListener("click", e => {
+  const b = e.target.closest("[data-code]"); if (!b) return;
+  const c = b.dataset.code;
+  filters.codes.has(c) ? filters.codes.delete(c) : filters.codes.add(c);
+  renderFilters(); renderFindings();
+});
+$("search").addEventListener("input", e => { filters.q = e.target.value; renderFindings(); });
+$("clearFilters").addEventListener("click", () => {
+  filters.disposition = "all"; filters.codes.clear(); filters.q = "";
+  $("search").value = ""; renderFilters(); renderFindings();
+});
+$("askBtn").addEventListener("click", () => {
+  const q = $("question").value.trim(); if (q) ask(q);
+});
+$("question").addEventListener("keydown", e => {
+  if (e.key === "Enter") { const q = e.target.value.trim(); if (q) ask(q); }
+});
+$("samples").innerHTML = SAMPLES.map(s =>
+  `<button class="chip" data-q="${esc(s)}">${esc(s)}</button>`).join("");
+$("samples").addEventListener("click", e => {
+  const b = e.target.closest("[data-q]"); if (b) ask(b.dataset.q);
+});
+
+fetch("/api/state").then(r => r.json()).then(s => {
+  if (s.ready) { STATE = s; $("seed").value = s.meta.seed; render(); }
+  else $("status").textContent = "No run yet — press Reconcile.";
+}).catch(e => $("status").textContent = "Could not reach the server: " + e.message);
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+  seed 1     link_f1=0.8667 exc_f1=0.9077 clear=80.3% 341 recs @ 59,195/s
+  seed 2     link_f1=0.9167 exc_f1=0.9434 clear=84.5% 348 recs @ 75,880/s
+  seed 3     link_f1=0.8889 exc_f1=0.8947 clear=85.7% 342 recs @ 70,779/s
+  seed 4     link_f1=0.7778 exc_f1=0.9091 clear=82.3% 340 recs @ 55,273/s
+  seed 5     link_f1=0.8667 exc_f1=0.9016 clear=82.2% 337 recs @ 45,891/s
+  seed 6     link_f1=0.8333 exc_f1=0.8966 clear=84.5% 342 recs @ 65,435/s
+  seed 7     link_f1=0.9091 exc_f1=0.9143 clear=85.9% 340 recs @ 42,761/s
+  seed 8     link_f1=0.8000 exc_f1=0.9323 clear=82.8% 342 recs @ 36,435/s
+  seed 9     link_f1=0.8667 exc_f1=0.9000 clear=84.0% 338 recs @ 37,964/s
+  seed 10    link_f1=0.9091 exc_f1=0.9268 clear=83.0% 336 recs @ 66,053/s
+  seed 11    link_f1=0.9333 exc_f1=0.9508 clear=83.3% 341 recs @ 70,773/s
+  seed 12    link_f1=0.9524 exc_f1=0.9709 clear=85.8% 339 recs @ 64,519/s
+  seed 13    link_f1=0.8889 exc_f1=0.9464 clear=83.3% 342 recs @ 75,839/s
+  seed 14    link_f1=0.8889 exc_f1=0.9500 clear=84.8% 341 recs @ 72,656/s
+  seed 15    link_f1=0.9167 exc_f1=0.9444 clear=86.1% 344 recs @ 73,293/s
+  seed 16    link_f1=0.9091 exc_f1=0.9333 clear=82.3% 345 recs @ 73,694/s
+  seed 17    link_f1=0.8667 exc_f1=0.8889 clear=84.4% 339 recs @ 75,263/s
+  seed 18    link_f1=0.9091 exc_f1=0.9244 clear=83.1% 338 recs @ 71,198/s
+  seed 19    link_f1=0.9333 exc_f1=0.9552 clear=82.4% 341 recs @ 73,801/s
+  seed 20    link_f1=0.9333 exc_f1=0.9455 clear=85.1% 348 recs @ 73,497/s
+  seed 21    link_f1=0.9091 exc_f1=0.9143 clear=85.0% 341 recs @ 76,372/s
+  seed 22    link_f1=0.9231 exc_f1=0.9143 clear=86.0% 350 recs @ 72,536/s
+  seed 23    link_f1=0.9167 exc_f1=0.9492 clear=84.1% 339 recs @ 73,751/s
+  seed 24    link_f1=0.8667 exc_f1=0.8776 clear=86.0% 351 recs @ 77,534/s
+  seed 25    link_f1=0.9444 exc_f1=0.9500 clear=84.2% 354 recs @ 72,252/s
+  seed 26    link_f1=0.8889 exc_f1=0.9062 clear=82.0% 339 recs @ 73,654/s
+  seed 27    link_f1=0.8333 exc_f1=0.9118 clear=81.4% 338 recs @ 74,218/s
+  seed 28    link_f1=0.8889 exc_f1=0.8966 clear=84.5% 348 recs @ 74,560/s
+  seed 29    link_f1=0.8889 exc_f1=0.9362 clear=87.5% 351 recs @ 53,931/s
+  seed 30    link_f1=0.8667 exc_f1=0.9048 clear=82.2% 342 recs @ 74,519/s
+
+30 seeds, 10,277 records, deterministic only
+metric          mean       min       max     stdev
+link_f1       0.8898    0.7778    0.9524    0.0406
+exc_p         0.9004    0.8431    0.9615    0.0301
+exc_r         0.9474    0.9149    0.9804    0.0167
+exc_f1        0.9232    0.8776    0.9709    0.0237
+macro_f1      0.9023    0.8857    0.9196    0.0081
+clear         0.8395    0.8035    0.8746    0.0167
+rps        66784.2000 36435.0000 77534.0000 12001.0160
+
+seeds scoring below a perfect run: 30 of 30
+  seed 1: link_f1=0.8667 exc_p=0.8806 exc_r=0.9365
+  seed 2: link_f1=0.9167 exc_p=0.9259 exc_r=0.9615
+  seed 3: link_f1=0.8889 exc_p=0.8644 exc_r=0.9273
+  seed 4: link_f1=0.7778 exc_p=0.8824 exc_r=0.9375
+  seed 5: link_f1=0.8667 exc_p=0.8730 exc_r=0.9322
+  seed 6: link_f1=0.8333 exc_p=0.8667 exc_r=0.9286
+  seed 7: link_f1=0.9091 exc_p=0.8889 exc_r=0.9412
+  seed 8: link_f1=0.8000 exc_p=0.9118 exc_r=0.9538
+  seed 9: link_f1=0.8667 exc_p=0.8710 exc_r=0.9310
+  seed 10: link_f1=0.9091 exc_p=0.9048 exc_r=0.9500
+  seed 11: link_f1=0.9333 exc_p=0.9355 exc_r=0.9667
+  seed 12: link_f1=0.9524 exc_p=0.9615 exc_r=0.9804
+  seed 13: link_f1=0.8889 exc_p=0.9298 exc_r=0.9636
+  seed 14: link_f1=0.8889 exc_p=0.9344 exc_r=0.9661
+  seed 15: link_f1=0.9167 exc_p=0.9273 exc_r=0.9623
+  seed 16: link_f1=0.9091 exc_p=0.9130 exc_r=0.9545
+  seed 17: link_f1=0.8667 exc_p=0.8571 exc_r=0.9231
+  seed 18: link_f1=0.9091 exc_p=0.9016 exc_r=0.9483
+  seed 19: link_f1=0.9333 exc_p=0.9412 exc_r=0.9697
+  seed 20: link_f1=0.9333 exc_p=0.9286 exc_r=0.9630
+  seed 21: link_f1=0.9091 exc_p=0.8889 exc_r=0.9412
+  seed 22: link_f1=0.9231 exc_p=0.8889 exc_r=0.9412
+  seed 23: link_f1=0.9167 exc_p=0.9333 exc_r=0.9655
+  seed 24: link_f1=0.8667 exc_p=0.8431 exc_r=0.9149
+  seed 25: link_f1=0.9444 exc_p=0.9344 exc_r=0.9661
+  seed 26: link_f1=0.8889 exc_p=0.8788 exc_r=0.9355
+  seed 27: link_f1=0.8333 exc_p=0.8857 exc_r=0.9394
+  seed 28: link_f1=0.8889 exc_p=0.8667 exc_r=0.9286
+  seed 29: link_f1=0.8889 exc_p=0.9167 exc_r=0.9565
+  seed 30: link_f1=0.8667 exc_p=0.8769 exc_r=0.9344
+
+wrote /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/benchmark.json

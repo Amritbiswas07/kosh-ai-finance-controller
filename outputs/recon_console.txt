@@ -1,0 +1,41 @@
+
+Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 11.1s)
+345 records · engine 13289.9 ms · wall 13.31 s · model 13.2 s
+
+Where the money is
+  Captured at the gateway                  +7,26,213.94
+  Less funds on hold                         -19,919.85
+  Less captures not yet batched                   +0.00
+  = Gross entering settlement               7,06,294.09
+  Less refunds settled                       -40,711.41
+  Less gateway fees                           -8,967.77
+  Less GST on fees                            -1,614.19
+  Less dispute adjustments                    -3,751.34
+  = Net settled into batches                6,51,249.38
+  Batches say                               6,51,249.38
+  Residual (must be zero)                         +0.00
+  Landed in the bank                       +5,79,299.00
+  Still in transit                           +71,950.38
+
+Matched 167 · T0_EXACT_ID=149 · T1_NORMALIZED_ID=3 · T2_AMOUNT_DATE=8 · T3_AGGREGATE=4 · T4_ADJUDICATED=3
+Findings 56 · 42 need review · 2,43,717.18 exposure
+  UNEXPECTED_BANK_CREDIT         7   needs review
+  UNPAID_INVOICE                 6   needs review
+  UNBILLED_PAYMENT               5   needs review
+  FEE_VARIANCE                   5   auto-resolved
+  DUPLICATE_PAYMENT              4   needs review
+  FUNDS_ON_HOLD                  4   needs review
+  TAX_LINE_MISMATCH              4   needs review
+  MERGED_PAYOUT                  4   auto-resolved
+  ORPHAN_REFUND                  3   needs review
+  CHARGEBACK_ADJUSTMENT          3   needs review
+  SETTLEMENT_AMOUNT_MISMATCH     3   needs review
+  MISSING_IN_BANK                3   needs review
+  TDS_WITHHELD                   3   auto-resolved
+  SPLIT_SETTLEMENT               2   auto-resolved
+
+Measured  link F1 1.0000 · exception P 1.0000 R 1.0000 F1 1.0000 · auto-clear 86.1% · 26 rec/s
+
+wrote /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/recon.json
+      /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/recon.md
+      /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/recon.html
