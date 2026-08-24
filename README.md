@@ -69,6 +69,10 @@ live, then work the queue.
 - **Run it from the header** — change the seed, toggle model adjudication, press
   Reconcile. A model-enabled run takes ~10 s, so the pipeline **streams stage by
   stage** over Server-Sent Events rather than showing an indefinite spinner.
+- **Sections live behind the menu button** — a navigation drawer, dismissable by
+  the close button, the scrim or Escape, returning focus where it came from. The
+  current section is the page's `<h1>` and its document title, so the header
+  still says where you are once the tabs are out of sight.
 - **Overview** — the cash bridge with its residual, the tier breakdown, and the
   scores against held-out ground truth.
 - **Exceptions** — every finding, filterable by code and by whether it needs a
@@ -78,7 +82,10 @@ live, then work the queue.
   whether the arithmetic accepted or rejected it.
 - **Ask** — settlement Q&A against the run that is loaded.
 
-**Styled to Razorpay.** The palette is sampled from the live razorpay.com — 
+**Styled to Razorpay.** Sizes come off one scale rather than being picked per
+component — type 11/12/13/14/15/17/20/26, space 4/8/12/16/24/32/48, radius
+8/12/40 — and the six summary tiles wrap 6 → 3 → 2 so no row is ever left
+ragged. The palette is sampled from the live razorpay.com — 
 `#305EFF` primary, `#132644` navy ink, `#F0F4F6` surface, `#ED2939` red, and
 their signature fully-rounded 40px pills — rather than recalled from memory. The
 static pack in `outputs/recon.html` uses the same tokens, so the report and the

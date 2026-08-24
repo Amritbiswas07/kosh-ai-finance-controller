@@ -3,37 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kosh — settlement reconciliation</title>
+<title>Settlement Reconciliation — AI Finance Controller</title>
 <style>
-/* Razorpay's live palette, sampled from razorpay.com: #305EFF primary,
-   #132644 navy ink, #F0F4F6 surface, and their signature fully-rounded pills.
-   No webfont — a local-first tool must render with the network unplugged, and
-   Mona Sans is not on a CSP-permitted host anyway, so the type is a system
-   stack tuned to sit close to it. */
+/* Razorpay's live palette, sampled from razorpay.com: #305EFF primary, #132644
+   navy ink, #F0F4F6 surface, #ED2939 red, and their 40px pills.
+
+   Sizes come off one scale rather than being chosen per component:
+   type 11/12/13/14/15/17/20/26, space 4/8/12/16/24/32/48, radius 8/12/40.
+   No webfont — a local-first tool must render with the network unplugged. */
 :root{
-  --paper:#fff; --panel:#fff; --panel-2:#f0f4f6; --panel-3:#e6edf2;
-  --ink:#132644; --ink-2:#192839; --muted:#5a6b84;
-  --line:#e3e9ef; --line-2:#eef2f6;
-  --brand:#305eff; --brand-2:#4d7fff; --brand-tint:rgba(48,94,255,.09);
+  --paper:#fff; --panel:#fff; --panel-2:#f7f9fb; --panel-3:#f0f4f6;
+  --ink:#132644; --muted:#5a6b84; --faint:#8496ad;
+  --line:#e5eaf0; --line-2:#eef2f6;
+  --brand:#305eff; --brand-2:#4d7fff; --brand-tint:rgba(48,94,255,.08);
   --brand-ink:#fff;
   --good:#12855c; --warn:#b26a00; --bad:#ed2939;
-  --pill:40px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --r1:8px; --r2:12px; --pill:40px;
+  --shadow:0 1px 2px rgba(19,38,68,.06), 0 8px 24px rgba(19,38,68,.06);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#0b1424; --panel:#101c30; --panel-2:#16253c; --panel-3:#1d2f4a;
-  --ink:#e8eef7; --ink-2:#cfdcec; --muted:#8ea3c0;
-  --line:#22344f; --line-2:#1a2a41;
-  --brand:#6e9bff; --brand-2:#8fb2ff; --brand-tint:rgba(110,155,255,.14);
+  --paper:#0b1424; --panel:#101c30; --panel-2:#132038; --panel-3:#16253c;
+  --ink:#e8eef7; --muted:#95a9c4; --faint:#728aa8;
+  --line:#20324c; --line-2:#1a2a41;
+  --brand:#6e9bff; --brand-2:#8fb2ff; --brand-tint:rgba(110,155,255,.12);
   --brand-ink:#0b1424;
   --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
 }}
 :root[data-theme="dark"]{
-  --paper:#0b1424; --panel:#101c30; --panel-2:#16253c; --panel-3:#1d2f4a;
-  --ink:#e8eef7; --ink-2:#cfdcec; --muted:#8ea3c0;
-  --line:#22344f; --line-2:#1a2a41;
-  --brand:#6e9bff; --brand-2:#8fb2ff; --brand-tint:rgba(110,155,255,.14);
+  --paper:#0b1424; --panel:#101c30; --panel-2:#132038; --panel-3:#16253c;
+  --ink:#e8eef7; --muted:#95a9c4; --faint:#728aa8;
+  --line:#20324c; --line-2:#1a2a41;
+  --brand:#6e9bff; --brand-2:#8fb2ff; --brand-tint:rgba(110,155,255,.12);
   --brand-ink:#0b1424;
   --good:#3fcf8e; --warn:#e8a33d; --bad:#ff6b78;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
 }
 
 *{box-sizing:border-box}
@@ -42,93 +47,125 @@ body{
   background:var(--paper); color:var(--ink);
   font-family:"Mona Sans",ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,
     Helvetica,Arial,sans-serif;
-  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
-  letter-spacing:-.005em;
+  font-size:14px; line-height:1.5; letter-spacing:-.004em;
+  -webkit-font-smoothing:antialiased;
 }
 .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:var(--r1)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* ---------- header ---------- */
 header{border-bottom:1px solid var(--line);background:var(--panel);
-  position:sticky;top:0;z-index:20}
-.bar{max-width:1180px;margin:0 auto;padding:15px 22px;
-  display:flex;flex-wrap:wrap;gap:16px;align-items:center}
-.brand{flex:1 1 300px;min-width:250px;display:flex;align-items:center;gap:13px}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
-.logo .rzp{height:23px;width:auto;display:block;color:var(--ink)}
-.rule{width:1px;height:26px;background:var(--line);flex:none}
-.mark{width:31px;height:31px;border-radius:8px;background:var(--brand);
-  color:var(--brand-ink);display:grid;place-items:center;font-weight:800;
-  font-size:16px;letter-spacing:-.03em;flex:none}
-.names{display:flex;flex-direction:column;line-height:1.15}
-.names h1{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:0;
-  line-height:1.15}
-.badge{font-size:10.5px;font-weight:600;letter-spacing:.02em;color:var(--muted)}
-.badge em{font-style:normal;color:var(--brand)}
-.controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
-label.field{display:flex;align-items:center;gap:7px;font-size:11px;
-  text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+  position:sticky;top:0;z-index:30}
+.bar{max-width:1200px;margin:0 auto;padding:0 var(--s5);height:60px;
+  display:flex;align-items:center;gap:var(--s3)}
+.iconbtn{width:34px;height:34px;display:grid;place-items:center;padding:0;flex:none;
+  border:1px solid var(--line);border-radius:var(--r1);background:var(--panel-2);
+  color:var(--ink);cursor:pointer}
+.iconbtn:hover{background:var(--panel-3)}
+.logo{display:flex;align-items:center;text-decoration:none;color:inherit;flex:none}
+.logo .rzp{height:21px;width:auto;display:block;color:var(--ink)}
+.mark{width:28px;height:28px;border-radius:var(--r1);background:var(--brand);
+  color:var(--brand-ink);display:grid;place-items:center;font-weight:700;
+  font-size:14px;flex:none}
+.rule{width:1px;height:22px;background:var(--line);flex:none}
+.unit{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.005em;
+  white-space:nowrap}
+.controls{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;
+  margin-left:auto}
+label.field{display:flex;align-items:center;gap:var(--s2);font-size:11px;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600}
 input[type=number],input[type=text]{
-  font:inherit;font-size:14px;padding:8px 15px;border:1px solid var(--line);
-  border-radius:var(--pill);background:var(--panel-2);color:var(--ink);width:132px;
+  font:inherit;font-size:13px;padding:7px 14px;border:1px solid var(--line);
+  border-radius:var(--pill);background:var(--panel-2);color:var(--ink);width:118px;
   font-variant-numeric:tabular-nums}
-input[type=text]{border-radius:var(--pill)}
-.toggle{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
-  padding:8px 15px;border:1px solid var(--line);border-radius:var(--pill);
-  background:var(--panel-2);cursor:pointer;user-select:none;text-transform:none;
-  letter-spacing:0;font-weight:500}
-.toggle input{accent-color:var(--brand);width:15px;height:15px;cursor:pointer}
-button{font:inherit;cursor:pointer;border-radius:var(--pill);border:1px solid transparent;
-  padding:9px 22px;font-weight:600;font-size:14px}
+input:hover{border-color:var(--faint)}
+.toggle{display:flex;align-items:center;gap:var(--s2);font-size:13px;color:var(--ink);
+  padding:7px 14px;border:1px solid var(--line);border-radius:var(--pill);
+  background:var(--panel-2);cursor:pointer;user-select:none;font-weight:500;
+  white-space:nowrap}
+.toggle:hover{border-color:var(--faint)}
+.toggle input{accent-color:var(--brand);width:14px;height:14px;cursor:pointer}
+button{font:inherit;cursor:pointer;border-radius:var(--pill);
+  border:1px solid transparent;padding:8px 18px;font-weight:600;font-size:13px}
 button.primary{background:var(--brand);color:var(--brand-ink)}
 button.primary:hover:not(:disabled){background:var(--brand-2)}
 button.primary:disabled{opacity:.45;cursor:not-allowed}
 button.ghost{background:var(--panel-2);color:var(--ink);border-color:var(--line);
-  padding:8px 15px;font-size:13px}
-.status{font-size:12.5px;color:var(--muted);width:100%;
+  padding:7px 14px}
+button.ghost:hover{border-color:var(--faint)}
+
+/* ---------- navigation drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(19,38,68,.34);z-index:40;
+  animation:fade .14s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:288px;max-width:86vw;z-index:50;
+  background:var(--panel);border-right:1px solid var(--line);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;animation:slide .16s ease-out}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:none}}
+.drawerhead{display:flex;align-items:center;gap:var(--s3);height:60px;flex:none;
+  padding:0 var(--s4) 0 var(--s5);border-bottom:1px solid var(--line)}
+.drawerhead .unit{margin-right:auto;text-transform:uppercase;letter-spacing:.1em;
+  font-size:10.5px;color:var(--faint)}
+#tabs{display:flex;flex-direction:column;gap:2px;padding:var(--s3);overflow-y:auto}
+#tabs button{display:flex;align-items:center;gap:var(--s3);width:100%;
+  text-align:left;background:none;border:none;border-radius:var(--r1);
+  padding:10px var(--s3);color:var(--muted);font-weight:600;font-size:13.5px}
+#tabs button:hover{background:var(--panel-2);color:var(--ink)}
+#tabs button[aria-current=page]{background:var(--brand-tint);color:var(--brand)}
+#tabs .lbl{display:flex;flex-direction:column;gap:1px;min-width:0}
+#tabs em{font-style:normal;font-size:11.5px;font-weight:500;color:var(--faint);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tabs button[aria-current=page] em{color:var(--brand)}
+#tabs .n{margin-left:auto;font-size:11px;font-weight:700;color:var(--faint);
+  font-variant-numeric:tabular-nums;background:var(--panel-3);
+  border-radius:var(--pill);padding:2px 8px;flex:none}
+#tabs button[aria-current=page] .n{background:var(--brand);color:var(--brand-ink)}
+
+/* ---------- page ---------- */
+main{max-width:1200px;margin:0 auto;padding:var(--s5) var(--s5) 80px}
+.pagehead{margin-bottom:var(--s5)}
+h1{font-size:26px;font-weight:700;letter-spacing:-.025em;margin:0;line-height:1.15}
+.status{font-size:12.5px;color:var(--muted);margin:6px 0 0;
   font-variant-numeric:tabular-nums}
-
-/* ---------- tabs ---------- */
-nav{max-width:1180px;margin:0 auto;padding:0 22px;display:flex;gap:3px;flex-wrap:wrap}
-nav button{background:none;border:none;border-bottom:2px solid transparent;
-  padding:11px 14px;color:var(--muted);font-weight:600;font-size:13.5px;border-radius:0}
-nav button:hover{color:var(--ink)}
-nav button[aria-selected=true]{color:var(--brand);border-bottom-color:var(--brand)}
-nav button .n{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-
-main{max-width:1180px;margin:0 auto;padding:26px 22px 90px}
-h2{font-size:20px;font-weight:700;letter-spacing:-.02em;margin:34px 0 11px}
+h2{font-size:17px;font-weight:700;letter-spacing:-.015em;margin:var(--s6) 0 var(--s3)}
 h2:first-child{margin-top:0}
-.hint{color:var(--muted);font-size:13px;margin:0 0 13px;max-width:70ch}
+.hint{color:var(--muted);font-size:12.5px;margin:0 0 var(--s3);max-width:72ch;
+  line-height:1.55}
 
 /* ---------- progress ---------- */
-#progress{border:1px solid var(--line);border-radius:12px;background:var(--panel-2);
-  padding:15px 19px;margin-bottom:22px}
-#progress ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
-#progress li{font-size:13.5px;color:var(--muted);display:flex;gap:9px;align-items:baseline}
-#progress li .tick{width:14px;color:var(--good);font-weight:700}
+#progress{border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--panel-2);padding:var(--s4) var(--s5);margin-bottom:var(--s5)}
+#progress ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;
+  gap:var(--s1)}
+#progress li{font-size:13px;color:var(--muted);display:flex;gap:var(--s2);
+  align-items:baseline}
+#progress li .tick{width:13px;color:var(--good);font-weight:700}
 #progress li.active{color:var(--ink);font-weight:600}
 #progress li.active .tick{color:var(--brand)}
 
 /* ---------- tiles ---------- */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:12px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-  padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+/* Six tiles. auto-fit alone wraps them 4+2 at laptop widths, which reads as an
+   unfinished row; explicit stops keep every wrap balanced. */
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--s3)}
+@media (max-width:1140px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:660px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);
+  padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)}
 .card.flag{background:var(--brand-tint);border-color:transparent}
-.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--muted);font-weight:700}
-.card .v{font-size:27px;font-weight:700;letter-spacing:-.03em;line-height:1.05;
-  font-variant-numeric:tabular-nums}
-.card .n{font-size:12px;color:var(--muted)}
+.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--faint);font-weight:700}
+.card .v{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1.1;
+  font-variant-numeric:tabular-nums;margin-top:2px}
+.card .n{font-size:11.5px;color:var(--muted)}
 
 /* ---------- tables ---------- */
-.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r2);
   background:var(--panel)}
-table{border-collapse:collapse;width:100%;font-size:13.5px}
-th,td{text-align:left;padding:10px 15px;border-bottom:1px solid var(--line-2);
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:9px var(--s4);border-bottom:1px solid var(--line-2);
   vertical-align:top}
-th{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);
   font-weight:700;white-space:nowrap;background:var(--panel-2);
   border-bottom:1px solid var(--line)}
 tr:last-child td{border-bottom:none}
@@ -137,72 +174,89 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 
 /* ---------- exception queue ---------- */
-.filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px;align-items:center}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
-  border-radius:var(--pill);font-size:11.5px;font-weight:600;letter-spacing:.01em;
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--s3);
+  align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:var(--pill);font-size:11.5px;font-weight:600;
   border:1px solid var(--line);background:var(--panel-2);color:var(--muted);
-  cursor:pointer;font-family:inherit}
-.chip:hover{color:var(--ink)}
+  cursor:pointer;font-family:inherit;white-space:nowrap}
+.chip:hover{color:var(--ink);border-color:var(--faint)}
 .chip[aria-pressed=true]{background:var(--brand);color:var(--brand-ink);
   border-color:var(--brand)}
-.chip .c{font-variant-numeric:tabular-nums;opacity:.75}
-.tag{display:inline-block;padding:3px 10px;border-radius:var(--pill);font-size:10px;
-  font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.chip .c{font-variant-numeric:tabular-nums;opacity:.72}
+.tag{display:inline-block;padding:2px 9px;border-radius:var(--pill);font-size:10px;
+  font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .tag.review{background:var(--warn);color:#fff}
 .tag.auto{background:var(--good);color:#fff}
-.finding{border:1px solid var(--line);border-radius:12px;background:var(--panel);
-  margin-bottom:8px;overflow:hidden}
+.finding{border:1px solid var(--line);border-radius:var(--r2);background:var(--panel);
+  margin-bottom:6px;overflow:hidden}
 .finding.review{border-left:3px solid var(--warn)}
-.finding summary{padding:12px 16px;cursor:pointer;display:flex;flex-wrap:wrap;gap:11px;
-  align-items:center;list-style:none}
+.finding summary{padding:11px var(--s4);cursor:pointer;display:flex;flex-wrap:wrap;
+  gap:var(--s3);align-items:center;list-style:none}
 .finding summary::-webkit-details-marker{display:none}
-.finding summary::before{content:"▸";color:var(--muted);font-size:11px;width:10px}
-.finding[open] summary::before{content:"▾"}
+.finding summary::before{content:"›";color:var(--faint);font-size:15px;width:9px;
+  line-height:1}
+.finding[open] summary::before{content:"⌄";font-size:13px}
 .finding[open]{border-color:var(--brand)}
-.finding .key{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;font-weight:600;
-  min-width:150px}
-.finding .code{font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--muted)}
+.finding .key{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;
+  min-width:144px}
+.finding .code{font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--faint)}
 .finding .amt{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;
-  font-size:14.5px;letter-spacing:-.02em}
-.finding .body{padding:13px 16px 15px 40px;border-top:1px solid var(--line-2)}
-.finding dl{display:grid;grid-template-columns:auto 1fr;gap:4px 15px;margin:0 0 12px;
-  font-size:12.5px}
-.finding dt{color:var(--muted);white-space:nowrap}
-.finding dd{margin:0;font-family:ui-monospace,Menlo,monospace;font-size:12px;
+  font-size:14px;letter-spacing:-.02em}
+.finding .body{padding:var(--s3) var(--s4) var(--s4) 38px;
+  border-top:1px solid var(--line-2)}
+.finding dl{display:grid;grid-template-columns:auto 1fr;gap:3px var(--s4);
+  margin:0 0 var(--s3);font-size:12px}
+.finding dt{color:var(--faint);white-space:nowrap}
+.finding dd{margin:0;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;
   word-break:break-word}
-.action{font-size:13px;background:var(--brand-tint);padding:10px 14px;border-radius:8px}
-.empty{color:var(--muted);font-size:13.5px;padding:26px;text-align:center;
-  border:1px dashed var(--line);border-radius:12px}
+.action{font-size:12.5px;background:var(--brand-tint);padding:10px var(--s3);
+  border-radius:var(--r1);line-height:1.55}
+.empty{color:var(--muted);font-size:13px;padding:var(--s6);text-align:center;
+  border:1px dashed var(--line);border-radius:var(--r2)}
 
 /* ---------- ask ---------- */
-.askrow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
-.askrow input{flex:1 1 380px;width:auto}
-.answer{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--brand);
-  border-radius:12px;padding:16px 19px;white-space:pre-wrap;font-size:14px;margin-bottom:14px}
+.askrow{display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)}
+.askrow input{flex:1 1 360px;width:auto}
+.answer{background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--brand);border-radius:var(--r2);padding:var(--s4);
+  white-space:pre-wrap;font-size:13.5px;margin-bottom:var(--s3);line-height:1.6}
 .answer.rejected{border-left-color:var(--bad)}
-.facts{font-size:12.5px;color:var(--muted)}
-.facts li{margin-bottom:5px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
-.samples{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
-footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);font-size:12px}
+.facts{font-size:12px;color:var(--muted)}
+.facts ul{margin:6px 0 0;padding-left:18px}
+.facts li{margin-bottom:4px;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.samples{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--s4)}
+footer{max-width:1200px;margin:0 auto;padding:0 var(--s5) var(--s6);
+  color:var(--faint);font-size:11.5px}
 [hidden]{display:none!important}
+
+@media (max-width:720px){
+  .bar{height:auto;padding:var(--s3) var(--s4);flex-wrap:wrap}
+  .controls{margin-left:0;width:100%}
+  .unit,.rule{display:none}
+  main{padding:var(--s4) var(--s4) 64px}
+  h1{font-size:22px}
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="bar">
-    <div class="brand">
-      <a class="logo" href="https://razorpay.com/buildathon/" target="_blank" rel="noreferrer noopener">
-        <!-- Server inlines src/kosh/static/razorpay-logo.svg here when present,
-             and drops the placeholder tile. See server.page_html(). -->
-        <!--RAZORPAY_LOGO--><span class="mark" id="fallbackmark">K</span>
-        <span class="rule" aria-hidden="true"></span>
-        <span class="names">
-          <h1>Kosh</h1>
-          <span class="badge">AI Finance Controller &middot; <em>Buildathon Track 4</em></span>
-        </span>
-      </a>
-    </div>
+    <button class="iconbtn" id="menu" aria-label="Open sections" aria-expanded="false"
+            aria-controls="drawer">
+      <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="none"
+           stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <path d="M3 5.5h14M3 10h14M3 14.5h14"/>
+      </svg>
+    </button>
+    <a class="logo" href="https://razorpay.com/buildathon/" target="_blank"
+       rel="noreferrer noopener">
+      <!-- Server inlines src/kosh/static/razorpay-logo.svg here. See page_html(). -->
+      <!--RAZORPAY_LOGO--><span class="mark" id="fallbackmark">K</span>
+    </a>
+    <span class="rule" aria-hidden="true"></span>
+    <span class="unit">AI Finance Controller</span>
     <div class="controls">
       <label class="field">Seed
         <input type="number" id="seed" value="20260824" min="1" step="1">
@@ -212,17 +266,44 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);fon
       </label>
       <button class="primary" id="run">Reconcile</button>
     </div>
-    <div class="status" id="status">Loading…</div>
   </div>
-  <nav id="tabs">
-    <button data-tab="overview" aria-selected="true">Overview</button>
-    <button data-tab="exceptions" aria-selected="false">Exceptions <span class="n" id="tabExc"></span></button>
-    <button data-tab="model" aria-selected="false">Model <span class="n" id="tabModel"></span></button>
-    <button data-tab="ask" aria-selected="false">Ask</button>
-  </nav>
 </header>
 
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Sections">
+  <div class="drawerhead">
+    <span class="unit">Sections</span>
+    <button class="iconbtn" id="closeMenu" aria-label="Close sections">
+      <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none"
+           stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M5 5l10 10M15 5L5 15"/>
+      </svg>
+    </button>
+  </div>
+  <nav id="tabs">
+    <button data-tab="overview" aria-current="page">
+      <span class="lbl">Overview<em>Cash position, tiers, scores</em></span>
+    </button>
+    <button data-tab="exceptions">
+      <span class="lbl">Exceptions<em>Everything needing a decision</em></span>
+      <span class="n" id="tabExc"></span>
+    </button>
+    <button data-tab="model">
+      <span class="lbl">Model<em>Adjudications and verdicts</em></span>
+      <span class="n" id="tabModel"></span>
+    </button>
+    <button data-tab="ask">
+      <span class="lbl">Ask<em>Question this run</em></span>
+    </button>
+  </nav>
+</aside>
+
 <main>
+  <div class="pagehead">
+    <h1 id="pageTitle">Overview</h1>
+    <p class="status" id="status">Loading&hellip;</p>
+  </div>
+
   <div id="progress" hidden><ol id="stages"></ol></div>
 
   <section id="tab-overview">
@@ -240,7 +321,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);fon
   </section>
 
   <section id="tab-exceptions" hidden>
-    <h2>Exception queue</h2>
     <p class="hint">Every finding, nothing truncated. Filter by code, or narrow to the items
       that actually need a person. Click any row for its evidence and proposed action.</p>
     <div class="filters" id="dispFilters"></div>
@@ -253,7 +333,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);fon
   </section>
 
   <section id="tab-model" hidden>
-    <h2>Model adjudications</h2>
     <p class="hint">What the deterministic tiers could not settle, what the model proposed,
       and whether the arithmetic accepted it. A pick whose amount cannot be reconciled is
       discarded however confident the model was.</p>
@@ -261,7 +340,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);fon
   </section>
 
   <section id="tab-ask" hidden>
-    <h2>Settlement Q&amp;A</h2>
     <p class="hint">Answers are assembled from this run's own matches, findings and cash
       position. With the model on, every amount in the answer must already appear in those
       facts, and aggregation wording is rejected outright.</p>
@@ -414,6 +492,7 @@ function render() {
   renderFilters(); renderFindings(); renderAdjudications();
   $("tabExc").textContent = STATE.findings.length;
   $("tabModel").textContent = STATE.adjudications.length || "";
+  $("tabModel").hidden = !STATE.adjudications.length;
   $("foot").innerHTML =
     `Deterministic tiers T0–T3, plus verified model adjudication at T4. `
     + `${STATE.matches.length} matches, ${STATE.findings.length} findings, `
@@ -540,11 +619,46 @@ async function ask(q) {
 
 /* -------------------------------------------------------------------- wiring */
 $("run").addEventListener("click", runRecon);
+
+/* ---- navigation drawer ---- */
+const TITLES = { overview: "Overview", exceptions: "Exceptions",
+                 model: "Model adjudications", ask: "Settlement Q&A" };
+let lastFocus = null;
+
+function openMenu() {
+  lastFocus = document.activeElement;
+  $("drawer").hidden = false; $("scrim").hidden = false;
+  $("menu").setAttribute("aria-expanded", "true");
+  ($("tabs").querySelector("[aria-current=page]") || $("tabs").firstElementChild).focus();
+}
+function closeMenu() {
+  $("drawer").hidden = true; $("scrim").hidden = true;
+  $("menu").setAttribute("aria-expanded", "false");
+  // Send focus back where it came from, so keyboard users are not dropped at
+  // the top of the document every time they pick a section.
+  const back = (lastFocus && lastFocus !== document.body && document.contains(lastFocus))
+    ? lastFocus : $("menu");
+  back.focus();
+}
+function selectTab(name) {
+  [...$("tabs").children].forEach(x =>
+    x.dataset.tab === name ? x.setAttribute("aria-current", "page")
+                           : x.removeAttribute("aria-current"));
+  Object.keys(TITLES).forEach(t => $("tab-" + t).hidden = t !== name);
+  $("pageTitle").textContent = TITLES[name];
+  document.title = TITLES[name] + " — AI Finance Controller";
+}
+
+$("menu").addEventListener("click", () => $("drawer").hidden ? openMenu() : closeMenu());
+$("closeMenu").addEventListener("click", closeMenu);
+$("scrim").addEventListener("click", closeMenu);
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("drawer").hidden) closeMenu();
+});
 $("tabs").addEventListener("click", e => {
   const b = e.target.closest("button[data-tab]"); if (!b) return;
-  [...$("tabs").children].forEach(x => x.setAttribute("aria-selected", x === b));
-  ["overview", "exceptions", "model", "ask"].forEach(t =>
-    $("tab-" + t).hidden = t !== b.dataset.tab);
+  selectTab(b.dataset.tab);
+  closeMenu();
 });
 $("dispFilters").addEventListener("click", e => {
   const b = e.target.closest("[data-disp]"); if (!b) return;

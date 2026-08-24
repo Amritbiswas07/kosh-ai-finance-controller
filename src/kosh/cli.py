@@ -65,7 +65,10 @@ def cmd_recon(a) -> int:
     if gt.exists() and not a.no_eval:
         metrics = evaluate(res, ds, gt, wall)
 
-    meta = {"seed": a.data.name, "model": label, "period": "synthetic",
+    manifest = a.data / "manifest.json"
+    seed = (json.loads(manifest.read_text()).get("seed", "unknown")
+            if manifest.exists() else "unknown")
+    meta = {"seed": seed, "model": label, "period": "synthetic",
             "llm_seconds": round(getattr(adj, "seconds", 0.0), 3) if adj else 0.0}
 
     print(f"\n{label}")

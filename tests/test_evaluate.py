@@ -82,3 +82,14 @@ def test_a_leg_with_nothing_to_find_is_not_scored_as_a_failure():
     assert _macro([perfect, perfect]) == 1.0
     assert _macro([s for s in (perfect, perfect, empty) if s.support]) == 1.0
     assert _macro([]) == 0.0
+
+
+def test_the_pack_records_the_seed_not_the_directory_name(tmp_path: Path):
+    """Regression: meta['seed'] was Path.name, so every footer read 'seed data'."""
+    import json as _json
+    from kosh.generate import build as _build, write as _write
+    ds, gt, inj = _build(seed=4321)
+    _write(ds, gt, inj, tmp_path, 4321)
+    manifest = _json.loads((tmp_path / "manifest.json").read_text())
+    assert manifest["seed"] == 4321
+    assert manifest["seed"] != tmp_path.name
