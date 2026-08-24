@@ -61,9 +61,9 @@ def test_serves_the_page(live):
     base, _ = live
     status, body, ctype = get(base, "/")
     assert status == 200 and "text/html" in ctype
-    assert b"<title>Kosh" in body
-    assert b"Kosh" in body and b"AI Finance Controller" in body
-    # Exactly one h1, so the page keeps a single document landmark.
+    assert b"AI Finance Controller" in body
+    # Exactly one h1, so the page keeps a single document landmark. It names the
+    # current section, since the section tabs live behind the menu button.
     assert body.count(b"<h1") == 1
 
 
@@ -245,3 +245,27 @@ def test_the_mark_is_cropped_to_its_artwork(live):
     x, y, w, h = (float(v) for v in vb.split())
     assert w / h > 3.5, f"viewBox {vb} is not cropped to the artwork band"
     assert h < 400, f"viewBox {vb} still carries the square canvas"
+
+
+def test_sections_live_behind_an_accessible_menu(live):
+    """The four sections moved into a drawer, so the button that opens it has to
+    carry the state a screen reader needs."""
+    base, _ = live
+    _, body, _ = get(base, "/")
+    page = body.decode()
+    assert 'id="menu"' in page
+    assert 'aria-controls="drawer"' in page
+    assert 'aria-expanded="false"' in page          # closed on first paint
+    assert 'aria-label="Open sections"' in page
+    assert '<aside class="drawer" id="drawer" hidden' in page
+    for section in ("overview", "exceptions", "model", "ask"):
+        assert f'data-tab="{section}"' in page, section
+    # The drawer can be dismissed three ways, all wired in the page itself.
+    assert "closeMenu" in page and "scrim" in page and '"Escape"' in page
+
+
+def test_the_product_name_is_not_in_the_header(live):
+    base, _ = live
+    _, body, _ = get(base, "/")
+    header = body.decode().split("</header>")[0]
+    assert "Kosh" not in header

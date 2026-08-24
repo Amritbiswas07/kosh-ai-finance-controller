@@ -277,7 +277,7 @@ def html_report(res: ReconResult, ds: Dataset, pos: Position,
     add("<title>Settlement Reconciliation Pack</title>")
     add(f"<style>{_CSS}</style><div class=wrap>")
     add(f"<div class=mast>{_brandmark()}<span class=rule></span><div class=masthead>"
-        "<p class=eyebrow>Kosh &middot; Razorpay AI Buildathon &middot; Track 4</p>"
+        "<p class=eyebrow>Razorpay AI Buildathon &middot; Track 4</p>"
         "<h1>Settlement reconciliation pack</h1>"
         f"<p class=sub>{res.counts['total_records']:,} records across ERP, gateway and "
         f"bank &middot; engine {_engine_ms(res, meta):.1f} ms"
@@ -375,7 +375,7 @@ def html_report(res: ReconResult, ds: Dataset, pos: Position,
                 f"<td class=ev>{_esc(a.get('reason', '')[:160])}</td></tr>")
         add("</table></div>")
 
-    add(f"<footer>Kosh · deterministic tiers T0–T3 plus verified model adjudication at T4 · "
+    add(f"<footer>Deterministic tiers T0–T3, plus verified model adjudication at T4 · "
         f"seed {_esc(meta.get('seed', '—'))} · "
         f"{_esc(meta.get('model', 'no model loaded'))}</footer></div>")
     return "\n".join(H)
