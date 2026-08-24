@@ -43,10 +43,61 @@ forever):
 | `kosh recon [--llm on]` | Reconcile; write the pack as Markdown, HTML and JSON |
 | `kosh evaluate` | Print precision/recall/F1 against ground truth as JSON |
 | `kosh ask "…" [--llm on]` | Question the completed run (settlement Q&A) |
-| `pytest -q` | 97 tests, no model loaded, ~0.2 s |
+| `kosh serve` | Browse and work the run in a local web UI |
+| `pytest -q` | 117 tests, no model loaded, ~1.2 s |
 | `python scripts/benchmark.py --seeds 30 [--llm]` | Accuracy across 30 regenerated worlds |
 | `python scripts/ablation.py` | Does the model earn its place, and on which leg? |
 | `python scripts/verify_offline.py` | Run everything with all outbound sockets blocked |
+
+```bash
+./.venv/bin/kosh serve
+```
+
+Opens a working UI at `http://127.0.0.1:8000` — see below.
+
+---
+
+## The web interface
+
+```bash
+./.venv/bin/kosh serve --port 8000
+```
+
+Not a prettier report: the controller's actual workflow. Pick a seed, run it
+live, then work the queue.
+
+- **Run it from the header** — change the seed, toggle model adjudication, press
+  Reconcile. A model-enabled run takes ~10 s, so the pipeline **streams stage by
+  stage** over Server-Sent Events rather than showing an indefinite spinner.
+- **Overview** — the cash bridge with its residual, the tier breakdown, and the
+  scores against held-out ground truth.
+- **Exceptions** — every finding, filterable by code and by whether it needs a
+  person, searchable across ids, narrations and customers, sorted by exposure.
+  Expand any row for its evidence and proposed action.
+- **Model** — the adjudication log: candidates offered, what was chosen, and
+  whether the arithmetic accepted or rejected it.
+- **Ask** — settlement Q&A against the run that is loaded.
+
+**Standard library only.** [`server.py`](src/kosh/server.py) is a
+`ThreadingHTTPServer`, not FastAPI — the web UI adds **zero dependencies**. It
+binds to localhost and serves one self-contained page with no CDN links and no
+webfonts, so it renders with the machine unplugged. A test asserts the page
+contains no `http://`, `https://` or `cdn.` reference at all.
+
+Three bugs worth recording, since two of them only appear under use:
+
+- **`Connection: close` on the SSE response is load-bearing.** With no
+  `Content-Length` and no chunked encoding, closing the socket is the browser's
+  only end-of-stream signal; on keep-alive the reader never reports done and the
+  page stays stuck showing the first run as still going.
+- **The model was loaded outside the lock.** An `/api/ask` arriving while a run
+  was in flight put two threads into `from_pretrained(...).to(device)` at once,
+  and torch failed the second with `Cannot copy out of meta tensor` — a
+  confusing error a long way from its cause. Loading now has its own lock.
+- **`"bank" in narration` matched `method=netbanking`.** Q&A retrieval used
+  substring tests, so every netbanking payment was a hit for "bank" and a ₹2.72
+  fee variance outranked a ₹44,994 settlement that had genuinely not arrived.
+  Retrieval now compares word tokens, and equal relevance is broken by exposure.
 
 ---
 
@@ -263,7 +314,9 @@ src/kosh/
   ask.py        grounded settlement Q&A
   evaluate.py   the only module that opens ground truth
   report.py     Markdown / HTML / JSON renderings of one payload
-  cli.py        `kosh generate | recon | evaluate | ask`
+  cli.py        `kosh generate | recon | evaluate | ask | serve`
+  server.py     stdlib web UI — streams the pipeline, serves the queue
+  static/       the single self-contained page it serves
 scripts/
   benchmark.py       accuracy across N regenerated worlds
   ablation.py        does the model earn its place, and where

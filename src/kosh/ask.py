@@ -23,40 +23,72 @@ _STOP = {"the", "a", "an", "of", "for", "to", "in", "on", "is", "are", "was", "w
          "that", "with", "does", "do", "we", "our", "my", "it", "has", "have"}
 
 
+def _stem(w: str) -> str:
+    """Crudest possible stemmer: drop a trailing plural s. Enough to let
+    'settlements' in a question reach a record that says 'settlement'."""
+    return w[:-1] if len(w) > 4 and w.endswith("s") and not w.endswith("ss") else w
+
+
 def _tokens(q: str) -> set[str]:
-    return {w for w in re.findall(r"[a-z]+", q.lower()) if w not in _STOP and len(w) > 2}
+    return {_stem(w) for w in re.findall(r"[a-z]+", q.lower())
+            if w not in _STOP and len(w) > 2}
+
+
+def _haystack(*parts: str) -> set[str]:
+    """Word tokens, not raw text.
+
+    Substring matching looked equivalent and was not: `"bank" in hay` is true of
+    `method=netbanking`, so a card fee variance outranked the settlements that
+    had genuinely not reached the bank. Underscores split, so MISSING_IN_BANK
+    still contributes 'missing', 'in' and 'bank'.
+    """
+    text = " ".join(parts).lower().replace("_", " ")
+    return {_stem(w) for w in re.findall(r"[a-z]+", text)}
 
 
 def retrieve(question: str, res: ReconResult, pos: Position, k: int = 6) -> list[str]:
     """Pull the facts that bear on the question. Pure lookup, no model."""
     ids = {m.group(1).lower() for m in _ID_RE.finditer(question)}
     toks = _tokens(question)
-    scored: list[tuple[int, str]] = []
+    scored: list[tuple[int, int, str]] = []
 
     for f in res.findings:
-        hay = (f"{f.key} {f.code.value} {f.proposed_action} "
+        raw = (f"{f.key} {f.code.value} {f.proposed_action} "
                f"{' '.join(str(v) for v in f.evidence.values())}").lower()
-        score = 6 * sum(1 for i in ids if i in hay) + sum(1 for t in toks if t in hay)
+        # The code's own definition is part of what the record is *about*.
+        words = _haystack(raw, EXCEPTION_MEANING.get(f.code, ""))
+        score = 6 * sum(1 for i in ids if i in raw) + sum(1 for t in toks if t in words)
         if score:
             ev = "; ".join(f"{k2}={v}" for k2, v in list(f.evidence.items())[:5])
-            scored.append((score, f"[{f.code.value}] {f.key} — "
-                                  f"exposure {fmt(f.value_at_risk_paise)}. {ev}. "
-                                  f"Action: {f.proposed_action}"))
+            scored.append((score, abs(f.value_at_risk_paise),
+                           f"[{f.code.value}] {f.key} — "
+                           f"exposure {fmt(f.value_at_risk_paise)}. {ev}. "
+                           f"Action: {f.proposed_action}"))
     for m in res.matches:
-        hay = f"{m.left} {' '.join(m.right)} {m.evidence}".lower()
-        score = 6 * sum(1 for i in ids if i in hay) + sum(1 for t in toks if t in hay)
+        raw = f"{m.left} {' '.join(m.right)} {m.evidence}".lower()
+        words = _haystack(raw)
+        score = 6 * sum(1 for i in ids if i in raw) + sum(1 for t in toks if t in words)
         if score:
-            scored.append((score, f"[MATCHED {m.tier.value}] {m.left} → "
-                                  f"{', '.join(m.right)} (confidence {m.confidence:.2f}); "
-                                  f"{m.evidence}"))
-    for code, meaning in EXCEPTION_MEANING.items():
-        if any(t in code.value.lower() or t in meaning.lower() for t in toks):
-            scored.append((2, f"[DEFINITION] {code.value}: {meaning}"))
+            scored.append((score, abs(m.delta_paise),
+                           f"[MATCHED {m.tier.value}] {m.left} → "
+                           f"{', '.join(m.right)} (confidence {m.confidence:.2f}); "
+                           f"{m.evidence}"))
+    # Definitions are context, not evidence, so they fill leftover slots rather
+    # than competing for the top ones. Scoring them a flat 2 let them outrank a
+    # real MISSING_IN_BANK record that had matched on a single token, and
+    # "which settlements have not reached the bank?" answered with a glossary.
+    definitions = [f"[DEFINITION] {code.value}: {meaning}"
+                   for code, meaning in EXCEPTION_MEANING.items()
+                   if toks & _haystack(code.value, meaning)]
 
-    scored.sort(key=lambda s: -s[0])
-    facts = [t for _, t in scored[:k]]
-    if any(t in {"cash", "position", "bank", "transit", "settled", "balance", "money"}
-           for t in toks):
+    # Equal relevance is broken by money at stake. Lexical scoring cannot tell
+    # "not reached the bank" from "arrived in two parts" — both are settlement
+    # and bank words — but a controller always wants the ₹44,994 that never
+    # landed above a split credit that reconciled to zero.
+    scored.sort(key=lambda s: (-s[0], -s[1]))
+    facts = [t for _, _, t in scored[:k]]
+    facts += definitions[:max(0, k - len(facts))]
+    if toks & {"cash", "position", "bank", "transit", "settled", "balance", "money"}:
         facts.append(
             f"[POSITION] net settled {fmt(pos.settled_net)}, landed in bank "
             f"{fmt(pos.landed_in_bank)}, still in transit {fmt(pos.in_transit)}, "
