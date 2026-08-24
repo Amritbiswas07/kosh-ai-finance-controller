@@ -12,6 +12,7 @@ stage by stage over Server-Sent Events rather than leaving a spinner up.
 from __future__ import annotations
 
 import json
+import re
 import threading
 import time
 import traceback
@@ -29,7 +30,27 @@ from .report import TIER_MEANING, json_report
 from .schema import EXCEPTION_MEANING
 
 STATIC = Path(__file__).resolve().parent / "static"
+LOGO = STATIC / "razorpay-logo.svg"
 ROOT = Path(__file__).resolve().parents[2]
+
+def page_html() -> bytes:
+    """The page, with the brand mark inlined if one has been supplied.
+
+    Inlined rather than referenced with `<img src>` on purpose: only an SVG that
+    is part of the document can inherit `currentColor`, which is what lets the
+    dark half of the Razorpay mark invert with the theme instead of disappearing
+    into the navy background. It also keeps the page a single request.
+    """
+    html = (STATIC / "app.html").read_text()
+    if not LOGO.is_file():
+        return html.encode()
+    svg = LOGO.read_text()
+    svg = re.sub(r"<\?xml[^>]*\?>\s*", "", svg).strip()
+    return (html
+            .replace("<!--RAZORPAY_LOGO-->", svg)
+            .replace('<span class="mark" id="fallbackmark">K</span>', "")
+            .encode())
+
 
 #: One run at a time. The generator writes to a shared directory and the model
 #: is not re-entrant, so two overlapping requests would interleave inside both.
@@ -152,8 +173,7 @@ def make_handler(session: Session):
         def _get(self) -> None:
             path = urlparse(self.path).path
             if path in ("/", "/index.html"):
-                self._send(200, (STATIC / "app.html").read_bytes(),
-                           "text/html; charset=utf-8")
+                self._send(200, page_html(), "text/html; charset=utf-8")
             elif path.startswith("/static/"):
                 # basename only: no traversal out of the static directory.
                 name = Path(path).name

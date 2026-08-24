@@ -85,12 +85,21 @@ static pack in `outputs/recon.html` uses the same tokens, so the report and the
 app read as one product. Both themes are token-defined for all three viewer
 states, and dark mode clears WCAG AA comfortably (ink 15.8:1, muted 7.15:1).
 
-**About the logo.** The header has a slot for it: drop the official mark at
-`src/kosh/static/razorpay-logo.svg` and it replaces the placeholder tile
-automatically; absent, the `onerror` removes the `<img>` and nothing breaks. I
-did not redraw the Razorpay mark from memory — it would be both inaccurate and
-would make a payments tool look like an official Razorpay product, which it is
-not. Grab the real asset from Razorpay's brand assets page.
+**The brand mark.** The official Razorpay SVG sits at
+`src/kosh/static/razorpay-logo.svg` and is **inlined** into both the app header
+and the report masthead — not referenced with `<img src>`. That matters twice
+over: only an SVG inside the document can inherit `currentColor`, which is what
+lets the mark's dark half invert on the navy dark theme instead of disappearing
+into it; and the pack is published under a CSP that blocks external hosts, so a
+referenced logo would simply not render.
+
+Two adjustments to the asset, both recorded because they are the kind that look
+like nothing: as supplied the artwork occupies a thin band of a 960-square
+canvas — measured at `x 26.8, y 384.4, 905.5 × 191.3` — so at header size it
+rendered about five pixels tall. The stored copy tightens the `viewBox` to those
+bounds; the geometry is untouched, only the window onto it. And the navy fill
+`#192839` became `currentColor` while Razorpay's blue `#3395ff` is left exactly
+as supplied. Remove the file and both surfaces fall back to a plain tile.
 
 **Standard library only.** [`server.py`](src/kosh/server.py) is a
 `ThreadingHTTPServer`, not FastAPI — the web UI adds **zero dependencies**. It

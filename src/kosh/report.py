@@ -14,12 +14,29 @@ from __future__ import annotations
 
 import html
 import json
+import re
+from pathlib import Path
 from datetime import datetime
 
 from .match import Disposition, ReconResult
 from .money import fmt, to_rupees
 from .position import Position, bridge_rows
 from .schema import EXCEPTION_MEANING, Dataset, ExceptionCode
+
+_LOGO = Path(__file__).resolve().parent / "static" / "razorpay-logo.svg"
+
+
+def _brandmark() -> str:
+    """The supplied mark, inlined so its dark half can follow `currentColor`.
+
+    Inlining also keeps the pack a single self-contained file — it is published
+    as an artifact under a CSP that blocks external hosts, so a referenced logo
+    would simply not appear.
+    """
+    if _LOGO.is_file():
+        return re.sub(r"<\?xml[^>]*\?>\s*", "", _LOGO.read_text()).strip()
+    return "<span class=mark>K</span>"
+
 
 TIER_MEANING = {
     "T0_EXACT_ID": "identifier present on both sides",
@@ -192,6 +209,8 @@ body{
 .mark{width:34px;height:34px;border-radius:9px;background:var(--brand);
   color:var(--brand-ink);display:grid;place-items:center;font-weight:800;
   font-size:17px;letter-spacing:-.03em;flex:none}
+.mast .rzp{height:26px;width:auto;color:var(--ink);flex:none}
+.rule{width:1px;height:30px;background:var(--line);flex:none}
 .masthead{flex:1 1 320px}
 .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
   color:var(--brand);margin:0 0 5px}
@@ -257,7 +276,7 @@ def html_report(res: ReconResult, ds: Dataset, pos: Position,
     add = H.append
     add("<title>Settlement Reconciliation Pack</title>")
     add(f"<style>{_CSS}</style><div class=wrap>")
-    add("<div class=mast><span class=mark>K</span><div class=masthead>"
+    add(f"<div class=mast>{_brandmark()}<span class=rule></span><div class=masthead>"
         "<p class=eyebrow>Kosh &middot; Razorpay AI Buildathon &middot; Track 4</p>"
         "<h1>Settlement reconciliation pack</h1>"
         f"<p class=sub>{res.counts['total_records']:,} records across ERP, gateway and "

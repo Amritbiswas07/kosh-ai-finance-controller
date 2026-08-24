@@ -56,7 +56,8 @@ header{border-bottom:1px solid var(--line);background:var(--panel);
   display:flex;flex-wrap:wrap;gap:16px;align-items:center}
 .brand{flex:1 1 300px;min-width:250px;display:flex;align-items:center;gap:13px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
-.logo img{height:26px;width:auto;display:block}
+.logo .rzp{height:23px;width:auto;display:block;color:var(--ink)}
+.rule{width:1px;height:26px;background:var(--line);flex:none}
 .mark{width:31px;height:31px;border-radius:8px;background:var(--brand);
   color:var(--brand-ink);display:grid;place-items:center;font-weight:800;
   font-size:16px;letter-spacing:-.03em;flex:none}
@@ -192,12 +193,10 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);fon
   <div class="bar">
     <div class="brand">
       <a class="logo" href="https://razorpay.com/buildathon/" target="_blank" rel="noreferrer noopener">
-        <!-- Drop the official mark at src/kosh/static/razorpay-logo.svg and it
-             replaces the placeholder tile. Absent, this quietly removes itself. -->
-        <img src="/static/razorpay-logo.svg" alt="Razorpay" id="brandmark"
-             onerror="this.remove()"
-             onload="document.getElementById('fallbackmark')?.remove()">
-        <span class="mark" id="fallbackmark">K</span>
+        <!-- Server inlines src/kosh/static/razorpay-logo.svg here when present,
+             and drops the placeholder tile. See server.page_html(). -->
+        <!--RAZORPAY_LOGO--><span class="mark" id="fallbackmark">K</span>
+        <span class="rule" aria-hidden="true"></span>
         <span class="names">
           <h1>Kosh</h1>
           <span class="badge">AI Finance Controller &middot; <em>Buildathon Track 4</em></span>
