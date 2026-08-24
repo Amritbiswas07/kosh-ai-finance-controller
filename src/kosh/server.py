@@ -154,6 +154,17 @@ def make_handler(session: Session):
             if path in ("/", "/index.html"):
                 self._send(200, (STATIC / "app.html").read_bytes(),
                            "text/html; charset=utf-8")
+            elif path.startswith("/static/"):
+                # basename only: no traversal out of the static directory.
+                name = Path(path).name
+                target = STATIC / name
+                if not name or not target.is_file():
+                    self._json({"error": "not found"}, 404)
+                    return
+                kind = ("image/svg+xml" if name.endswith(".svg")
+                        else "image/png" if name.endswith(".png")
+                        else "application/octet-stream")
+                self._send(200, target.read_bytes(), kind)
             elif path == "/api/state":
                 if session.state is None:
                     self._json({"ready": False})
