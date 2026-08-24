@@ -55,7 +55,7 @@ forever):
 | The ask | Where |
 |---|---|
 | One financial-operations workflow | Three-way settlement reconciliation, four legs |
-| 50+ synthetic data records | **345** per run, across three sources — 10,277 across the benchmark |
+| 50+ synthetic data records | **345** per run (135 invoices, 148 gateway rows, 62 bank lines) — 10,277 across the benchmark |
 | Report match accuracy | Precision/recall/F1 per leg, scored against held-out ground truth |
 | Report unresolved exceptions | Every one, itemised, with evidence, exposure and a proposed action |
 | Throughput plus measured accuracy | See below — both, measured, not estimated |
@@ -65,10 +65,10 @@ forever):
 
 ## Results
 
-**345 records · 44 seconds of nothing but arithmetic.** The deterministic engine
-reconciles a full corpus in **1.2 ms** — about **71,000 records/second** end to
-end including CSV parsing. With the model enabled, wall time is dominated
-entirely by the three adjudication calls.
+**345 records, reconciled in under 5 milliseconds.** The deterministic engine
+itself takes **0.8 ms**; end to end including CSV parsing it is **5.0 ms**, or
+about **69,000 records/second**. With the model enabled, wall time is dominated
+entirely by the three adjudication calls — the arithmetic is unchanged.
 
 Across **30 regenerated corpora (10,277 records)**, each with independently
 jittered defect rates:
@@ -128,11 +128,12 @@ subtotal. It earned its place immediately — see
 ### The exception list
 
 Fourteen closed exception codes, no open-ended "other" bucket. Each finding
-carries its evidence, its rupee exposure, and what a controller should do:
+carries its evidence, its rupee exposure, and what a controller should do.
+This is the full run with adjudication on — 56 findings, 42 needing a human:
 
 ```
-UNEXPECTED_BANK_CREDIT        10   needs review
-UNPAID_INVOICE                 9   needs review
+UNEXPECTED_BANK_CREDIT         7   needs review
+UNPAID_INVOICE                 6   needs review
 UNBILLED_PAYMENT               5   needs review
 FEE_VARIANCE                   5   auto-resolved
 DUPLICATE_PAYMENT              4   needs review
@@ -143,6 +144,7 @@ ORPHAN_REFUND                  3   needs review
 CHARGEBACK_ADJUSTMENT          3   needs review
 SETTLEMENT_AMOUNT_MISMATCH     3   needs review
 MISSING_IN_BANK                3   needs review
+TDS_WITHHELD                   3   auto-resolved
 SPLIT_SETTLEMENT               2   auto-resolved
 ```
 

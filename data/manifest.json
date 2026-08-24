@@ -1,11 +1,11 @@
 {
-  "seed": 77,
-  "generated_at": "2026-08-25T03:10:55",
+  "seed": 20260824,
+  "generated_at": "2026-08-25T03:29:39",
   "counts": {
     "erp_invoices": 135,
     "pg_transactions": 148,
-    "bank_lines": 58,
-    "total_records": 341
+    "bank_lines": 62,
+    "total_records": 345
   },
   "injected": {
     "unpaid_invoice": 6,
@@ -29,8 +29,8 @@
   "ground_truth_exceptions": 56,
   "true_links": {
     "invoice_to_payment": 123,
-    "payment_to_batch": 140,
-    "batch_to_bank": 38,
+    "payment_to_batch": 141,
+    "batch_to_bank": 42,
     "invoice_to_bank": 6
   }
 }
