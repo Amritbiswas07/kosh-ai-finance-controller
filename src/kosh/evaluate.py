@@ -66,8 +66,11 @@ def _score(predicted: set, truth: set) -> PRF:
 
 
 def _pairs_erp(res: ReconResult) -> set[tuple[str, str]]:
-    return {(m.left, m.right[0]) for m in res.matches
-            if m.leg is Leg.ERP_PG and len(m.right) == 1}
+    """Every (invoice, payment) link, including instalments where one invoice is
+    settled by several captures. Reading only `right[0]` silently dropped the
+    second half of every part payment."""
+    return {(m.left, key) for m in res.matches
+            if m.leg is Leg.ERP_PG for key in m.right}
 
 
 def _pairs_direct(res: ReconResult) -> set[tuple[str, str]]:
@@ -93,7 +96,8 @@ def evaluate(res: ReconResult, ds: Dataset, gt_path: Path, wall_seconds: float) 
 
     link_scores = {
         "invoice_to_payment": _score(
-            _pairs_erp(res), {(k, v) for k, v in gt["invoice_to_payment"].items()}),
+            _pairs_erp(res),
+            {(k, v) for k, vs in gt["invoice_to_payment"].items() for v in vs}),
         "settlement_to_bank": _score(
             _pairs_bank(res),
             {(sid, key) for sid, keys in gt["batch_to_bank"].items() for key in keys}),
@@ -130,7 +134,8 @@ def evaluate(res: ReconResult, ds: Dataset, gt_path: Path, wall_seconds: float) 
     needs_review_keys = {f.key for f in res.findings
                          if f.disposition is Disposition.NEEDS_REVIEW}
     correctly_linked: set[str] = set()
-    for a, b in _pairs_erp(res) & {(k, v) for k, v in gt["invoice_to_payment"].items()}:
+    for a, b in _pairs_erp(res) & {(k, v) for k, vs in gt["invoice_to_payment"].items()
+                                   for v in vs}:
         correctly_linked.update((a, b))
     for sid, key in _pairs_bank(res) & {(s, k) for s, ks in gt["batch_to_bank"].items()
                                         for k in ks}:

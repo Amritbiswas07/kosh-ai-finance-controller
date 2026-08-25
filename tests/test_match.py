@@ -137,7 +137,8 @@ def test_auto_resolved_items_are_genuinely_settled(run):
     for f in res.findings:
         if f.disposition is Disposition.AUTO_RESOLVED:
             assert f.code in {ExceptionCode.SPLIT_SETTLEMENT, ExceptionCode.MERGED_PAYOUT,
-                              ExceptionCode.FEE_VARIANCE, ExceptionCode.TDS_WITHHELD}
+                              ExceptionCode.FEE_VARIANCE, ExceptionCode.TDS_WITHHELD,
+                              ExceptionCode.PART_PAYMENT}
 
 
 def test_timings_cover_all_four_legs(run):
@@ -161,3 +162,119 @@ def test_over_collected_gst_asks_for_a_credit_note_not_an_invoice(run):
             assert "credit note" in f.proposed_action
         else:
             assert "revised invoice" in f.proposed_action
+
+
+# ---------------------------------------------------------------- P0 regressions
+
+def _mini(invoices, pg, bank=()):
+    from kosh.schema import Dataset
+    return Dataset(invoices=list(invoices), pg=list(pg), bank=list(bank))
+
+
+def _inv(no, order, taxable, cust="Acme"):
+    from datetime import date
+    from kosh.schema import Invoice
+    tax = round(taxable * 1800 / 10_000)
+    return Invoice(no, order, cust, date(2026, 7, 1), taxable, tax, taxable + tax)
+
+
+def _pay(eid, order, amt, hour=10, day=1, receipt=None):
+    from datetime import datetime
+    from kosh.schema import PGTxn
+    return PGTxn(eid, "payment", amt, 0, 0, datetime(2026, 7, day, hour), "upi",
+                 order_id=order, order_receipt=receipt)
+
+
+def test_an_identifier_match_with_a_money_gap_is_still_an_exception():
+    """The worst bug this engine had: a 10,000 invoice paid with 100 shared an
+    order_id, so it was reported as a clean match and never reached the
+    exception list. The match rate counted a 9,900 hole as a win."""
+    inv = _inv("INV-1", "o1", 8_474_58)
+    ds = _mini([inv], [_pay("pay_1", "o1", 1_00_00)])
+    res = reconcile(ds, build_batches(ds))
+    assert [m.left for m in res.matches] == ["INV-1"]        # the link is right
+    short = [f for f in res.findings if f.code is ExceptionCode.SHORT_PAYMENT]
+    assert len(short) == 1
+    assert short[0].value_at_risk_paise == 1_00_00 - inv.gross_paise
+    assert short[0].disposition is Disposition.NEEDS_REVIEW
+
+
+def test_an_overpayment_is_named_as_one():
+    inv = _inv("INV-1", "o1", 8_474_58)
+    ds = _mini([inv], [_pay("pay_1", "o1", inv.gross_paise + 5_000_00)])
+    res = reconcile(ds, build_batches(ds))
+    codes = {f.code for f in res.findings}
+    assert ExceptionCode.OVERPAYMENT in codes
+    assert ExceptionCode.SHORT_PAYMENT not in codes
+
+
+def test_a_gap_matching_a_statutory_tds_rate_is_not_called_a_short_payment():
+    inv = _inv("INV-1", "o1", 8_474_58)
+    net = inv.gross_paise - round(inv.gross_paise * 200 / 10_000)      # 2% u/s 194C
+    ds = _mini([inv], [_pay("pay_1", "o1", net)])
+    res = reconcile(ds, build_batches(ds))
+    codes = {f.code for f in res.findings}
+    assert ExceptionCode.TDS_WITHHELD in codes
+    assert ExceptionCode.SHORT_PAYMENT not in codes
+
+
+def test_instalments_are_not_duplicates_and_are_never_told_to_refund():
+    """Calling a part payment a duplicate was not just a wrong label — the
+    proposed action said 'refund it', which would take back money owed."""
+    inv = _inv("INV-2", "o2", 8_474_58)
+    half = inv.gross_paise // 2
+    ds = _mini([inv], [_pay("pay_a", "o2", half),
+                       _pay("pay_b", "o2", inv.gross_paise - half, day=3)])
+    res = reconcile(ds, build_batches(ds))
+    codes = {f.code for f in res.findings}
+    assert ExceptionCode.PART_PAYMENT in codes
+    assert ExceptionCode.DUPLICATE_PAYMENT not in codes
+    part = next(f for f in res.findings if f.code is ExceptionCode.PART_PAYMENT)
+    assert "refund" not in part.proposed_action.lower()
+    # Both captures are linked to the one invoice.
+    agg = next(m for m in res.matches if m.tier is Tier.AGGREGATE)
+    assert set(agg.right) == {"pay_a", "pay_b"}
+
+
+def test_duplicates_are_caught_when_the_export_carries_no_order_id():
+    inv = _inv("INV-3", "o3", 4_237_29)
+    ds = _mini([inv], [_pay("pay_a", None, inv.gross_paise, receipt="INV-3"),
+                       _pay("pay_b", None, inv.gross_paise, hour=18, receipt="INV-3")])
+    res = reconcile(ds, build_batches(ds))
+    dupes = [f for f in res.findings if f.code is ExceptionCode.DUPLICATE_PAYMENT]
+    assert [f.key for f in dupes] == ["pay_b"]               # the later capture
+
+
+def test_a_gap_too_large_for_a_bank_charge_is_admitted_as_unclassified():
+    """UNCLASSIFIED existed to stop the engine naming a cause it does not know,
+    and had never once fired: every settlement delta became
+    SETTLEMENT_AMOUNT_MISMATCH with a confident note about a bank charge."""
+    from datetime import date, datetime
+    from kosh.schema import BankLine, PGTxn
+    inv = _inv("INV-FX", "oFX", 1_00_000_00)
+    pg = PGTxn("pay_fx", "payment", inv.gross_paise, 0, 0, datetime(2026, 7, 1, 10),
+               "card", order_id="oFX", settlement_id="setl_fx",
+               settlement_utr="HDFCN260703111111", settled_at=datetime(2026, 7, 3, 11))
+    line = BankLine(1, date(2026, 7, 3), "NEFT-HDFCN260703111111-RAZORPAY-SETTLEMENT",
+                    "111111", inv.gross_paise - 4_200_00, 0)
+    ds = _mini([inv], [pg], [line])
+    res = reconcile(ds, build_batches(ds))
+    codes = {f.code for f in res.findings}
+    assert ExceptionCode.UNCLASSIFIED in codes
+    assert ExceptionCode.SETTLEMENT_AMOUNT_MISMATCH not in codes
+
+
+def test_a_charge_sized_gap_is_still_named_as_a_charge():
+    from datetime import date, datetime
+    from kosh.schema import BankLine, PGTxn
+    inv = _inv("INV-C", "oC", 1_00_000_00)
+    pg = PGTxn("pay_c", "payment", inv.gross_paise, 0, 0, datetime(2026, 7, 1, 10),
+               "card", order_id="oC", settlement_id="setl_c",
+               settlement_utr="HDFCN260703222222", settled_at=datetime(2026, 7, 3, 11))
+    line = BankLine(1, date(2026, 7, 3), "NEFT-HDFCN260703222222-RAZORPAY-SETTLEMENT",
+                    "222222", inv.gross_paise - 23_60, 0)      # ₹23.60, a real charge
+    ds = _mini([inv], [pg], [line])
+    res = reconcile(ds, build_batches(ds))
+    codes = {f.code for f in res.findings}
+    assert ExceptionCode.SETTLEMENT_AMOUNT_MISMATCH in codes
+    assert ExceptionCode.UNCLASSIFIED not in codes

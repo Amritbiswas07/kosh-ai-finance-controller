@@ -77,6 +77,9 @@ class Injections:
     missing_order_id: int = 5  # payment exported with no order reference at all
     direct_bank_payment: int = 3  # customer paid the bank directly, bypassing the gateway
     tds_deduction: int = 3        # direct payment net of TDS, counterparty name mangled
+    short_payment: int = 3        # customer underpaid the invoice
+    overpayment: int = 2          # customer overpaid it
+    part_payment: int = 3         # invoice settled by instalments that add up
 
     def total(self) -> int:
         return sum(getattr(self, f) for f in self.__dataclass_fields__)
@@ -101,7 +104,7 @@ class Injections:
 class GroundTruth:
     """What is actually true. The engine must never read this."""
 
-    invoice_to_payment: dict[str, str] = field(default_factory=dict)
+    invoice_to_payment: dict[str, list[str]] = field(default_factory=dict)
     payment_to_batch: dict[str, str] = field(default_factory=dict)
     invoice_to_bank: dict[str, str] = field(default_factory=dict)
     batch_to_bank: dict[str, list[str]] = field(default_factory=dict)
@@ -128,6 +131,18 @@ def _expected_fee(amount_paise: int, method: str) -> tuple[int, int]:
     fee = round(amount_paise * MDR_BPS.get(method, 200) / 10_000)
     tax = round(fee * FEE_GST_BPS / 10_000)
     return fee, tax
+
+
+def _repriced(p: PGTxn, amount: int) -> PGTxn:
+    """Change a capture's amount and recharge the fee to match.
+
+    The gateway's fee is a percentage of what it actually processed, so editing
+    the amount without recomputing the fee left every altered row looking like
+    an MDR variance — nine false positives, and the engine was right each time.
+    """
+    fee, tax = _expected_fee(amount, p.method)
+    return PGTxn(**{**p.__dict__, "amount_paise": amount,
+                    "fee_paise": fee, "tax_paise": tax})
 
 
 def _abbreviate(name: str) -> str:
@@ -190,13 +205,17 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
     s_noid = set(take(inj.missing_order_id))
     s_direct = set(take(inj.direct_bank_payment))
     s_tds = set(take(inj.tds_deduction))
+    s_short = set(take(inj.short_payment))
+    s_over = set(take(inj.overpayment))
+    s_part = set(take(inj.part_payment))
     s_refund = set(take(10))                                   # normal, matched refunds
 
     inj = replace(inj, unpaid_invoice=len(s_unpaid), unbilled_payment=len(s_unbilled),
                   duplicate_payment=len(s_dupe), funds_on_hold=len(s_hold),
                   fee_variance=len(s_feevar), tax_line_mismatch=len(s_taxbad),
                   missing_order_id=len(s_noid), direct_bank_payment=len(s_direct),
-                  tds_deduction=len(s_tds))
+                  tds_deduction=len(s_tds), short_payment=len(s_short),
+                  overpayment=len(s_over), part_payment=len(s_part))
 
     payments: list[PGTxn] = []
     direct_receipts: list[tuple[dict, bool]] = []
@@ -229,6 +248,7 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
                 invoice_date=o["date"], taxable_paise=o["taxable"], tax_paise=tax,
                 gross_paise=o["taxable"] + tax,
             ))
+            o["gross"] = o["taxable"] + tax      # the customer pays what it says
             if idx in s_taxbad:
                 gt.flag(o["receipt"], ExceptionCode.TAX_LINE_MISMATCH,
                         f"GST on the invoice is not 18% of taxable value {o['taxable']}p.")
@@ -244,6 +264,19 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
 
         drift = rng.choice([-1_50, 2_30, 4_10, -3_05, 7_50]) if idx in s_feevar else 0
         p = new_payment(o, on_hold=idx in s_hold, fee_drift=drift)
+
+        # Deliberately imperfect payments. The gaps avoid 1%, 2% and 10% so they
+        # cannot be mistaken for a statutory TDS deduction.
+        if idx in s_short:
+            gap = round(o["gross"] * rng.choice([500, 700, 1300]) / 10_000)
+            p = _repriced(p, o["gross"] - gap)
+            gt.flag(o["receipt"], ExceptionCode.SHORT_PAYMENT,
+                    f"Customer paid {o['gross'] - gap}p against a {o['gross']}p invoice.")
+        elif idx in s_over:
+            extra = round(o["gross"] * rng.choice([400, 900]) / 10_000)
+            p = _repriced(p, o["gross"] + extra)
+            gt.flag(o["receipt"], ExceptionCode.OVERPAYMENT,
+                    f"Customer paid {o['gross'] + extra}p against a {o['gross']}p invoice.")
         if idx in s_noid:
             # The gateway export carries no order reference — a real and common
             # case (payment links, invoices raised outside the order flow). The
@@ -253,7 +286,7 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
             p = PGTxn(**{**p.__dict__, "order_id": None, "order_receipt": None})
         payments.append(p)
         if idx not in s_unbilled:
-            gt.invoice_to_payment[o["receipt"]] = p.entity_id
+            gt.invoice_to_payment.setdefault(o["receipt"], []).append(p.entity_id)
         else:
             gt.flag(p.entity_id, ExceptionCode.UNBILLED_PAYMENT,
                     "Payment captured against an order with no invoice in the ERP.")
@@ -263,6 +296,17 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
         if idx in s_hold:
             gt.flag(p.entity_id, ExceptionCode.FUNDS_ON_HOLD,
                     "Gateway is holding these funds; the batch will not carry them.")
+        if idx in s_part:
+            first = round(o["gross"] * rng.choice([0.4, 0.55, 0.65]))
+            payments[-1] = _repriced(p, first)
+            second = _repriced(p, o["gross"] - first)
+            payments.append(PGTxn(**{
+                **second.__dict__, "entity_id": p.entity_id + "b",
+                "created_at": p.created_at + timedelta(days=rng.randrange(2, 9))}))
+            gt.invoice_to_payment.setdefault(o["receipt"], []).append(p.entity_id + "b")
+            gt.flag(o["receipt"], ExceptionCode.PART_PAYMENT,
+                    f"Invoice settled by two captures adding to {o['gross']}p.")
+
         if idx in s_dupe:
             d = new_payment(o, on_hold=False)
             d = PGTxn(**{**d.__dict__,
@@ -515,7 +559,7 @@ def write(ds: Dataset, gt: GroundTruth, inj: Injections, out: Path, seed: int) -
         "injected_total": inj.total(),
         "ground_truth_exceptions": len(gt.exceptions),
         "true_links": {
-            "invoice_to_payment": len(gt.invoice_to_payment),
+            "invoice_to_payment": sum(len(v) for v in gt.invoice_to_payment.values()),
             "payment_to_batch": len(gt.payment_to_batch),
             "batch_to_bank": sum(len(v) for v in gt.batch_to_bank.values()),
             "invoice_to_bank": len(gt.invoice_to_bank),

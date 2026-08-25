@@ -43,6 +43,9 @@ class ExceptionCode(str, Enum):
     CHARGEBACK_ADJUSTMENT = "CHARGEBACK_ADJUSTMENT"
     MERGED_PAYOUT = "MERGED_PAYOUT"
     TDS_WITHHELD = "TDS_WITHHELD"
+    SHORT_PAYMENT = "SHORT_PAYMENT"
+    OVERPAYMENT = "OVERPAYMENT"
+    PART_PAYMENT = "PART_PAYMENT"
     UNCLASSIFIED = "UNCLASSIFIED"
 
 
@@ -62,6 +65,9 @@ EXCEPTION_MEANING: dict[ExceptionCode, str] = {
     ExceptionCode.CHARGEBACK_ADJUSTMENT: "The gateway debited a dispute or reserve adjustment the ERP does not carry.",
     ExceptionCode.MERGED_PAYOUT: "Several settlement batches arrived as a single consolidated bank credit.",
     ExceptionCode.TDS_WITHHELD: "A customer paid the invoice net of tax deducted at source.",
+    ExceptionCode.SHORT_PAYMENT: "The payment against an invoice is less than the invoice was raised for.",
+    ExceptionCode.OVERPAYMENT: "More was paid against an invoice than it was raised for.",
+    ExceptionCode.PART_PAYMENT: "One invoice was settled by several captures that add up to it exactly.",
     ExceptionCode.UNCLASSIFIED: "The engine could not place this residual in any known category.",
 }
 
