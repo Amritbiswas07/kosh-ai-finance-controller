@@ -148,12 +148,21 @@ def test_timings_cover_all_four_legs(run):
         assert key in res.timings
 
 
-def test_over_collected_gst_asks_for_a_credit_note_not_an_invoice(run):
-    """Both directions of a tax break need the right remedy, and no negative amounts."""
-    _ds, _gt, _b, res = run
+def test_over_collected_gst_asks_for_a_credit_note_not_an_invoice():
+    """Both directions of a tax break need the right remedy, and no negative
+    amounts reach the controller's action text. Built explicitly rather than
+    fished out of the corpus, which need not contain both directions."""
+    under = _inv("INV-UNDER", "o1", 10_000_00)
+    under = type(under)(**{**under.__dict__, "tax_paise": 100_00,
+                           "gross_paise": 10_000_00 + 100_00})
+    over = _inv("INV-OVER", "o2", 10_000_00)
+    over = type(over)(**{**over.__dict__, "tax_paise": 3_000_00,
+                         "gross_paise": 10_000_00 + 3_000_00})
+    ds = _mini([under, over], [])
+    res = reconcile(ds, build_batches(ds))
     tax = [f for f in res.findings if f.code is ExceptionCode.TAX_LINE_MISMATCH]
-    assert tax
-    assert any(f.value_at_risk_paise < 0 for f in tax), "no over-collection in this corpus"
+    assert {f.key for f in tax} == {"INV-UNDER", "INV-OVER"}
+    assert any(f.value_at_risk_paise < 0 for f in tax)
     import re
     for f in tax:
         # No negative rupee amount should ever reach the controller's action text.

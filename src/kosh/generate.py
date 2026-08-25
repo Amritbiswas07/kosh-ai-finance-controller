@@ -19,8 +19,10 @@ import json
 import random
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
 
+from .currency import BASE, Money, Rate, RateTable, write_rates
 from .money import to_paise
 from .schema import FEE_GST_BPS, MDR_BPS, BankLine, Dataset, ExceptionCode, Invoice, PGTxn
 
@@ -80,6 +82,7 @@ class Injections:
     short_payment: int = 3        # customer underpaid the invoice
     overpayment: int = 2          # customer overpaid it
     part_payment: int = 3         # invoice settled by instalments that add up
+    foreign_invoice: int = 6      # invoiced abroad, settled after conversion
 
     def total(self) -> int:
         return sum(getattr(self, f) for f in self.__dataclass_fields__)
@@ -109,6 +112,7 @@ class GroundTruth:
     invoice_to_bank: dict[str, str] = field(default_factory=dict)
     batch_to_bank: dict[str, list[str]] = field(default_factory=dict)
     exceptions: dict[str, str] = field(default_factory=dict)   # record key -> code
+    rates: object = None                    # the FX table this world used
     notes: dict[str, str] = field(default_factory=dict)        # record key -> why
 
     def flag(self, key: str, code: ExceptionCode, why: str) -> None:
@@ -164,6 +168,25 @@ def _utr(rng: random.Random, when: date) -> str:
     return f"{rng.choice(BANK_CODES)}{when:%y%m%d}{rng.randrange(10**5, 10**6)}"
 
 
+def _rate_table(rng: random.Random, start: date) -> RateTable:
+    """A month of dated reference rates.
+
+    The generator owns these for the same reason it owns everything else: if it
+    knows the rate on both days, it knows what the revaluation must come to, and
+    can put that in the answer key rather than trusting the engine's arithmetic
+    to check itself.
+    """
+    table = RateTable()
+    for cur, opening in (("USD", Decimal("83.10")), ("EUR", Decimal("90.20"))):
+        rate = opening
+        for n in range(0, 70, 3):
+            drift = Decimal(rng.uniform(-0.012, 0.012)).quantize(Decimal("0.00001"))
+            rate = (rate * (Decimal(1) + drift)).quantize(Decimal("0.0001"))
+            table.add(Rate(cur, BASE, rate, start + timedelta(days=n),
+                           "RBI reference"))
+    return table
+
+
 def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = None
           ) -> tuple[Dataset, GroundTruth, Injections]:
     rng = random.Random(seed)
@@ -172,6 +195,7 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
     ds = Dataset()
 
     start = date(2026, 7, 1)
+    rates = _rate_table(random.Random(seed ^ 0x5F), start)
     orders: list[dict] = []
     for i in range(n_orders):
         day = start + timedelta(days=rng.randrange(0, 45))
@@ -186,6 +210,7 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
             "tax": tax,
             "gross": taxable + tax,
             "method": rng.choice(METHODS),
+            "currency": "INR",
         })
 
     # Pick disjoint order slices for each order-level defect.
@@ -208,6 +233,7 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
     s_short = set(take(inj.short_payment))
     s_over = set(take(inj.overpayment))
     s_part = set(take(inj.part_payment))
+    s_fx = set(take(inj.foreign_invoice))
     s_refund = set(take(10))                                   # normal, matched refunds
 
     inj = replace(inj, unpaid_invoice=len(s_unpaid), unbilled_payment=len(s_unbilled),
@@ -215,7 +241,8 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
                   fee_variance=len(s_feevar), tax_line_mismatch=len(s_taxbad),
                   missing_order_id=len(s_noid), direct_bank_payment=len(s_direct),
                   tds_deduction=len(s_tds), short_payment=len(s_short),
-                  overpayment=len(s_over), part_payment=len(s_part))
+                  overpayment=len(s_over), part_payment=len(s_part),
+                  foreign_invoice=len(s_fx))
 
     payments: list[PGTxn] = []
     direct_receipts: list[tuple[dict, bool]] = []
@@ -235,10 +262,21 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
             type="payment", amount_paise=o["gross"], fee_paise=fee, tax_paise=tax,
             created_at=created, method=o["method"], order_id=o["order_id"],
             order_receipt=o["receipt"], on_hold=on_hold,
+            currency=o.get("currency", "INR"),
         )
 
     for idx, o in enumerate(orders):
         # --- ERP side -------------------------------------------------------
+        if idx in s_fx:
+            # Re-denominate the whole order abroad. Minor units happen to match
+            # for USD and EUR, so the figures stay the same size; what changes
+            # is that they are no longer rupees, and the settlement rate will
+            # differ from the invoice rate.
+            o["currency"] = rng.choice(["USD", "EUR"])
+            o["taxable"] = round(o["taxable"] / 80)
+            o["tax"] = 0                     # exports are zero-rated for GST
+            o["gross"] = o["taxable"]
+
         if idx not in s_unbilled:
             tax = o["tax"]
             if idx in s_taxbad:
@@ -247,6 +285,7 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
                 invoice_no=o["receipt"], order_id=o["order_id"], customer=o["customer"],
                 invoice_date=o["date"], taxable_paise=o["taxable"], tax_paise=tax,
                 gross_paise=o["taxable"] + tax,
+                currency=o.get("currency", "INR"),
             ))
             o["gross"] = o["taxable"] + tax      # the customer pays what it says
             if idx in s_taxbad:
@@ -363,16 +402,19 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
                 "Dispute adjustment debited by the gateway; no matching ERP entry.")
 
     # --- settle everything that is settleable into daily batches -------------
+    # A payout is per day *and per currency*: a gateway does not pay dollars and
+    # rupees in one transfer, and a batch that summed both would have a net that
+    # is not a quantity.
     to_settle = [t for t in payments + refunds + adjustments if not t.on_hold]
-    by_day: dict[date, list[PGTxn]] = {}
+    by_day: dict[tuple[date, str], list[PGTxn]] = {}
     for t in to_settle:
         settle_day = (t.created_at + timedelta(days=2)).date()
-        by_day.setdefault(settle_day, []).append(t)
+        by_day.setdefault((settle_day, t.currency), []).append(t)
 
     settled_rows: list[PGTxn] = []
     batches: list[dict] = []
-    for n, day in enumerate(sorted(by_day)):
-        members = by_day[day]
+    for n, (day, currency) in enumerate(sorted(by_day)):
+        members = by_day[(day, currency)]
         sid = f"setl_{seed % 1000:03d}{n:05d}"
         utr = _utr(rng, day)
         settled_at = datetime.combine(day, datetime.min.time()) + timedelta(hours=11)
@@ -508,11 +550,41 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
             gt.flag(line.key, ExceptionCode.UNEXPECTED_BANK_CREDIT,
                     "Credit in the bank with no settlement batch behind it.")
 
+    # The exchange difference on every foreign invoice, computed from the same
+    # rates the engine will be handed. Knowing the rate on both days means the
+    # answer key can state what the revaluation must come to, rather than
+    # trusting the engine's arithmetic to check itself.
+    gt.rates = rates
+    pay_by_receipt: dict[str, PGTxn] = {}
+    for t in ds.pg:
+        if t.type == "payment" and t.order_receipt:
+            pay_by_receipt.setdefault(t.order_receipt, t)
+    for inv in ds.invoices:
+        if inv.currency == BASE or inv.invoice_no in gt.exceptions:
+            continue
+        p = pay_by_receipt.get(inv.invoice_no)
+        if p is None:
+            continue
+        received = (p.settled_at or p.created_at).date()
+        try:
+            booked = rates.convert(Money(inv.gross_paise, inv.currency), BASE,
+                                   inv.invoice_date)
+            realised = rates.convert(Money(inv.gross_paise, inv.currency), BASE,
+                                     received)
+        except Exception:
+            continue
+        if realised.amount.minor != booked.amount.minor:
+            gt.flag(inv.invoice_no, ExceptionCode.FX_REVALUATION,
+                    f"{inv.currency} invoice booked at {booked.rate.rate}, "
+                    f"received when the rate was {realised.rate.rate}.")
+
     return ds, gt, inj
 # --------------------------------------------------------------------------- IO
 
 def write(ds: Dataset, gt: GroundTruth, inj: Injections, out: Path, seed: int) -> dict:
     out.mkdir(parents=True, exist_ok=True)
+    if gt.rates is not None:
+        write_rates(gt.rates, out / "fx_rates.csv")
 
     with (out / "erp_invoices.csv").open("w", newline="") as fh:
         w = csv.writer(fh)
@@ -533,7 +605,8 @@ def write(ds: Dataset, gt: GroundTruth, inj: Injections, out: Path, seed: int) -
             debit = f"{-t.amount_paise / 100:.2f}" if t.amount_paise < 0 else "0.00"
             credit = f"{t.amount_paise / 100:.2f}" if t.amount_paise > 0 else "0.00"
             w.writerow([t.entity_id, t.type, debit, credit, f"{t.amount_paise / 100:.2f}",
-                        "INR", f"{t.fee_paise / 100:.2f}", f"{t.tax_paise / 100:.2f}",
+                        t.currency, f"{t.fee_paise / 100:.2f}",
+                        f"{t.tax_paise / 100:.2f}",
                         "Y" if t.on_hold else "N", "Y" if t.settled else "N",
                         t.created_at.isoformat(sep=" "),
                         t.settled_at.isoformat(sep=" ") if t.settled_at else "",
@@ -563,6 +636,10 @@ def write(ds: Dataset, gt: GroundTruth, inj: Injections, out: Path, seed: int) -
             "payment_to_batch": len(gt.payment_to_batch),
             "batch_to_bank": sum(len(v) for v in gt.batch_to_bank.values()),
             "invoice_to_bank": len(gt.invoice_to_bank),
+        },
+        "fx_rates": len(gt.rates) if gt.rates is not None else 0,
+        "currencies": sorted({i.currency for i in ds.invoices}),
+        "unused": {
         },
     }
     (out / "ground_truth.json").write_text(json.dumps(

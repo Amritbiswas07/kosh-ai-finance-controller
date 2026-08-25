@@ -420,10 +420,64 @@ else.
 
 ---
 
-## 12. Known limitations
+## 12. More than one currency
 
-- **Single currency.** Everything is INR paise. Multi-currency settlement would
-  need an FX rate table and a revaluation line in the bridge; neither exists.
+Kosh began single-currency, and the shortcut showed: amounts were bare integers
+of paise, so nothing stopped ₹100 being added to $100. Refusing every non-INR
+row at the door was an honest stopgap and a useless one for a merchant whose
+international payments settle after conversion.
+
+`kosh.currency` replaces the bare integer with `Money(minor, currency)`, and
+insists on three things — each because the alternative is a wrong number nobody
+notices.
+
+**Minor units are per currency.** Rupees, dollars and euros have two decimal
+places; yen has none, Kuwaiti dinars have three. Reading ¥1,000 as 1,000 minor
+units when it is 1,000 *whole* yen is an error of a hundredfold that looks
+exactly like a correct figure. A currency whose decimal places are unknown is
+still refused, because two is not a safe guess.
+
+**Different currencies never add.** `Money` raises rather than coercing. A total
+that silently mixes currencies is worse than a crash: it reconciles.
+
+**A conversion is an event, not a function call.** It happened on a date, at a
+rate, from a source, and all three are recorded on the result — "what rate did
+you use?" being the first question anyone asks about a revalued figure. Rates
+come from a dated file versioned beside the statements they applied to, so the
+same run months later produces the same figures. A missing rate is an error,
+never a stale fallback: `FX_RATE_MISSING` is raised and the amount is left in
+its own currency rather than estimated.
+
+### The revaluation line
+
+An invoice raised in dollars enters the books at the rate on the day it was
+raised. The money arrives later, at whatever the rate is then. That gap is **not
+a reconciliation break** — both sides are correct — and the important thing is
+that it does not get absorbed into a settlement variance, where it would read as
+the bank having short-paid. It is an exchange difference, reported as one, and
+it now has its own line on the face of the cash bridge:
+
+```
+  Landed in the bank                       +5,26,997.09
+  Still in transit                           +81,875.98
+  Exchange gain / loss on foreign invoices        +96.12
+```
+
+Two things fell out of building it, both of which had been quietly wrong the
+moment a foreign invoice existed:
+
+- **Exports are zero-rated.** The GST check expected 18% of every invoice, so
+  every foreign sale was flagged as a tax break the instant multi-currency
+  arrived. The check now applies to domestic invoices only.
+- **A payout is per day *and* per currency.** Gateways do not pay dollars and
+  rupees in one transfer, and a batch summing both has a net that is not a
+  quantity. Batches are keyed by both, and one that still mixes them is raised
+  as `MIXED_CURRENCY_BATCH` rather than being netted into nonsense.
+
+---
+
+## 13. Known limitations
+
 - **No fuzzy string matching on counterparty names.** Leg D uses token overlap
   and a model, not edit distance or embeddings. `ANND TRDRS` (first word also
   mangled) would defeat both.
@@ -441,6 +495,15 @@ else.
   The Authorization header, paging, every error branch and the whole mapping are
   exercised through an injected transport, so the only untested thing is the
   socket itself — but that is still untested.
+- **Revaluation is at the invoice, not the balance.** A foreign invoice is
+  revalued between the day it was raised and the day it was received. Open
+  foreign balances are not marked to a period-end rate, which is what a full
+  month-end close would also do.
+- **Cross-currency matching is not attempted.** A dollar invoice matches a
+  dollar payment; nothing tries to match a dollar invoice directly to a rupee
+  bank credit. The gateway converts before settling, so the case has not
+  arisen — but a merchant collecting in one currency and banking in another
+  would need it.
 - **The model is small.** Qwen2.5-1.5B is reliable at choosing among candidates
   and unreliable at prose (§7). A larger local model would likely widen what
   T4 can recover; it has not been tried.
