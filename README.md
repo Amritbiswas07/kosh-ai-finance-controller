@@ -45,6 +45,7 @@ forever):
 | `kosh ask "…" [--llm on]` | Question the completed run (settlement Q&A) |
 | `kosh serve` | Browse and work the run in a local web UI |
 | `kosh sync` | Reconcile and fold the result into the running ledger |
+| `kosh pull --year --month [--day]` | Fetch a real settlement recon period from Razorpay |
 | `pytest -q` | 117 tests, no model loaded, ~1.2 s |
 | `python scripts/benchmark.py --seeds 30 [--llm]` | Accuracy across 30 regenerated worlds |
 | `python scripts/ablation.py` | Does the model earn its place, and on which leg? |
@@ -285,6 +286,50 @@ residual is records with no counterparty *in the data at all* — an invoice
 nobody paid, a batch the bank has not sent — so there is nothing to find and
 every answer is a false positive. Of its 15 calls there, 13 were declines and 2
 were wrong picks the arithmetic gate caught.
+
+---
+
+## It reads the real API, not just a CSV that looks like one
+
+```bash
+export RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
+export RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxx
+./.venv/bin/kosh pull --year 2026 --month 7
+```
+
+`GET /v1/settlements/recon/combined` is the report the synthetic CSV was written
+to imitate. `kosh pull` fetches it, maps it onto the engine's own records and
+writes it in the same shape the generator emits — so a pulled period and a
+generated one are read by **the same parser** and reconciled by the same engine.
+
+**Read-only by construction.** One request method, it issues `GET`, and there is
+a test asserting the strings `POST`, `PUT`, `PATCH` and `DELETE` appear nowhere
+in the module. Nothing in Kosh can move money.
+
+**Credentials are read from the environment and never stored, logged or
+printed** — they go into the `Authorization` header and nowhere else, and are
+scrubbed from every error message, since an API error that echoes its request
+URL is the ordinary way a key reaches a log file.
+
+Three things about the live API differ from the CSV, and each silently produces
+wrong money if missed:
+
+| | CSV | API |
+|---|---|---|
+| Amounts | rupee strings, parsed with `to_paise` | **already integer paise** — reparsing multiplies by 100 |
+| Timestamps | ISO strings | Unix epochs |
+| Direction | sign of `amount` | the `debit` / `credit` columns; `amount` is unsigned |
+
+That middle column is why the engine has used integer paise from the first
+commit: Razorpay's own API speaks paise, so the representation matches the
+source rather than being converted at the boundary.
+
+**Verified against the documented shape, not a live account.** I have no
+merchant credentials, so `tests/fixtures/razorpay_recon.json` carries the
+response structure from Razorpay's docs with invented values, and twelve tests
+pin every unit, null and edge — including a row that cannot be mapped, which is
+reported rather than dropped. The network call itself is untested against a real
+key; that is the one part of this path that a live account would exercise.
 
 ---
 

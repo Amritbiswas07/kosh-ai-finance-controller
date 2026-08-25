@@ -117,6 +117,51 @@ def cmd_evaluate(a) -> int:
     return 0
 
 
+def cmd_pull(a) -> int:
+    """Fetch a real settlement recon period and write it where the engine reads."""
+    from .razorpay import MissingCredentials, RazorpayClient, RazorpayError, to_pg_txns, write_csv
+    try:
+        client = RazorpayClient.from_env()
+    except MissingCredentials as exc:
+        print(f"\n{exc}\n")
+        print("  export RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx")
+        print("  export RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxx\n")
+        print("Kosh never stores or prints them; they are read from the environment")
+        print("and sent only in the Authorization header.")
+        return 2
+
+    period = f"{a.year}-{a.month:02d}" + (f"-{a.day:02d}" if a.day else "")
+    print(f"GET {client.base}/settlements/recon/combined  ({period}) …")
+    try:
+        items = client.fetch_recon(a.year, a.month, a.day, limit=a.limit)
+    except RazorpayError as exc:
+        print(f"\n  {exc}\n")
+        return 1
+
+    rows, errors = to_pg_txns(items)
+    print(f"  {len(items):,} recon rows · {len(rows):,} mapped"
+          + (f" · {len(errors)} unmappable" if errors else ""))
+    for e in errors[:5]:
+        print(f"    ! {e}")
+    if not rows:
+        print("\n  Nothing settled in that period. Try a different month, or "
+              "--day to narrow it.")
+        return 0
+
+    a.out.mkdir(parents=True, exist_ok=True)
+    target = a.out / "pg_settlement_report.csv"
+    write_csv(rows, target)
+    gross = sum(t.amount_paise for t in rows if t.type == "payment")
+    fees = sum(t.fee_paise + t.tax_paise for t in rows)
+    print(f"\n  captured {fmt(gross)} · fees and GST {fmt(fees)} · "
+          f"{len({t.settlement_id for t in rows if t.settlement_id})} settlement(s)")
+    print(f"  wrote {target}")
+    print("\nThe pulled period is written in the same shape the generator emits,")
+    print("so `kosh recon` reads it with the same parser. Supply the matching")
+    print("ERP and bank exports in the same directory to reconcile it.")
+    return 0
+
+
 def cmd_sync(a) -> int:
     from .store import Store
     ds, batches, res, pos, wall, errs, adj, label = _run(a.data, a.llm)
@@ -177,7 +222,9 @@ def main(argv: list[str] | None = None) -> int:
                                ("ask", cmd_ask, "ask a question about the run"),
                                ("serve", cmd_serve, "browse the run in a local web UI"),
                                ("sync", cmd_sync,
-                                "reconcile and fold the result into the running ledger")):
+                                "reconcile and fold the result into the running ledger"),
+                               ("pull", cmd_pull,
+                                "fetch a real settlement recon period from Razorpay")):
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--data", type=Path, default=DATA)
         p.add_argument("--out", type=Path, default=OUT)
@@ -190,6 +237,14 @@ def main(argv: list[str] | None = None) -> int:
         if name == "ask":
             p.add_argument("question", nargs="+")
             p.add_argument("--show-facts", action="store_true")
+        if name == "pull":
+            # A pulled period belongs beside the other source files, not in the
+            # reports directory the other commands write to.
+            p.set_defaults(out=DATA)
+            p.add_argument("--year", type=int, required=True)
+            p.add_argument("--month", type=int, required=True)
+            p.add_argument("--day", type=int, default=None)
+            p.add_argument("--limit", type=int, default=None)
         if name == "sync":
             p.add_argument("--db", type=Path, default=ROOT / "outputs" / "kosh.db")
             p.add_argument("--top", type=int, default=8)
