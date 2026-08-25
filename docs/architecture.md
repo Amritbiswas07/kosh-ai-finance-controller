@@ -120,11 +120,18 @@ rows a model touched.
 
 It was wired into all four legs first, then measured — `scripts/ablation.py`:
 
-| configuration | link F1 | exc F1 | LLM calls | LLM seconds |
+| configuration | link F1 | exception F1 | LLM calls | LLM seconds |
 |---|---:|---:|---:|---:|
-| deterministic only | 0.8889 | 0.9217 | 0 | 0.0 |
-| model on every leg | 1.0000 | 1.0000 | 18 | 46.4 |
-| **model on invoice→bank only** | **1.0000** | **1.0000** | **3** | **9.3** |
+| deterministic only | 0.8889 | 0.9313 | 0 | 0.0 |
+| model on every leg | 1.0000 | 1.0000 | 18 | 47.5 |
+| **model on the two legs it can help** | **1.0000** | **1.0000** | **6** | **21.2** |
+
+Three of those six calls are spent on the settlement leg and every one is
+rejected by the arithmetic gate — on *this* corpus there is nothing there to
+find, exactly as the first ablation said. They are kept because the same call
+is what recovers 4 of 4 links against statement formats the extractor cannot
+parse (§8). The cost of carrying it is three wasted calls a run; the cost of
+dropping it is every unfamiliar narration going unmatched.
 
 Identical accuracy from 3 calls instead of 18. On legs A and C the residual is
 records with no counterparty *in the data at all* — an invoice nobody paid, a
@@ -243,6 +250,15 @@ a rejected answer is replaced by the underlying records rather than reworded.
 The deterministic path already carries a correct explanation for every code —
 `EXCEPTION_MEANING` plus the finding's `proposed_action` — so on this evidence
 the model adds risk to Q&A without adding information. It stays as an opt-in.
+
+**A stale answer key scored as a wrong answer.** Ground truth used to map an
+invoice to a single payment id; instalments made it a list. The evaluator
+iterated whatever it found, so an older file yielded one pair per *character* —
+1,035 links from 135 invoices — and it reported link F1 0.0 for the leg without
+a word of complaint. The 30-seed benchmark stayed at 1.0000 throughout, because
+it regenerates its data every run and never touched the stale file. Two numbers
+describing the same engine disagreed by half, and only comparing them exposed
+it. The reader now normalises both shapes; the silence was the real defect.
 
 **A benchmark that measured the same thing 30 times.** The first multi-seed run
 returned identical scores to four decimal places on every seed. Not a bug — the

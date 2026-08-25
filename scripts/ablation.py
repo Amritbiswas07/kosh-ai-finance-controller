@@ -50,7 +50,7 @@ def main() -> None:
     rows = [
         run("deterministic only (no model)", None, frozenset()),
         run("model on every leg", adj, ALL_ADJUDICATED_LEGS),
-        run("model on invoice→bank only (default)", adj, DEFAULT_ADJUDICATED_LEGS),
+        run("model on the two legs it can help (default)", adj, DEFAULT_ADJUDICATED_LEGS),
     ]
 
     hdr = (f"| {'configuration':38} | link F1 | exc P | exc R | exc F1 | cleared | "

@@ -72,7 +72,7 @@ def main() -> None:
         adj = LocalAdjudicator()
         print(f"loading {adj.name} …", flush=True)
         print(f"loaded in {adj.load():.1f}s on {adj.device}", flush=True)
-        label = f"{adj.name} on invoice→bank"
+        label = f"{adj.name} (default legs)"
 
     rows = []
     for i in range(args.seeds):

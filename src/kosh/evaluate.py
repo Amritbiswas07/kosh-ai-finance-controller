@@ -57,6 +57,25 @@ class PRF:
                 "f1": round(self.f1, 4), "support": self.support}
 
 
+def _links(mapping: dict) -> set[tuple[str, str]]:
+    """Ground-truth links, tolerant of both shapes it has had.
+
+    An invoice used to map to a single payment id; it now maps to a list,
+    because an invoice can be settled by several captures. Iterating the older
+    string form yields one pair per *character* — 1,035 of them from 135
+    invoices — and the evaluator happily scored that as F1 0.0 rather than
+    saying the file was stale. Normalising here is the fix; the silence was the
+    bug.
+    """
+    out: set[tuple[str, str]] = set()
+    for key, value in mapping.items():
+        if isinstance(value, str):
+            out.add((key, value))
+        else:
+            out.update((key, v) for v in value)
+    return out
+
+
 def _macro(scores: list[PRF]) -> float:
     return sum(s.f1 for s in scores) / len(scores) if scores else 0.0
 
@@ -96,8 +115,7 @@ def evaluate(res: ReconResult, ds: Dataset, gt_path: Path, wall_seconds: float) 
 
     link_scores = {
         "invoice_to_payment": _score(
-            _pairs_erp(res),
-            {(k, v) for k, vs in gt["invoice_to_payment"].items() for v in vs}),
+            _pairs_erp(res), _links(gt["invoice_to_payment"])),
         "settlement_to_bank": _score(
             _pairs_bank(res),
             {(sid, key) for sid, keys in gt["batch_to_bank"].items() for key in keys}),
@@ -134,8 +152,7 @@ def evaluate(res: ReconResult, ds: Dataset, gt_path: Path, wall_seconds: float) 
     needs_review_keys = {f.key for f in res.findings
                          if f.disposition is Disposition.NEEDS_REVIEW}
     correctly_linked: set[str] = set()
-    for a, b in _pairs_erp(res) & {(k, v) for k, vs in gt["invoice_to_payment"].items()
-                                   for v in vs}:
+    for a, b in _pairs_erp(res) & _links(gt["invoice_to_payment"]):
         correctly_linked.update((a, b))
     for sid, key in _pairs_bank(res) & {(s, k) for s, ks in gt["batch_to_bank"].items()
                                         for k in ks}:

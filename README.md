@@ -277,11 +277,18 @@ It was wired into all four legs first, then measured (`scripts/ablation.py`):
 
 | configuration | link F1 | exception F1 | LLM calls | LLM seconds |
 |---|---:|---:|---:|---:|
-| deterministic only | 0.8889 | 0.9217 | 0 | 0.0 |
-| model on every leg | 1.0000 | 1.0000 | 18 | 46.4 |
-| **model on invoice→bank only** | **1.0000** | **1.0000** | **3** | **9.3** |
+| deterministic only | 0.8889 | 0.9313 | 0 | 0.0 |
+| model on every leg | 1.0000 | 1.0000 | 18 | 47.5 |
+| **model on the two legs it can help** | **1.0000** | **1.0000** | **6** | **21.2** |
 
-Same accuracy from three calls instead of eighteen. On the other legs the
+Three of those six calls are spent on the settlement leg and every one is
+rejected by the arithmetic gate — on *this* corpus there is nothing there to
+find, exactly as the first ablation said. They are kept because the same call
+is what recovers 4 of 4 links against statement formats the extractor cannot
+parse (§8). The cost of carrying it is three wasted calls a run; the cost of
+dropping it is every unfamiliar narration going unmatched.
+
+Same accuracy from six calls instead of eighteen. On the other legs the
 residual is records with no counterparty *in the data at all* — an invoice
 nobody paid, a batch the bank has not sent — so there is nothing to find and
 every answer is a false positive. Of its 15 calls there, 13 were declines and 2
