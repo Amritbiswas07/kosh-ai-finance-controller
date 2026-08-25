@@ -4,3 +4,7 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 *.egg-info/
+
+# Local ledger state. A judge cloning this should start their own, not inherit
+# mine — shipping it made the first `kosh sync` report "run 2, nothing new".
+outputs/*.db
