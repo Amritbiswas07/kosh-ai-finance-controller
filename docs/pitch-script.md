@@ -164,7 +164,9 @@ past the tier names.
 
 ## Notes
 
-- 787 spoken words. At a normal 150 words a minute that is about 5:15, leaving room to breathe.
+- 748 spoken words. At a normal 150 words a minute that is about 4:59.
+  Counted from the script itself, not estimated — plain language takes more
+  words to say the same thing, and the first draft of this rewrite ran 6:16.
 - Don't rush 1:20–2:20. "The AI never decides whether two records match" is the
   point that sets this apart. Everything else, plenty of people will have built.
 - Running long? Cut 3:45–4:35 down to just the thirty-datasets line.
