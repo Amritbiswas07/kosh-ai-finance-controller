@@ -1,6 +1,6 @@
 {
-  "seed": 20260824,
-  "generated_at": "2026-08-25T04:04:40",
+  "seed": 20260825,
+  "generated_at": "2026-08-25T15:40:02",
   "counts": {
     "erp_invoices": 135,
     "pg_transactions": 148,
@@ -29,7 +29,7 @@
   "ground_truth_exceptions": 56,
   "true_links": {
     "invoice_to_payment": 123,
-    "payment_to_batch": 141,
+    "payment_to_batch": 142,
     "batch_to_bank": 42,
     "invoice_to_bank": 6
   }
