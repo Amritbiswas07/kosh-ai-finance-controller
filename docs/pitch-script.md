@@ -25,23 +25,17 @@ description column so people see the mess.
 
 **SAY**
 
-> If you sell online, three different systems keep track of your money, and they
-> never quite agree.
->
+> If you sell online, three systems track your money and none of them agree.
 > Your accounting software says what you invoiced. Your payment provider says
-> what it collected and what it paid out to you. Your bank says what actually
-> turned up in the account.
+> what it collected and paid out. Your bank says what actually arrived.
 >
-> The three don't match, because along the way the provider takes a fee, adds tax
-> on that fee, holds some money back for refunds and disputes, and pays you in
-> batches a couple of days later. So at the end of the month somebody has to sit
-> down and explain, rupee by rupee, why the three numbers are different — and be
-> able to prove it to an auditor.
+> They differ because the provider takes a fee, taxes that fee, holds money back
+> for refunds, and pays out in batches days later. At month end somebody has to
+> explain every rupee of that gap, and prove it to an auditor.
 >
-> And this is what they have to work with. Every payout carries a reference
-> number that should tie it back to the provider. But by the time your bank
-> prints it, it's been squashed into a line like this — different case, stuck to
-> a company name, sometimes missing altogether.
+> And this is what they get to work with. Every payout carries a reference number
+> tying it back — and by the time the bank prints it, it looks like this.
+> Different case, glued to a company name, sometimes just missing.
 
 ---
 
@@ -54,16 +48,16 @@ progress list run.
 
 > This is Kosh. Three hundred and forty-five records from those three sources.
 >
-> The matching itself finishes in under a millisecond — around sixty-nine
-> thousand records a second. What you're waiting on is the AI, and it gets used
-> exactly three times. I'll explain why in a moment.
+> The matching finishes in under a millisecond — about sixty-nine thousand
+> records a second. What you're waiting on is the AI, and it runs exactly three
+> times.
 >
-> The first thing it shows you isn't a score. It's where your money actually is.
-> Six and a half lakh rupees went out from the provider in batches. Five point
-> seven nine lakh reached the bank. Seventy-two thousand is still on its way.
+> The first thing you see isn't a score. It's where the money is. Six and a half
+> lakh went out in batches. Five point seven nine reached the bank. Seventy-two
+> thousand is still in flight.
 >
-> And this line has to be zero. It's a self-check: if the maths doesn't hold, it
-> says so right here instead of quietly hiding the difference.
+> And this line has to be zero. If the maths doesn't hold, it says so here rather
+> than quietly burying the difference.
 
 ---
 
@@ -74,26 +68,24 @@ past the tier names.
 
 **SAY**
 
-> Matching happens in five passes. Each pass only looks at what the one before it
+> Matching happens in five passes, each only looking at what the pass before it
 > couldn't solve.
 >
-> First, the easy ones — both sides carry the same reference number. Then the
-> same number written differently. Then the hard ones, where there's no shared
-> reference at all and it has to match on amount and date. For those it works out
-> the best set of pairings across the whole file at once, rather than grabbing the
-> nearest match one row at a time. That matters more than it sounds: grabbing as
-> you go means an early row can take the partner a later row needed, and then your
-> answer changes just because the file was sorted differently.
+> Easy ones first — both sides carry the same reference number. Then the same
+> number written differently. Then the hard ones, with no shared reference at
+> all, matched on amount and date. There it picks the best set of pairings across
+> the whole file at once, rather than grabbing the nearest match row by row. That
+> matters: grabbing as you go lets an early row take the partner a later row
+> needed, so your answer changes if the file was sorted differently.
 >
 > Now the decision I'd defend hardest. **The AI never decides whether two records
-> match.** That part is pure arithmetic, because it's the part an auditor will
-> check, and "the AI thought so" is not an answer you can give them.
+> match.** That's pure arithmetic — it's the part an auditor checks, and "the AI
+> thought so" is not an answer you can give them.
 >
-> The AI gets one job. A customer paid our bank directly instead of going through
-> the provider, they held back two percent as tax, and the bank has mangled their
-> name down to `MERIDIAN LBS`. No rule catches that. A person reads it instantly
-> as Meridian Labs — and so does a small AI model. Then the arithmetic checks its
-> answer before accepting it.
+> The AI gets one job. A customer paid our bank directly, held back two percent
+> as tax, and the bank mangled their name to `MERIDIAN LBS`. No rule catches
+> that. A person reads it instantly as Meridian Labs — so does a small AI model.
+> Then the arithmetic checks its answer before accepting it.
 
 ---
 
@@ -106,12 +98,11 @@ past the tier names.
 > I didn't just decide that felt right. I let the AI loose on every part of the
 > job first, then measured both ways.
 >
-> Exactly the same accuracy from three AI calls as from eighteen. Everywhere
-> else, the leftovers are records that have no match anywhere in the data — an
-> invoice nobody ever paid, a payout the bank hasn't sent yet. There's nothing
-> for it to find, so anything it says is a wrong answer. Out of fifteen tries, it
-> passed on thirteen, and the two guesses it did make were caught by the
-> arithmetic check and thrown out.
+> Identical accuracy from three AI calls as from eighteen. Everywhere else the
+> leftovers have no match anywhere in the data — an invoice nobody paid, a payout
+> the bank hasn't sent. Nothing to find, so anything it says is wrong. Out of
+> fifteen tries it passed on thirteen, and the two guesses it made were caught by
+> the arithmetic and thrown out.
 
 ---
 
@@ -122,19 +113,18 @@ past the tier names.
 
 **SAY**
 
-> The brief asks for the match rate **and** the things it couldn't sort out. This
-> is that second half, and honestly it's the harder one.
+> The brief asks for the match rate **and** what it couldn't sort out. This is
+> that second half, and it's the harder one.
 >
-> There are fourteen possible reasons something didn't reconcile, and that list
-> is fixed. There's deliberately no "other" category, because that's exactly
-> where a tool like this hides its failures.
+> Fourteen possible reasons something didn't match, and the list is fixed. No
+> "other" bucket — that's where a tool like this hides its failures.
 >
-> Forty-two items need a human, and together they account for two point four lakh
-> rupees. Every single one shows its evidence and what to do next.
+> Forty-two items need a human, worth two point four lakh between them. Each
+> shows its evidence and what to do next.
 >
-> This one: forty-five thousand rupees left the provider on the eighth, and no
-> matching credit has arrived at the bank. So that isn't cash yet — it's money
-> you're still owed. That's something a finance person can pick up and chase.
+> This one: forty-five thousand left the provider on the eighth and never reached
+> the bank. That isn't cash — it's money you're owed, and someone can chase it
+> today.
 
 ---
 
@@ -144,17 +134,15 @@ past the tier names.
 
 **SAY**
 
-> One set of test data, written by the same person who wrote the matcher, on the
-> same afternoon, proves nothing. So it rebuilds the entire dataset from scratch
-> thirty times over, each one with a different mix of problems. Ten thousand
-> records in total. It scores a perfect one point oh on all thirty. Without the
-> AI it's 0.89 and 0.92 — that gap is what the AI is actually worth.
+> One set of test data, written by the same person who wrote the matcher, proves
+> nothing. So it rebuilds the whole dataset thirty times, each with a different
+> mix of problems — ten thousand records. Perfect score on all thirty. Without
+> the AI, 0.89 and 0.92. That gap is what the AI is worth.
 >
 > And I wrote down what went wrong. The scoring code caught a bug in my own data
-> generator. A stress test showed accuracy falling off a cliff, and that turned
-> out to be my own maths counting empty results as failures. And once, the AI
-> matched a bank interest payment to a customer's invoice, because the amount
-> happened to line up. I fixed that with a hard rule, not a better prompt.
+> generator. And once the AI matched a bank interest payment to a customer
+> invoice because the amounts lined up — fixed with a hard rule, not a better
+> prompt.
 
 ---
 
@@ -165,19 +153,18 @@ past the tier names.
 **SAY**
 
 > All of this runs on this laptop. The AI model is free and open, loaded from
-> disk — here it is running with the internet switched off completely. No API
-> key, no cost per use, and any result can be rebuilt from scratch.
+> disk — here it is with the internet switched off entirely. No API key, no cost
+> per use.
 >
 > A hundred and twenty-five tests. Every accuracy number is checked against an
-> answer key the program is built so it cannot read. And when it can't work
-> something out, it tells you.
+> answer key the program cannot read. And when it can't work something out, it
+> says so.
 
 ---
 
 ## Notes
 
-- About 730 words. At a normal speaking pace that's roughly 4:50, which leaves
-  room to breathe.
+- 787 spoken words. At a normal 150 words a minute that is about 5:15, leaving room to breathe.
 - Don't rush 1:20–2:20. "The AI never decides whether two records match" is the
   point that sets this apart. Everything else, plenty of people will have built.
 - Running long? Cut 3:45–4:35 down to just the thirty-datasets line.
