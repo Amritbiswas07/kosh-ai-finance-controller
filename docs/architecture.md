@@ -253,7 +253,58 @@ seed, and the spread in the results is real.
 
 ---
 
-## 8. Known limitations
+## 8. Scored on data written against it
+
+`generate.py` cannot escape one problem: the same person wrote the defects and
+the detectors, so a perfect score there only proves the matcher can solve its
+author's puzzle. `kosh.adversary` exists to be unfair. Its cases were chosen by
+asking *what actually breaks a close* — not what Kosh can already do — and most
+have no code in the taxonomy at all.
+
+`scripts/adversarial.py` scores three different things, because they fail
+differently:
+
+| | deterministic | + model |
+|---|---:|---:|
+| links recovered | **1 / 4** | **4 / 4** |
+| false links created | 1 / 8 | 1 / 8 |
+| unknown breaks admitted as unknown | 1 / 3 | 1 / 3 |
+| partial — true but unlinked | 2 / 3 | 2 / 3 |
+| **invented a cause it could not know** | **0 %** | **0 %** |
+
+The metric that matters is the last one. A finance tool that names a plausible
+wrong cause is more dangerous than one that says nothing, and before the
+`UNCLASSIFIED` fix it did exactly that — reporting a ₹4,200 *bank charge* on a
+currency conversion. The two "partial" rows are not that failure: the engine
+correctly reports *no credit arrived* and *this credit is unexplained*, and only
+misses that they are the same event.
+
+**This is also where the model stops being a garnish.** Three payouts of the
+same amount on the same day — routine for subscription billing — with the
+reference written in a statement format no pattern reads. Amount and date are
+useless because they are identical; the reference is the only signal. Rules get
+1 of 4. Reading the narration gets 4 of 4.
+
+Two design changes came out of running it:
+
+- **An optimal assignment is not an unambiguous one.** With identical costs the
+  Hungarian pairing was decided by input order, so it "recovered" all three
+  collisions by accident of ordering and, once shuffled, got them wrong while
+  reporting them as matches. It now refuses ties, exactly as subset-sum already
+  did.
+- **Evidence has an order.** An identifier beats a reference in free text, which
+  beats an amount that happens to agree. The blind amount pass had been running
+  first and consuming lines whose reference was sitting there in plain sight.
+
+An earlier ablation concluded model adjudication on the settlement leg was
+worthless. It was — *on a corpus whose narrations all came from six templates
+the extractor already knew*, where every residual genuinely had no counterparty.
+The rule was never about the leg; it was about whether anything was there to
+find. Against unfamiliar formats the same call earns its place.
+
+---
+
+## 9. Known limitations
 
 - **Single currency.** Everything is INR paise. Multi-currency settlement would
   need an FX rate table and a revaluation line in the bridge; neither exists.
@@ -265,8 +316,13 @@ seed, and the spread in the results is real.
 - **The corpus is synthetic.** It was written to be hard in the ways real data
   is hard, but it was written by the same person as the matcher. The multi-seed
   benchmark reduces that risk; it does not eliminate it.
-- **`UNCLASSIFIED` has never fired.** Good, but it means that path is untested
-  against a real unknown.
+- **One false link survives**, on the adversarial corpus: when a bank reuses a
+  single reference across two payouts, the engine matches the credit to one of
+  them rather than declining. Reported rather than fixed.
+- **Two breaks are seen but not connected.** A capture and its exact reversal,
+  and two batches netted against a chargeback, are each reported truthfully as
+  separate absences. Linking them needs a pass that reasons over combinations of
+  *signed* amounts, which does not exist.
 - **I could not find a defect density that makes it mis-match.** Scaling every
   defect rate to 6× left precision and recall at 1.0 while the auto-clear rate
   fell to 39.5%. That is the expected behaviour of a cascade that never guesses,

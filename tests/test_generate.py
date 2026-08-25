@@ -24,10 +24,18 @@ def test_corpus_clears_the_track_minimum():
 
 
 def test_every_exception_code_is_exercised():
-    ds, gt, _ = build(seed=20260824)
+    """Across both corpora. A few codes exist only for cases the main generator
+    is not supposed to contain — that is the adversarial corpus's job."""
+    from kosh.adversary import build as build_adversarial
+    from kosh.ingest import build_batches as _batches
+    from kosh.match import reconcile as _reconcile
+
+    _ds, gt, _ = build(seed=20260824)
     present = set(gt.exceptions.values())
+    ads, _cases = build_adversarial()
+    present |= {f.code.value for f in _reconcile(ads, _batches(ads)).findings}
     expected = {c.value for c in ExceptionCode} - {ExceptionCode.UNCLASSIFIED.value}
-    assert expected - present == set(), f"never generated: {expected - present}"
+    assert expected - present == set(), f"never exercised: {expected - present}"
 
 
 def test_ground_truth_keys_exist_in_the_data(run):

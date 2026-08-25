@@ -46,6 +46,7 @@ class ExceptionCode(str, Enum):
     SHORT_PAYMENT = "SHORT_PAYMENT"
     OVERPAYMENT = "OVERPAYMENT"
     PART_PAYMENT = "PART_PAYMENT"
+    DUPLICATE_BANK_LINE = "DUPLICATE_BANK_LINE"
     UNCLASSIFIED = "UNCLASSIFIED"
 
 
@@ -68,6 +69,7 @@ EXCEPTION_MEANING: dict[ExceptionCode, str] = {
     ExceptionCode.SHORT_PAYMENT: "The payment against an invoice is less than the invoice was raised for.",
     ExceptionCode.OVERPAYMENT: "More was paid against an invoice than it was raised for.",
     ExceptionCode.PART_PAYMENT: "One invoice was settled by several captures that add up to it exactly.",
+    ExceptionCode.DUPLICATE_BANK_LINE: "The same bank credit appears more than once in the statement.",
     ExceptionCode.UNCLASSIFIED: "The engine could not place this residual in any known category.",
 }
 
