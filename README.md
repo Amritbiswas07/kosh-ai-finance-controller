@@ -376,12 +376,26 @@ That middle column is why the engine has used integer paise from the first
 commit: Razorpay's own API speaks paise, so the representation matches the
 source rather than being converted at the boundary.
 
-**Verified against the documented shape, not a live account.** I have no
-merchant credentials, so `tests/fixtures/razorpay_recon.json` carries the
-response structure from Razorpay's docs with invented values, and twelve tests
-pin every unit, null and edge — including a row that cannot be mapped, which is
-reported rather than dropped. The network call itself is untested against a real
-key; that is the one part of this path that a live account would exercise.
+**The request path has been run against a real key.** Against a test-mode
+account it authenticated and returned `200` with an empty collection — test
+payments do not settle to a bank, so there is no recon report to return:
+
+```
+GET https://api.razorpay.com/v1/settlements/recon/combined  (2026-07) …
+  0 recon rows · 0 mapped
+  Nothing settled in that period. Try a different month, or --day to narrow it.
+```
+
+That exercises the part nothing else could: credentials read from the
+environment, the Basic auth header accepted, a live HTTPS round trip, and the
+empty-collection path handled rather than crashed.
+
+**The row mapping is verified against the documented shape**, not against live
+rows — `tests/fixtures/razorpay_recon.json` carries the response structure from
+Razorpay's docs with invented values, and twelve tests pin every unit, null and
+edge, including a row that cannot be mapped and is reported rather than dropped.
+Paging past the first page is likewise exercised through an injected transport
+rather than a real one.
 
 ---
 
