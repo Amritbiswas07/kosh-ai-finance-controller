@@ -74,6 +74,11 @@ class StubAdjudicator:
     def narrate(self, finding, context: str = "") -> str:
         return ""
 
+    def compile_rule(self, instruction, catalogue, examples="") -> str:
+        raise RuntimeError(
+            "compiling a rule needs the local model. Install the LLM extra and "
+            "pass --llm on, or write the rule as JSON with `kosh rule add-json`.")
+
     def read_narration(self, line, candidates) -> dict:
         return self.choose("", []).as_dict()
 
@@ -87,7 +92,7 @@ class LocalAdjudicator:
 
     device: str = "auto"
     offline: bool = True
-    max_new_tokens: int = 96
+    max_new_tokens: int = 160
     name: str = GENERATOR
     calls: int = 0
     seconds: float = 0.0
@@ -189,6 +194,30 @@ class LocalAdjudicator:
         q = (f"Settlement batch {batch['settlement_id']} netting INR {batch['net']} on "
              f"{batch['settled_at']}.\nWhich bank credit is this batch?")
         return self.choose(q, candidates).as_dict()
+
+    # ------------------------------------------------------------- compiling
+
+    _COMPILE = (
+        "You turn a finance controller's instruction into a matching rule. "
+        "Reply with one JSON object and nothing else:\n"
+        '{"name": "short-kebab-name", "when": [{"field": ..., "op": ..., '
+        '"value": ...}]}\n'
+        "Use only the fields and operators listed. Every condition must hold for "
+        "the rule to fire, so do not add conditions the instruction did not ask "
+        "for. Percentages are numbers: five percent is 5. Never invent a field.")
+
+    def compile_rule(self, instruction: str, catalogue: str,
+                     examples: str = "") -> str:
+        """Turn an instruction into a rule structure.
+
+        This is the model's most useful job in the whole engine, and the one
+        furthest from deciding anything. It never sees a transaction and never
+        proposes a link; it reads a sentence and returns fields and thresholds.
+        Whatever it returns is validated against a fixed catalogue, shown to the
+        person who asked, and backtested before it can affect a close.
+        """
+        body = f"{catalogue}\n\n{examples}\nInstruction: {instruction}\n\nJSON:"
+        return self._generate(self._COMPILE, body)
 
     # --------------------------------------------------------------- narrating
 

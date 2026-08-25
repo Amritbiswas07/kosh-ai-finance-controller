@@ -31,12 +31,12 @@ def _adjudicator(mode: str):
     return adj, f"{adj.name} on {adj.device} (loaded in {took:.1f}s)"
 
 
-def _run(data: Path, llm: str, confirmed=None) -> tuple:
+def _run(data: Path, llm: str, confirmed=None, rules=None) -> tuple:
     adj, label = _adjudicator(llm)
     t = time.perf_counter()
     ds, errs = load(data)
     batches = build_batches(ds)
-    res = reconcile(ds, batches, adj, confirmed=confirmed)
+    res = reconcile(ds, batches, adj, confirmed=confirmed, rules=rules)
     wall = time.perf_counter() - t
     pos = build_position(ds, batches, res)
     return ds, batches, res, pos, wall, errs, adj, label
@@ -166,7 +166,11 @@ def cmd_sync(a) -> int:
     from .store import Store
     store = Store(a.db)
     confirmed = store.manual_links()
-    ds, batches, res, pos, wall, errs, adj, label = _run(a.data, a.llm, confirmed)
+    rules = store.rules(enabled_only=True)
+    ds, batches, res, pos, wall, errs, adj, label = _run(a.data, a.llm, confirmed,
+                                                        rules)
+    if rules:
+        print(f"  applying {len(rules)} rule(s) a controller stated")
     if confirmed:
         print(f"  replaying {len(confirmed)} link(s) a person already confirmed")
     rep = store.sync(ds, res)
@@ -195,6 +199,113 @@ def cmd_sync(a) -> int:
             print(f"    · {k:<22} {c:<28} {fmt(v):>14}   {age} run(s) old")
     print(f"\n  ledger: {before}")
     return 0
+
+
+#: Few-shot examples. The third exists because a 1.5B model reads "mentions the
+#: customer's name" as the literal string "customer" unless it has seen the
+#: boolean field used; the backtest caught that, twice, before these were added.
+RULE_EXAMPLES = """Examples
+
+Instruction: link a credit if the narration mentions ACME and it is within 2 percent of the invoice
+JSON: {"name": "acme-direct", "when": [{"field": "narration", "op": "contains", "value": "ACME"}, {"field": "amount_gap_pct", "op": "at_most", "value": 2}]}
+
+Instruction: only link credits over 50000 rupees that landed within a week of the invoice
+JSON: {"name": "large-and-prompt", "when": [{"field": "credit_amount", "op": "at_least", "value": 50000}, {"field": "days_after_invoice", "op": "at_most", "value": 7}]}
+
+Instruction: if the narration mentions the customer's own name and the amount is within 4 percent, link it
+JSON: {"name": "customer-named", "when": [{"field": "narration_mentions_customer", "op": "is_true"}, {"field": "amount_gap_pct", "op": "at_most", "value": 4}]}
+
+Instruction: link a credit that does not mention REVERSAL and is within 1 percent of the invoice
+JSON: {"name": "not-a-reversal", "when": [{"field": "narration", "op": "not_contains", "value": "REVERSAL"}, {"field": "amount_gap_pct", "op": "at_most", "value": 1}]}
+"""
+
+
+def cmd_rule(a) -> int:
+    """State a rule in English, see what it compiled to, and what it would do."""
+    import json as _json
+
+    from .rules import Rule, RuleError, backtest, catalogue, parse_compiled
+    from .store import Store
+
+    store = Store(a.db)
+    try:
+        if a.action == "list":
+            rules = store.rules()
+            if not rules:
+                print("  no rules yet — `kosh rule add \"...\"` states one")
+            for r in rules:
+                mark = "on " if r.enabled else "off"
+                print(f"\n  [{mark}] {r.describe()}")
+                if r.source_text:
+                    print(f"        stated as: {r.source_text}")
+                if r.backtest:
+                    b = r.backtest
+                    print(f"        backtest: {b.get('correct', 0)} correct, "
+                          f"{b.get('wrong', 0)} wrong, "
+                          f"precision {b.get('precision', 0):.0%}")
+            return 0
+
+        if a.action in ("enable", "disable"):
+            store.set_rule_enabled(a.name, a.action == "enable", a.by or "unknown")
+            print(f"  {a.name} {a.action}d")
+            return 0
+
+        # --- stating a rule --------------------------------------------------
+        if a.action == "add-json":
+            rule = Rule.from_json(_json.loads(a.text))
+            rule.author = a.by or rule.author
+        else:
+            from .llm import LocalAdjudicator
+            adj = LocalAdjudicator()
+            print(f"compiling with {adj.name} …", flush=True)
+            adj.load()
+            raw = adj.compile_rule(a.text, catalogue(), RULE_EXAMPLES)
+            rule = parse_compiled(raw, author=a.by or "unknown", source_text=a.text)
+
+        print("\nThe model read that as a rule. It decided nothing; this is what")
+        print("will be evaluated, by arithmetic, on every run:\n")
+        print("  " + rule.describe().replace("\n", "\n  "))
+
+        # --- backtest against books whose answers are known ------------------
+        ds, errs = load(a.data)
+        gt_path = a.data / "ground_truth.json"
+        if not gt_path.exists():
+            print("\n  No history to test it against; saved but left off.")
+            store.save_rule(rule, a.by or "unknown")
+            return 0
+        truth = _json.loads(gt_path.read_text()).get("invoice_to_bank", {})
+        res = reconcile(ds, build_batches(ds))
+        unpaid = [i for i in ds.invoices
+                  if any(f.key == i.invoice_no and f.code.value == "UNPAID_INVOICE"
+                         for f in res.findings)]
+        credits = [b for b in ds.bank
+                   if any(f.key == b.key and f.code.value == "UNEXPECTED_BANK_CREDIT"
+                          for f in res.findings)]
+        bt = backtest(rule, unpaid, credits, truth)
+        rule.backtest = bt.to_json()
+
+        print(f"\nBacktested over {len(unpaid)} unmatched invoice(s) against "
+              f"{len(credits)} unexplained credit(s):")
+        print(f"  {bt.verdict()}")
+        for pair in bt.wrong[:3]:
+            print(f"    wrong: {pair[0]} -> {pair[1]}")
+
+        if bt.precision >= 1.0 and bt.proposed and a.enable:
+            rule.enabled = True
+            store.save_rule(rule, a.by or "unknown")
+            print(f"\n  Enabled. Later runs apply it before anything guesses.")
+        else:
+            store.save_rule(rule, a.by or "unknown")
+            reason = ("it links nothing" if not bt.proposed
+                      else "it would mislink" if bt.precision < 1.0
+                      else "pass --enable to switch it on")
+            print(f"\n  Saved but left off: {reason}.")
+        return 0
+    except (RuleError, KeyError, ValueError) as exc:
+        print(f"\n  {exc}\n")
+        return 1
+    finally:
+        store.close()
 
 
 def cmd_exception(a) -> int:
@@ -281,7 +392,10 @@ def main(argv: list[str] | None = None) -> int:
                                ("pull", cmd_pull,
                                 "fetch a real settlement recon period from Razorpay"),
                                ("exception", cmd_exception,
-                                "work an exception: assign, note, resolve, link")):
+                                "work an exception: assign, note, resolve, link"),
+                               ("rule", cmd_rule,
+                                "state a matching rule in English; see it compiled "
+                                "and backtested")):
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--data", type=Path, default=DATA)
         p.add_argument("--out", type=Path, default=OUT)
@@ -306,9 +420,18 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--db", type=Path, default=ROOT / "outputs" / "kosh.db")
             p.add_argument("--no-ledger", action="store_true",
                            help="run without the accumulated ledger")
-        if name in ("sync", "exception"):
+        if name in ("sync", "exception", "rule"):
             p.add_argument("--db", type=Path, default=ROOT / "outputs" / "kosh.db")
             p.add_argument("--top", type=int, default=8)
+        if name == "rule":
+            p.add_argument("action",
+                           choices=("add", "add-json", "list", "enable", "disable"))
+            p.add_argument("text", nargs="?", default="",
+                           help="the instruction, in plain English")
+            p.add_argument("--name", default="")
+            p.add_argument("--by", default="")
+            p.add_argument("--enable", action="store_true",
+                           help="switch it on if the backtest is clean")
         if name == "exception":
             p.add_argument("action", choices=("list", "assign", "note", "resolve",
                                               "write-off", "link", "history"))
