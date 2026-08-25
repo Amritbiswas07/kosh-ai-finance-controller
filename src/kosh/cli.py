@@ -117,6 +117,33 @@ def cmd_evaluate(a) -> int:
     return 0
 
 
+def cmd_sync(a) -> int:
+    from .store import Store
+    ds, batches, res, pos, wall, errs, adj, label = _run(a.data, a.llm)
+    store = Store(a.db)
+    rep = store.sync(ds, res)
+    before = store.counts()
+    store.close()
+
+    print(f"\nrun {rep.run_id} · {rep.records:,} records "
+          f"({rep.new_records:,} new or amended) · {rep.new_links} new links")
+    if rep.opened:
+        print(f"\n  opened {len(rep.opened)}")
+        for k, c, v in sorted(rep.opened, key=lambda x: -abs(x[2]))[:a.top]:
+            print(f"    + {k:<22} {c:<28} {fmt(v):>14}")
+    if rep.resolved:
+        print(f"\n  cleared {len(rep.resolved)}")
+        for k, c, v, how in sorted(rep.resolved, key=lambda x: -abs(x[2])):
+            print(f"    - {k:<22} {c:<28} {fmt(v):>14}   {how}")
+    if rep.carried:
+        print(f"\n  still open {len(rep.carried)} "
+              f"(oldest {max(a2 for *_, a2 in rep.carried)} run(s) ago)")
+        for k, c, v, age in sorted(rep.carried, key=lambda x: (-x[3], -abs(x[2])))[:a.top]:
+            print(f"    · {k:<22} {c:<28} {fmt(v):>14}   {age} run(s) old")
+    print(f"\n  ledger: {before}")
+    return 0
+
+
 def cmd_serve(a) -> int:
     from .server import serve
     serve(a.data, host=a.host, port=a.port, preload=not a.no_preload)
@@ -148,7 +175,9 @@ def main(argv: list[str] | None = None) -> int:
     for name, fn, helptext in (("recon", cmd_recon, "reconcile and write the pack"),
                                ("evaluate", cmd_evaluate, "print metrics as JSON"),
                                ("ask", cmd_ask, "ask a question about the run"),
-                               ("serve", cmd_serve, "browse the run in a local web UI")):
+                               ("serve", cmd_serve, "browse the run in a local web UI"),
+                               ("sync", cmd_sync,
+                                "reconcile and fold the result into the running ledger")):
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--data", type=Path, default=DATA)
         p.add_argument("--out", type=Path, default=OUT)
@@ -161,6 +190,9 @@ def main(argv: list[str] | None = None) -> int:
         if name == "ask":
             p.add_argument("question", nargs="+")
             p.add_argument("--show-facts", action="store_true")
+        if name == "sync":
+            p.add_argument("--db", type=Path, default=ROOT / "outputs" / "kosh.db")
+            p.add_argument("--top", type=int, default=8)
         if name == "serve":
             p.add_argument("--host", default="127.0.0.1")
             p.add_argument("--port", type=int, default=8000)
