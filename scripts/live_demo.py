@@ -12,7 +12,6 @@ reconciliation you can safely re-run is a reconciliation somebody can automate.
 """
 from __future__ import annotations
 
-import shutil
 import sys
 import tempfile
 from pathlib import Path

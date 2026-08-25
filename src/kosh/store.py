@@ -30,7 +30,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from .match import Disposition, Leg, ReconResult
+from .match import Disposition, ReconResult
 from .money import to_rupees
 from .schema import Dataset
 

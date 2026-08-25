@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from kosh.adversary import build                                   # noqa: E402
 from kosh.ingest import build_batches                              # noqa: E402
-from kosh.match import Leg, Tier, reconcile                        # noqa: E402
+from kosh.match import Leg, reconcile                        # noqa: E402
 from kosh.schema import ExceptionCode                              # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "outputs"

@@ -19,7 +19,7 @@ from pathlib import Path
 from datetime import datetime
 
 from .match import Disposition, ReconResult
-from .money import fmt, to_rupees
+from .money import fmt
 from .position import Position, bridge_rows
 from .schema import EXCEPTION_MEANING, Dataset, ExceptionCode
 

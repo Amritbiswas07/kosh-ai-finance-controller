@@ -1,15 +1,15 @@
 {
   "model": "Qwen/Qwen2.5-1.5B-Instruct",
   "device": "mps",
-  "load_seconds": 6.6,
+  "load_seconds": 5.1,
   "rows": [
     {
       "label": "deterministic only (no model)",
       "metrics": {
         "records": 347,
-        "wall_seconds": 0.0016,
-        "records_per_second": 212731,
-        "engine_seconds": 0.0016,
+        "wall_seconds": 0.0017,
+        "records_per_second": 206743,
+        "engine_seconds": 0.0017,
         "auto_clear_rate": 0.8242,
         "auto_cleared_records": 286,
         "links": {
@@ -302,9 +302,9 @@
       "label": "model on every leg",
       "metrics": {
         "records": 347,
-        "wall_seconds": 47.5177,
-        "records_per_second": 7,
-        "engine_seconds": 47.5177,
+        "wall_seconds": 62.4957,
+        "records_per_second": 6,
+        "engine_seconds": 62.4957,
         "auto_clear_rate": 0.8415,
         "auto_cleared_records": 292,
         "links": {
@@ -588,7 +588,7 @@
         }
       },
       "llm_calls": 18,
-      "llm_seconds": 47.5,
+      "llm_seconds": 62.4,
       "verdicts": {
         "declined": 11,
         "rejected_by_arithmetic": 4,
@@ -596,12 +596,12 @@
       }
     },
     {
-      "label": "model on invoice\u2192bank only (default)",
+      "label": "model on the two legs it can help (default)",
       "metrics": {
         "records": 347,
-        "wall_seconds": 21.1743,
-        "records_per_second": 16,
-        "engine_seconds": 21.1743,
+        "wall_seconds": 33.1421,
+        "records_per_second": 10,
+        "engine_seconds": 33.1421,
         "auto_clear_rate": 0.8415,
         "auto_cleared_records": 292,
         "links": {
@@ -885,7 +885,7 @@
         }
       },
       "llm_calls": 6,
-      "llm_seconds": 21.2,
+      "llm_seconds": 33.1,
       "verdicts": {
         "rejected_by_arithmetic": 3,
         "accepted": 3

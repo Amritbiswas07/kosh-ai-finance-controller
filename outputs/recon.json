@@ -1,9 +1,9 @@
 {
   "meta": {
     "seed": 20260824,
-    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 10.1s)",
+    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 5.1s)",
     "period": "synthetic",
-    "llm_seconds": 23.378
+    "llm_seconds": 22.407
   },
   "counts": {
     "erp_invoices": 135,
@@ -16,11 +16,11 @@
     "unresolved": 47
   },
   "timings": {
-    "erp_to_gateway_s": 0.0063,
+    "erp_to_gateway_s": 0.0011,
     "integrity_s": 0.0001,
-    "settlement_to_bank_s": 12.8115,
-    "direct_receipts_s": 10.6051,
-    "total_s": 23.423
+    "settlement_to_bank_s": 12.2821,
+    "direct_receipts_s": 10.1438,
+    "total_s": 22.4272
   },
   "position": {
     "captured": "724300.88",
@@ -3946,9 +3946,9 @@
   ],
   "metrics": {
     "records": 347,
-    "wall_seconds": 23.4323,
+    "wall_seconds": 22.4365,
     "records_per_second": 15,
-    "engine_seconds": 23.423,
+    "engine_seconds": 22.4272,
     "auto_clear_rate": 0.8415,
     "auto_cleared_records": 292,
     "links": {
