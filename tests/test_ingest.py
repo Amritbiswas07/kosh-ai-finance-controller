@@ -61,3 +61,31 @@ def test_debits_and_credits_collapse_to_one_signed_amount(tmp_path):
     assert any(l.amount_paise > 0 for l in ds.bank)
     assert any(l.amount_paise < 0 for l in ds.bank)
     assert all(l.amount_paise != 0 for l in ds.bank)
+
+
+def test_a_foreign_currency_invoice_is_refused(tmp_path):
+    """Invoice.currency was parsed and then never looked at by anything."""
+    root = _corpus(tmp_path)
+    path = root / "erp_invoices.csv"
+    rows = list(csv.reader(path.open()))
+    rows.append(["INV-USD-1", "o_usd", "Foreign Buyer", "2026-07-04",
+                 "1000.00", "180.00", "1180.00", "USD"])
+    with path.open("w", newline="") as fh:
+        csv.writer(fh).writerows(rows)
+    ds, errors = load(root)
+    assert len(errors) == 1 and "USD" in errors[0]
+    assert all(i.invoice_no != "INV-USD-1" for i in ds.invoices)
+
+
+def test_a_foreign_currency_gateway_row_is_refused(tmp_path):
+    root = _corpus(tmp_path)
+    path = root / "pg_settlement_report.csv"
+    rows = list(csv.reader(path.open()))
+    rows.append(["pay_usd1", "payment", "0.00", "1500.00", "1500.00", "USD",
+                 "30.00", "5.40", "N", "N", "2026-07-04 10:00:00", "", "", "",
+                 "o_usd", "INV-USD-1", "card", "", ""])
+    with path.open("w", newline="") as fh:
+        csv.writer(fh).writerows(rows)
+    ds, errors = load(root)
+    assert len(errors) == 1 and "USD" in errors[0]
+    assert all(t.entity_id != "pay_usd1" for t in ds.pg)
