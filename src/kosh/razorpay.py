@@ -36,7 +36,7 @@ import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from .schema import PGTxn
+from .schema import BASE_CURRENCY, CurrencyMismatch, PGTxn
 
 BASE = "https://api.razorpay.com/v1"
 RECON_PATH = "/settlements/recon/combined"
@@ -136,6 +136,13 @@ def to_pg_txn(item: dict) -> PGTxn:
     carries rupee strings and is parsed with `to_paise`; running this row
     through that would multiply every figure by a hundred.
     """
+    currency = (item.get("currency") or BASE_CURRENCY).strip().upper()
+    if currency != BASE_CURRENCY:
+        # The live report carries a currency column that the CSV path never
+        # used. Dropping it here would map a USD settlement as INR paise —
+        # wrong by roughly a factor of 83, and wrong silently.
+        raise CurrencyMismatch(str(item.get("entity_id", "?")), currency)
+
     kind = (item.get("type") or "").lower()
     credit = int(item.get("credit") or 0)
     debit = int(item.get("debit") or 0)

@@ -117,3 +117,35 @@ def test_the_engine_never_reads_the_store():
     for mod in (match, ingest, position):
         assert "store" not in inspect.getsource(mod).lower().replace(
             "restore", ""), mod.__name__
+
+
+def test_a_truncated_export_does_not_clear_a_break(store, corpus):
+    """The nastiest failure a ledger can have: a break stops being reported
+    because its record vanished from the file, and the ledger writes it off as
+    reconciled. The money never arrived."""
+    ds, _gt, _inj = corpus
+    first = _sync(store, ds)
+    missing = [k for k, c, _ in first.opened if c == "MISSING_IN_BANK"]
+    assert missing, "no MISSING_IN_BANK to test with"
+
+    keep = {t.settlement_id for t in ds.pg} - set(missing)
+    truncated = Dataset(
+        invoices=list(ds.invoices),
+        pg=[t for t in ds.pg if t.settlement_id in keep or not t.settlement_id],
+        bank=list(ds.bank))
+    second = _sync(store, truncated)
+
+    cleared = {k for k, _c, _v, _h in second.resolved}
+    assert not (set(missing) & cleared), "a vanished record was written off"
+    assert {k for k, _c, _v in second.vanished} >= set(missing)
+    assert store.counts()["open_exceptions"] >= len(missing)
+
+
+def test_a_genuine_clear_is_still_recorded_as_one(store, corpus):
+    """The guard must not make every resolution impossible."""
+    ds, _gt, _inj = corpus
+    early, _held = _split(ds, 4)
+    _sync(store, early)
+    second = _sync(store, ds)
+    assert second.resolved, "nothing cleared when the data caught up"
+    assert not second.vanished

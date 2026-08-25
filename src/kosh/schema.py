@@ -15,6 +15,24 @@ from datetime import date, datetime
 from enum import Enum
 
 
+#: Every amount in Kosh is integer paise of one currency. Nothing in the engine
+#: revalues, so a row in another currency cannot be reconciled — it can only be
+#: mishandled. A USD settlement read as INR is wrong by a factor of about 83,
+#: silently, with no line anywhere saying so. Rows that are not in this currency
+#: are refused at ingest rather than converted on a guess.
+BASE_CURRENCY = "INR"
+
+
+class CurrencyMismatch(ValueError):
+    def __init__(self, key: str, found: str) -> None:
+        super().__init__(
+            f"{key} is denominated in {found}, but this engine reconciles "
+            f"{BASE_CURRENCY} only. Multi-currency needs an FX rate table and a "
+            "revaluation line in the cash bridge; neither exists, so the row is "
+            "refused rather than silently treated as " + BASE_CURRENCY + ".")
+        self.key, self.found = key, found
+
+
 class Source(str, Enum):
     ERP = "erp"
     PG = "pg"

@@ -180,6 +180,11 @@ def cmd_sync(a) -> int:
         print(f"\n  cleared {len(rep.resolved)}")
         for k, c, v, how in sorted(rep.resolved, key=lambda x: -abs(x[2])):
             print(f"    - {k:<22} {c:<28} {fmt(v):>14}   {how}")
+    if rep.vanished:
+        print(f"\n  !! {len(rep.vanished)} open break(s) whose record left the data")
+        print("     kept open: absence from an export is not a resolution")
+        for k, c, v in sorted(rep.vanished, key=lambda x: -abs(x[2]))[:a.top]:
+            print(f"    ? {k:<22} {c:<28} {fmt(v):>14}")
     if rep.carried:
         print(f"\n  still open {len(rep.carried)} "
               f"(oldest {max(a2 for *_, a2 in rep.carried)} run(s) ago)")

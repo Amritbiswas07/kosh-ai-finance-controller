@@ -81,6 +81,7 @@ class SyncReport:
     opened: list[tuple[str, str, int]]
     resolved: list[tuple[str, str, int, str]]
     carried: list[tuple[str, str, int, int]]      # key, code, value, age in runs
+    vanished: list[tuple[str, str, int]]         # open, but its record left the data
     new_links: int
 
     def to_json(self) -> dict:
@@ -93,6 +94,8 @@ class SyncReport:
                           "how": h} for k, c, v, h in self.resolved],
             "carried": [{"key": k, "code": c, "value": str(to_rupees(v)),
                          "age_runs": a} for k, c, v, a in self.carried],
+            "vanished": [{"key": k, "code": c, "value": str(to_rupees(v))}
+                         for k, c, v in self.vanished],
         }
 
 
@@ -187,12 +190,28 @@ class Store:
                  json.dumps(f.evidence), f.proposed_action, run_id, now))
             opened.append((key, code, f.value_at_risk_paise))
 
-        # Anything open last time and absent now has been answered by new data.
-        resolved = []
+        # An open break that is absent from this run has either been answered or
+        # had its record disappear — and those are not the same thing. A
+        # truncated export used to clear breaks silently: the settlement had not
+        # arrived, it had simply stopped being in the file, and the ledger
+        # recorded the money as reconciled. So absence only counts as a
+        # resolution when the record it concerns is still in front of us.
+        present_keys = (
+            {i.invoice_no for i in ds.invoices}
+            | {t.entity_id for t in ds.pg}
+            | {t.settlement_id for t in ds.pg if t.settlement_id}
+            | {b.key for b in ds.bank})
+        resolved, vanished = [], []
         linked = {m.left for m in res.matches} | {
             r for m in res.matches for r in m.right}
         for (key, code), row in was_open.items():
             if (key, code) in now_present:
+                continue
+            if key not in present_keys:
+                vanished.append((key, code, row["value_at_risk"]))
+                cur.execute(
+                    "UPDATE exception SET resolution=? WHERE key=? AND code=?",
+                    ("record absent from the latest data; still open", key, code))
                 continue
             how = ("matched once the data arrived" if key in linked
                    else "condition no longer present")
@@ -203,7 +222,8 @@ class Store:
 
         cur.execute("UPDATE run SET new_records=?, opened=?, resolved=?, carried=? "
                     "WHERE id=?",
-                    (new_records, len(opened), len(resolved), len(carried), run_id))
+                    (new_records, len(opened), len(resolved),
+                     len(carried) + len(vanished), run_id))
         self.db.commit()
         return SyncReport(run_id, len(ds), new_records, opened, resolved,
-                          carried, new_links)
+                          carried, vanished, new_links)

@@ -14,7 +14,8 @@ from datetime import date, datetime
 from pathlib import Path
 
 from .money import to_paise
-from .schema import BankLine, Dataset, Invoice, PGTxn, SettlementBatch
+from .schema import (BASE_CURRENCY, BankLine, CurrencyMismatch, Dataset,
+                     Invoice, PGTxn, SettlementBatch)
 
 _DATE_FORMATS = ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%d-%b-%Y", "%Y/%m/%d")
 _DT_FORMATS = ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d")
@@ -59,6 +60,9 @@ def load(root: Path) -> tuple[Dataset, list[str]]:
     with (root / "erp_invoices.csv").open(newline="") as fh:
         for n, row in enumerate(csv.DictReader(fh), start=2):
             try:
+                cur = (row.get("currency") or BASE_CURRENCY).strip().upper()
+                if cur != BASE_CURRENCY:
+                    raise CurrencyMismatch(row.get("invoice_no", "?"), cur)
                 taxable, tax = to_paise(row["taxable_amount"]), to_paise(row["tax_amount"])
                 ds.invoices.append(Invoice(
                     invoice_no=row["invoice_no"].strip(), order_id=row["order_id"].strip(),
@@ -72,6 +76,9 @@ def load(root: Path) -> tuple[Dataset, list[str]]:
     with (root / "pg_settlement_report.csv").open(newline="") as fh:
         for n, row in enumerate(csv.DictReader(fh), start=2):
             try:
+                cur = (row.get("currency") or BASE_CURRENCY).strip().upper()
+                if cur != BASE_CURRENCY:
+                    raise CurrencyMismatch(row.get("entity_id", "?"), cur)
                 ds.pg.append(PGTxn(
                     entity_id=row["entity_id"].strip(), type=row["type"].strip().lower(),
                     amount_paise=to_paise(row["amount"]), fee_paise=to_paise(row["fee"]),
