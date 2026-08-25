@@ -437,10 +437,14 @@ else.
   an MT940 download, but both are fetched on demand; there is no webhook
   listener, so nothing reacts the moment a payment is captured. The ERP side is
   still a CSV, because there is no single ERP format to read.
-- **The API has never run against a live key.** I have no merchant credentials.
-  The Authorization header, paging, every error branch and the whole mapping are
-  exercised through an injected transport, so the only untested thing is the
-  socket itself — but that is still untested.
+- **The API has been run against a real key, but never against real rows.** A
+  test-mode account authenticated and returned `200` with an empty collection,
+  which is what test mode holds — test payments do not settle to a bank. So the
+  transport is proven: environment credentials, the Basic auth header, a live
+  HTTPS round trip, the empty-collection path. What remains unproven is the
+  mapping against *live* rows, and paging past the first page; both are covered
+  by an injected transport and the documented response shape, which is not the
+  same as having seen a real settlement come through.
 - **The model is small.** Qwen2.5-1.5B is reliable at choosing among candidates
   and unreliable at prose (§7). A larger local model would likely widen what
   T4 can recover; it has not been tried.
