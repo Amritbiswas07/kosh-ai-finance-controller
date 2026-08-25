@@ -1,0 +1,69 @@
+{
+  "_note": "Shape taken from Razorpay's documented response for GET /v1/settlements/recon/combined. Values are invented; the field names, types and units are the API's. Amounts are integer paise, timestamps are Unix epochs, direction is carried by debit/credit.",
+  "entity": "collection",
+  "count": 5,
+  "items": [
+    {
+      "entity_id": "pay_JVbRT2wjU2X4wy", "type": "payment",
+      "debit": 0, "credit": 979200, "amount": 1000000, "currency": "INR",
+      "fee": 20000, "tax": 3600, "on_hold": false, "settled": true,
+      "created_at": 1783944600, "settled_at": 1784117400,
+      "settlement_id": "setl_JVbRuLnKqPTX9r", "posted_at": null,
+      "credit_type": "default", "description": "Recon entry",
+      "notes": [], "payment_id": null,
+      "settlement_utr": "hdfcn260703551001",
+      "order_id": "order_JVbRQ8nKpLmX2a", "order_receipt": "INV-2627-1001",
+      "method": "CARD", "card_network": "Visa", "card_issuer": "HDFC",
+      "card_type": "credit", "dispute_id": null
+    },
+    {
+      "entity_id": "rfnd_JVbSA1pQrS7tZk", "type": "refund",
+      "debit": 250000, "credit": 0, "amount": 250000, "currency": "INR",
+      "fee": 0, "tax": 0, "on_hold": false, "settled": true,
+      "created_at": 1784031000, "settled_at": 1784117400,
+      "settlement_id": "setl_JVbRuLnKqPTX9r", "posted_at": null,
+      "credit_type": "default", "description": null, "notes": null,
+      "payment_id": "pay_JVbRT2wjU2X4wy",
+      "settlement_utr": "hdfcn260703551001",
+      "order_id": "order_JVbRQ8nKpLmX2a", "order_receipt": null,
+      "method": "card", "card_network": null, "card_issuer": null,
+      "card_type": null, "dispute_id": null
+    },
+    {
+      "entity_id": "pay_JVbSKmNoP4qR6t", "type": "payment",
+      "debit": 0, "credit": 500000, "amount": 500000, "currency": "INR",
+      "fee": 0, "tax": 0, "on_hold": true, "settled": false,
+      "created_at": 1784034600, "settled_at": null,
+      "settlement_id": null, "posted_at": null,
+      "credit_type": "default", "description": null, "notes": null,
+      "payment_id": null, "settlement_utr": null,
+      "order_id": "order_JVbSJ2kLmN5pQ8", "order_receipt": "INV-2627-1002",
+      "method": "upi", "card_network": null, "card_issuer": null,
+      "card_type": null, "dispute_id": null
+    },
+    {
+      "entity_id": "adjs_JVbSXyZ1a2B3c4", "type": "adjustment",
+      "debit": 145000, "credit": 0, "amount": 145000, "currency": "INR",
+      "fee": 0, "tax": 0, "on_hold": false, "settled": true,
+      "created_at": 1784038200, "settled_at": 1784117400,
+      "settlement_id": "setl_JVbRuLnKqPTX9r", "posted_at": null,
+      "credit_type": "default", "description": "Chargeback debit",
+      "notes": null, "payment_id": null,
+      "settlement_utr": "hdfcn260703551001",
+      "order_id": null, "order_receipt": null, "method": null,
+      "card_network": null, "card_issuer": null, "card_type": null,
+      "dispute_id": "disp_JVbSYbCdEfGhIj"
+    },
+    {
+      "entity_id": "pay_BROKEN000000", "type": "payment",
+      "debit": 0, "credit": 100, "amount": 100, "currency": "INR",
+      "fee": 0, "tax": 0, "on_hold": false, "settled": false,
+      "created_at": null, "settled_at": null, "settlement_id": null,
+      "posted_at": null, "credit_type": "default", "description": null,
+      "notes": null, "payment_id": null, "settlement_utr": null,
+      "order_id": null, "order_receipt": null, "method": "upi",
+      "card_network": null, "card_issuer": null, "card_type": null,
+      "dispute_id": null
+    }
+  ]
+}

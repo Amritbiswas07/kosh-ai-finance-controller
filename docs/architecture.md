@@ -369,9 +369,14 @@ the engine never reads the store.
   nobody can be assigned one, nothing is approved by a second pair of eyes, and
   a human resolution teaches the matcher nothing. Those are the next things a
   real deployment would need.
-- **Ingest is a snapshot, not a feed.** There is no webhook listener and no bank
-  connection; `sync` reads the same three files. The state model is what a feed
-  would need, but the feed is not written.
+- **Ingest is a snapshot, not a feed.** `kosh pull` reads the settlement recon
+  API, but there is no webhook listener and no bank connection, so the ERP and
+  bank sides are still files. The state model is what a feed would need; two of
+  the three feeds are not written.
+- **The API path is verified against the documented shape, not a live
+  account.** I have no merchant credentials. The mapping, paging, unit handling
+  and error paths are all tested against a recorded fixture; the HTTP call
+  itself has never run against a real key.
 - **One false link survives**, on the adversarial corpus: when a bank reuses a
   single reference across two payouts, the engine matches the credit to one of
   them rather than declining. Reported rather than fixed.
