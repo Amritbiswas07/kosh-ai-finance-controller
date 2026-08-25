@@ -1,0 +1,185 @@
+{
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "cases": 8,
+  "valid": 8,
+  "exact": 7,
+  "accuracy": 0.875,
+  "rows": [
+    {
+      "instruction": "link a credit if the narration mentions ACME and it is within 2 percent of the invoice",
+      "expected": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "narration",
+          "contains"
+        ]
+      ],
+      "got": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "narration",
+          "contains"
+        ]
+      ],
+      "exact": true,
+      "note": ""
+    },
+    {
+      "instruction": "only link credits over 50000 rupees",
+      "expected": [
+        [
+          "credit_amount",
+          "at_least"
+        ]
+      ],
+      "got": [
+        [
+          "credit_amount",
+          "at_least"
+        ]
+      ],
+      "exact": true,
+      "note": ""
+    },
+    {
+      "instruction": "link a credit that landed within 10 days of the invoice",
+      "expected": [
+        [
+          "days_after_invoice",
+          "at_most"
+        ]
+      ],
+      "got": [
+        [
+          "days_after_invoice",
+          "at_most"
+        ]
+      ],
+      "exact": true,
+      "note": ""
+    },
+    {
+      "instruction": "if the narration mentions the customer's own name, link it",
+      "expected": [
+        [
+          "narration_mentions_customer",
+          "is_true"
+        ]
+      ],
+      "got": [
+        [
+          "narration_mentions_customer",
+          "is_true"
+        ]
+      ],
+      "exact": true,
+      "note": ""
+    },
+    {
+      "instruction": "link credits whose narration does not mention REVERSAL and are within 1 percent",
+      "expected": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "narration",
+          "not_contains"
+        ]
+      ],
+      "got": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "narration",
+          "not_contains"
+        ]
+      ],
+      "exact": true,
+      "note": ""
+    },
+    {
+      "instruction": "link a credit if the narration contains CHENNAI and the invoice is under 20000 rupees",
+      "expected": [
+        [
+          "invoice_amount",
+          "at_most"
+        ],
+        [
+          "narration",
+          "contains"
+        ]
+      ],
+      "got": [
+        [
+          "invoice_amount",
+          "at_most"
+        ],
+        [
+          "narration",
+          "contains"
+        ]
+      ],
+      "exact": true,
+      "note": ""
+    },
+    {
+      "instruction": "link anything within half a percent of an invoice raised in the last 90 days",
+      "expected": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "days_after_invoice",
+          "at_most"
+        ]
+      ],
+      "got": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "days_after_invoice",
+          "at_most"
+        ]
+      ],
+      "exact": true,
+      "note": ""
+    },
+    {
+      "instruction": "if the narration mentions the customer and the gap is at most 3 percent, link it",
+      "expected": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "narration_mentions_customer",
+          "is_true"
+        ]
+      ],
+      "got": [
+        [
+          "amount_gap_pct",
+          "at_most"
+        ],
+        [
+          "narration",
+          "contains"
+        ]
+      ],
+      "exact": false,
+      "note": "read as [('amount_gap_pct', 'at_most'), ('narration', 'contains')]"
+    }
+  ]
+}

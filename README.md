@@ -47,7 +47,8 @@ forever):
 | `kosh sync` | Reconcile and fold the result into the running ledger |
 | `kosh pull --year --month [--day]` | Fetch a real settlement recon period from Razorpay |
 | `kosh exception list \| assign \| resolve \| link` | Work a break: own it, close it, or confirm a link |
-| `pytest -q` | 205 tests, no model loaded, ~2 s |
+| `kosh rule add "…" --by you` | State a matching rule in English; see it compiled and backtested |
+| `pytest -q` | 226 tests, no model loaded, ~2.5 s |
 | `python scripts/benchmark.py --seeds 30 [--llm]` | Accuracy across 30 regenerated worlds |
 | `python scripts/ablation.py` | Does the model earn its place, and on which leg? |
 | `python scripts/adversarial.py [--llm]` | Score it on data written **against** it |
@@ -55,6 +56,7 @@ forever):
 | `python scripts/verify_offline.py` | Run everything with all outbound sockets blocked |
 | `python scripts/check_docs.py` | Assert every figure in these documents is still true |
 | `python scripts/baseline.py [--llm]` | What this is worth against a spreadsheet |
+| `python scripts/rule_compile_eval.py` | How often the model reads an instruction correctly |
 
 ```bash
 ./.venv/bin/kosh serve
@@ -439,6 +441,58 @@ Three payouts of the same amount on the same day, references in a statement
 format no pattern reads: amount and date are useless, so the reference is the
 only signal. **This is where the model stops being a garnish** — rules get one
 of four, reading the narration gets four of four.
+
+---
+
+## The model writes rules, not answers
+
+Everywhere else the model makes a decision: shown a residual and some
+candidates, it picks one. Useful, tightly bounded — and the least durable thing
+a model can do, because the judgement evaporates when the run ends and the next
+run asks again.
+
+A rule is the opposite. A controller states what they know:
+
+```bash
+./.venv/bin/kosh rule add "if the narration mentions the customer's name and \
+    the credit is within 3 percent of an open invoice raised in the last 30 \
+    days, link it" --by priya --enable
+```
+
+The model's job is **not to decide anything**. It reads the sentence and returns
+fields and thresholds, drawn from a fixed catalogue. What comes back is shown to
+the person who asked:
+
+```
+The model read that as a rule. It decided nothing; this is what
+will be evaluated, by arithmetic, on every run:
+
+  customer-named-net-of-tds:
+      when whether the customer's name appears in the narration holds
+      and how far the credit is from the invoice total, as a percentage at most 3
+      and days between the invoice date and the credit landing at most 30
+
+Backtested over 9 unmatched invoice(s) against 10 unexplained credit(s):
+  links 3 pair(s), all of them correct
+```
+
+Then it runs deterministically, forever, above the tiers that guess — and every
+link it makes carries the rule's name and author, so a reviewer revokes the
+*policy* rather than hunting the match. In this corpus it links 6 pairs and
+takes the residual findings from 19 to 13, **including the very cases the model
+used to adjudicate one at a time.**
+
+Nothing is executed. A rule is a list of typed conditions; a field or operator
+outside the catalogue is refused at compile time, so the worst a bad reading can
+produce is a rule that matches nothing.
+
+**How often does it read the instruction correctly? 7 times in 8.**
+`scripts/rule_compile_eval.py` puts a number on it rather than asserting it
+works. The one it gets wrong is genuinely ambiguous English — "mentions the
+customer" read as the literal word rather than their name — and it produced a
+*valid* rule that simply matched nothing, which the backtest caught. **A wrong
+reading costs a retype, not money**, and `kosh rule add-json` writes one by hand
+when the sentence defeats a 1.5B model.
 
 ---
 

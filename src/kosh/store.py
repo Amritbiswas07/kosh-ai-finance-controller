@@ -72,6 +72,15 @@ CREATE TABLE IF NOT EXISTS manual_link (
   confirmed_by TEXT NOT NULL, note TEXT, confirmed_at TEXT NOT NULL,
   PRIMARY KEY (leg, left_key, right_key)
 );
+-- A rule a controller stated, as compiled and as backtested. Kept whether or
+-- not it is enabled, so a rejected one is a record of what was tried.
+CREATE TABLE IF NOT EXISTS rule (
+  name TEXT PRIMARY KEY,
+  body TEXT NOT NULL,
+  author TEXT, source_text TEXT,
+  enabled INTEGER NOT NULL DEFAULT 0,
+  backtest TEXT, created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS audit (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   at TEXT NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL,
@@ -151,6 +160,7 @@ class Store:
                     "SELECT COUNT(*) FROM exception WHERE assignee IS NOT NULL "
                     "AND status IN ('open','investigating')"),
                 "confirmed_links": q("SELECT COUNT(*) FROM manual_link"),
+                "rules_enabled": q("SELECT COUNT(*) FROM rule WHERE enabled = 1"),
                 "resolved_exceptions": q(
                     "SELECT COUNT(*) FROM exception "
                     "WHERE status IN ('resolved','written_off')")}
@@ -159,6 +169,34 @@ class Store:
         """Confirmations to replay into the next reconciliation."""
         return {(r[0], r[1], r[2]) for r in self.db.execute(
             "SELECT leg, left_key, right_key FROM manual_link")}
+
+    def rules(self, enabled_only: bool = False) -> list:
+        from .rules import Rule
+        sql = "SELECT body FROM rule" + (" WHERE enabled = 1" if enabled_only else "")
+        return [Rule.from_json(json.loads(r[0])) for r in self.db.execute(sql)]
+
+    def save_rule(self, rule, by: str) -> None:
+        self.db.execute(
+            "INSERT OR REPLACE INTO rule VALUES (?,?,?,?,?,?,?)",
+            (rule.name, json.dumps(rule.to_json()), rule.author, rule.source_text,
+             1 if rule.enabled else 0, json.dumps(rule.backtest),
+             datetime.now().isoformat(timespec="seconds")))
+        self._audit(by, "enable_rule" if rule.enabled else "save_rule", rule.name,
+                    rule.source_text[:180])
+        self.db.commit()
+
+    def set_rule_enabled(self, name: str, on: bool, by: str) -> None:
+        from .rules import Rule
+        row = self.db.execute("SELECT body FROM rule WHERE name = ?",
+                              (name,)).fetchone()
+        if row is None:
+            raise KeyError(f"no rule called {name!r}")
+        rule = Rule.from_json(json.loads(row[0]))
+        rule.enabled = on
+        self.db.execute("UPDATE rule SET enabled = ?, body = ? WHERE name = ?",
+                        (1 if on else 0, json.dumps(rule.to_json()), name))
+        self._audit(by, "enable_rule" if on else "disable_rule", name, "")
+        self.db.commit()
 
     def history(self, limit: int = 20) -> list[tuple]:
         return self.db.execute(

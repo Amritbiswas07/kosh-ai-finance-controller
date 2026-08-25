@@ -445,9 +445,12 @@ else.
   mapping against *live* rows, and paging past the first page; both are covered
   by an injected transport and the documented response shape, which is not the
   same as having seen a real settlement come through.
-- **The model is small.** Qwen2.5-1.5B is reliable at choosing among candidates
-  and unreliable at prose (§7). A larger local model would likely widen what
-  T4 can recover; it has not been tried.
+- **The model is small.** Qwen2.5-1.5B is reliable at choosing among candidates,
+  right 7 times in 8 at compiling a rule, and unreliable at prose (§7). A larger
+  local model would likely improve the first two; it has not been tried.
+- **Rules apply to one leg.** They match an open invoice to an unexplained bank
+  credit, which is where a controller's knowledge is most often the only thing
+  that can settle it. Nothing yet lets a rule speak about the gateway legs.
 - **One false link survives**, on the adversarial corpus: when a bank reuses a
   single reference across two payouts, the engine matches the credit to one of
   them rather than declining. Reported rather than fixed.

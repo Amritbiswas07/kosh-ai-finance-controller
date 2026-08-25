@@ -46,7 +46,7 @@ def test_every_command_in_the_readme_exists():
     readme = (ROOT / "README.md").read_text()
     invoked = set(re.findall(r"kosh (\w[\w-]*)", readme))
     known = {"generate", "recon", "evaluate", "ask", "serve", "sync", "pull",
-             "exception"}
+             "exception", "rule"}
     unknown = invoked - known
     assert not unknown, f"README invokes commands that do not exist: {unknown}"
 

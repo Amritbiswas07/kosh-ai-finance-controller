@@ -57,6 +57,7 @@ class Tier(str, Enum):
     CONFIRMED = "T0_HUMAN_CONFIRMED"     # a person decided; nothing outranks that
     EXACT_ID = "T0_EXACT_ID"
     NORMALIZED_ID = "T1_NORMALIZED_ID"
+    LOCAL_RULE = "T2_LOCAL_RULE"          # a rule a controller wrote
     AMOUNT_DATE = "T2_AMOUNT_DATE"
     AGGREGATE = "T3_AGGREGATE"
     ADJUDICATED = "T4_ADJUDICATED"
@@ -959,7 +960,47 @@ def _tds_relation(gross: int, credit: int) -> str | None:
     return None
 
 
-def reconcile_direct_receipts(ds: Dataset, res: ReconResult, adjudicator=None) -> None:
+def _apply_rules(rules, inv_by_no, line_by_key, unpaid, credits, resolved,
+                 settle, res: ReconResult) -> None:
+    """Run the rules a controller wrote, before anything guesses.
+
+    A rule is policy: somebody stated it, it was backtested, and it is on the
+    record. That outranks matching on an amount that happens to agree, so it
+    runs first — and every link it makes carries the rule's name, so a reviewer
+    can see which policy produced it and revoke the policy rather than hunt the
+    match.
+    """
+    from .rules import explain, matches
+    for rule in rules:
+        if not rule.enabled:
+            continue
+        for ikey in list(unpaid):
+            if ikey in resolved:
+                continue
+            inv = inv_by_no.get(ikey)
+            if inv is None:
+                continue
+            hits = [line_by_key[b] for b in credits
+                    if b not in resolved and b in line_by_key
+                    and matches(rule, inv, line_by_key[b])]
+            if len(hits) != 1:
+                # No match, or several — a rule that cannot single one out has
+                # not identified anything, and picking the first would be a
+                # guess wearing a policy's name.
+                continue
+            line = hits[0]
+            res.matches.append(Match(
+                Leg.INVOICE_BANK, inv.invoice_no, (line.key,), Tier.LOCAL_RULE,
+                0.90, line.amount_paise - inv.gross_paise,
+                {"on": "local_rule", "rule": rule.name, "author": rule.author,
+                 "stated_as": rule.source_text,
+                 "why": "; ".join(explain(rule, inv, line)),
+                 "narration": line.narration}))
+            resolved.update((inv.invoice_no, line.key))
+
+
+def reconcile_direct_receipts(ds: Dataset, res: ReconResult, adjudicator=None,
+                              rules=None) -> None:
     """Some customers pay the bank directly and never touch the gateway.
 
     The invoice then looks unpaid and the credit looks unexplained — two
@@ -1010,6 +1051,10 @@ def reconcile_direct_receipts(ds: Dataset, res: ReconResult, adjudicator=None) -
                           "customer": inv.customer, "matched_by": tier.value},
                 proposed_action=f"Book {to_rupees(withheld)} as TDS receivable against "
                                 f"{inv.customer} and collect Form 16A for the quarter."))
+
+    if rules:
+        _apply_rules(rules, inv_by_no, line_by_key, unpaid, credits, resolved,
+                     settle, res)
 
     # T2 — amount relationship plus a name the narration actually carries.
     for ikey in list(unpaid):
@@ -1102,7 +1147,8 @@ def _suggest_causes(res: ReconResult, adjudicator) -> None:
 
 def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
               adjudicate_legs: frozenset | None = None,
-              confirmed: "set[tuple[str, str, str]] | None" = None) -> ReconResult:
+              confirmed: "set[tuple[str, str, str]] | None" = None,
+              rules: "list | None" = None) -> ReconResult:
     """`adjudicate_legs` selects which legs may consult the model. Defaults to
     the one leg where a model answer can be verified against arithmetic; see
     docs/architecture.md for the measurement behind that default."""
@@ -1122,7 +1168,7 @@ def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
     reconcile_settlement_to_bank(batches, ds, res, pick(Leg.BATCH_BANK))
     t3 = time.perf_counter()
     # Runs last: it consumes the exceptions the first three legs produced.
-    reconcile_direct_receipts(ds, res, pick(Leg.INVOICE_BANK))
+    reconcile_direct_receipts(ds, res, pick(Leg.INVOICE_BANK), rules)
     if adjudicator is not None:
         _suggest_causes(res, adjudicator)
     t4 = time.perf_counter()
