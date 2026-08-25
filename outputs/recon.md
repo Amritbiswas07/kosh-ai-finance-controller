@@ -1,6 +1,6 @@
 # Reconciliation pack — synthetic
 
-Generated 2026-08-25 16:41. 347 source records across three systems, reconciled in 19.0 ms of engine time plus 22.2 s of model adjudication.
+Generated 2026-08-25 19:26. 347 source records across three systems, reconciled in 19.9 ms of engine time plus 22.7 s of model adjudication.
 
 ## Where the money is
 
@@ -45,7 +45,7 @@ The engine never reads `ground_truth.json`; only the evaluator does.
 
 Exception classification, scored strictly over (record, code) pairs: **precision 1.0000, recall 1.0000, F1 1.0000** on 64 true exceptions (64 correct, 0 false positives, 0 missed).
 
-Throughput: **16 records/second** end to end including CSV parsing. Auto-clear rate **84.2%** (292 of 347 records correctly linked and carrying nothing that needs a human).
+Throughput: **15 records/second** end to end including CSV parsing. Auto-clear rate **84.2%** (292 of 347 records correctly linked and carrying nothing that needs a human).
 
 ## Exceptions
 

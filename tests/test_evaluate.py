@@ -93,3 +93,17 @@ def test_the_pack_records_the_seed_not_the_directory_name(tmp_path: Path):
     manifest = _json.loads((tmp_path / "manifest.json").read_text())
     assert manifest["seed"] == 4321
     assert manifest["seed"] != tmp_path.name
+
+
+def test_ground_truth_links_read_the_same_in_both_shapes():
+    """An invoice used to map to one payment id; it now maps to a list. Iterating
+    the older string form gave one pair per character — 1,035 from 135 invoices —
+    and the evaluator scored that as F1 0.0 instead of saying the file was stale."""
+    from kosh.evaluate import _links
+    old = {"INV-1": "pay_1", "INV-2": "pay_2"}
+    new = {"INV-1": ["pay_1"], "INV-2": ["pay_2"]}
+    assert _links(old) == _links(new) == {("INV-1", "pay_1"), ("INV-2", "pay_2")}
+    assert _links({"INV-3": ["pay_a", "pay_b"]}) == {("INV-3", "pay_a"),
+                                                     ("INV-3", "pay_b")}
+    # The failure mode itself: never one pair per character.
+    assert all(len(v) > 1 for _, v in _links(old))
