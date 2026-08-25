@@ -1,11 +1,11 @@
 {
-  "seed": 20260825,
-  "generated_at": "2026-08-25T15:40:02",
+  "seed": 20260824,
+  "generated_at": "2026-08-25T16:30:03",
   "counts": {
     "erp_invoices": 135,
-    "pg_transactions": 148,
-    "bank_lines": 62,
-    "total_records": 345
+    "pg_transactions": 151,
+    "bank_lines": 61,
+    "total_records": 347
   },
   "injected": {
     "unpaid_invoice": 6,
@@ -23,14 +23,17 @@
     "merged_payout": 2,
     "missing_order_id": 5,
     "direct_bank_payment": 3,
-    "tds_deduction": 3
+    "tds_deduction": 3,
+    "short_payment": 3,
+    "overpayment": 2,
+    "part_payment": 3
   },
-  "injected_total": 59,
-  "ground_truth_exceptions": 56,
+  "injected_total": 67,
+  "ground_truth_exceptions": 64,
   "true_links": {
-    "invoice_to_payment": 123,
-    "payment_to_batch": 142,
-    "batch_to_bank": 42,
+    "invoice_to_payment": 126,
+    "payment_to_batch": 141,
+    "batch_to_bank": 41,
     "invoice_to_bank": 6
   }
 }

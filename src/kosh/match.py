@@ -46,6 +46,10 @@ NAME_TOL = 0.34             # token overlap below which a narration name is not 
 DIRECT_WINDOW = 45          # days a direct bank payment may lag its invoice
 TDS_BPS = (100, 200, 1000)  # 1% / 2% u/s 194C, 10% u/s 194J
 ADJUDICATION_TOL = 5000     # ₹50 — the widest gap a model-proposed match may carry
+#: A settlement delta this small is consistent with a correspondent bank charge.
+#: Anything larger is not something the engine can account for, and says so.
+CHARGE_TOL_PAISE = 10_000   # ₹100
+CHARGE_TOL_FRAC = 0.0025    # or 0.25% of the batch, whichever is larger
 
 
 class Tier(str, Enum):
@@ -144,15 +148,65 @@ def expected_fee(amount_paise: int, method: str) -> tuple[int, int]:
 
 def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None) -> None:
     payments = [t for t in ds.pg if t.type == "payment"]
+    handled: set[str] = set()   # captures already accounted for as instalments
 
     # Duplicates first: a second capture on an order is not a candidate for the
     # invoice, it is an exception in its own right. Earliest capture wins.
+    inv_by_order_pre = {i.order_id: i for i in ds.invoices}
+    inv_by_receipt_pre = {norm_id(i.invoice_no): i for i in ds.invoices}
+
+    def group_key(p: PGTxn) -> str:
+        """Group captures that belong to the same sale.
+
+        `order_id` when the export carries one — and when it does not, the
+        receipt, because a gateway that omitted the order reference will still
+        usually carry the invoice number. Keying on the entity id alone (the
+        previous behaviour) made every id-less capture its own group, so a
+        straightforward double charge came back as UNBILLED_PAYMENT.
+        """
+        if p.order_id:
+            return f"order:{p.order_id}"
+        if p.order_receipt:
+            return f"receipt:{norm_id(p.order_receipt)}"
+        return f"solo:{p.entity_id}"
+
     by_order: dict[str, list[PGTxn]] = {}
     for p in payments:
-        by_order.setdefault(p.order_id or f"__none__{p.entity_id}", []).append(p)
+        by_order.setdefault(group_key(p), []).append(p)
     primary, duplicates = [], []
     for order, group in by_order.items():
         group.sort(key=lambda p: (p.created_at, p.entity_id))
+
+        # Several captures that add up to the invoice are instalments, not
+        # duplicates. Calling them duplicates was not merely a wrong label: the
+        # proposed action said "refund it", which would take back money the
+        # customer legitimately owed.
+        if len(group) > 1:
+            inv = (inv_by_order_pre.get(group[0].order_id or "")
+                   or inv_by_receipt_pre.get(norm_id(group[0].order_receipt)))
+            total = sum(g.amount_paise for g in group)
+            if inv and abs(total - inv.gross_paise) <= AMOUNT_TOL:
+                res.matches.append(Match(
+                    Leg.ERP_PG, inv.invoice_no, tuple(g.entity_id for g in group),
+                    Tier.AGGREGATE, 0.97, 0,
+                    {"on": "instalments_sum_to_invoice",
+                     "parts": len(group),
+                     "amounts": [str(to_rupees(g.amount_paise)) for g in group],
+                     "invoice_gross": str(to_rupees(inv.gross_paise))}))
+                res.findings.append(Finding(
+                    key=inv.invoice_no, source="erp", code=ExceptionCode.PART_PAYMENT,
+                    disposition=Disposition.AUTO_RESOLVED, value_at_risk_paise=0,
+                    evidence={"parts": len(group),
+                              "payments": [g.entity_id for g in group],
+                              "dates": [g.created_at.date().isoformat() for g in group],
+                              "sums_to": str(to_rupees(total)),
+                              "customer": inv.customer},
+                    proposed_action="No action: the instalments reconcile exactly. "
+                                    "Post them against the one invoice."))
+                for g in group:
+                    handled.add(g.entity_id)
+                continue
+
         primary.append(group[0])
         for extra in group[1:]:
             duplicates.append(extra)
@@ -167,8 +221,9 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None) ->
                 proposed_action=f"Refund {extra.entity_id} and credit-note the order, "
                                 f"or confirm two genuine shipments against {order}."))
 
-    open_inv = {i.invoice_no: i for i in ds.invoices}
-    open_pay = {p.entity_id: p for p in primary}
+    open_inv = {i.invoice_no: i for i in ds.invoices if i.invoice_no not in
+                {m.left for m in res.matches if m.leg is Leg.ERP_PG}}
+    open_pay = {p.entity_id: p for p in primary if p.entity_id not in handled}
 
     # T0 — the order_id is on both sides.
     inv_by_order = {i.order_id: i for i in ds.invoices}
@@ -182,6 +237,7 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None) ->
                 {"on": "order_id", "order_id": p.order_id,
                  "invoice_gross": str(to_rupees(inv.gross_paise)),
                  "payment_amount": str(to_rupees(p.amount_paise))}))
+            _flag_amount_gap(inv, p, delta, res)
             open_inv.pop(inv.invoice_no); open_pay.pop(p.entity_id)
 
     # T1 — the gateway carried the invoice number as the receipt.
@@ -193,6 +249,7 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None) ->
             res.matches.append(Match(
                 Leg.ERP_PG, inv.invoice_no, (p.entity_id,), Tier.NORMALIZED_ID, 0.95, delta,
                 {"on": "order_receipt~invoice_no", "receipt": p.order_receipt}))
+            _flag_amount_gap(inv, p, delta, res)
             open_inv.pop(inv.invoice_no); open_pay.pop(p.entity_id)
 
     # T2 — no shared identifier left. Assign on amount and date, globally.
@@ -228,6 +285,46 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None) ->
                       "amount": str(to_rupees(p.amount_paise))},
             proposed_action=f"Raise an invoice for {to_rupees(p.amount_paise)} against "
                             f"{p.order_id or 'the captured order'}; revenue is currently unrecognised."))
+
+
+def _flag_amount_gap(inv: Invoice, p: PGTxn, delta: int, res: ReconResult) -> None:
+    """An identifier that agrees is not the same as money that agrees.
+
+    T0 and T1 matched on an id alone, so a ₹10,000 invoice paid with ₹100 was
+    reported as a clean match and never reached the exception list at all — the
+    headline match rate counted a ₹9,900 hole as a win. The link is still
+    correct, so the match stands; what was missing is saying that the amounts
+    do not.
+    """
+    if abs(delta) <= AMOUNT_TOL:
+        return
+    rel = _tds_relation(inv.gross_paise, p.amount_paise)
+    if rel and rel != "gross":
+        res.findings.append(Finding(
+            key=inv.invoice_no, source="erp", code=ExceptionCode.TDS_WITHHELD,
+            disposition=Disposition.AUTO_RESOLVED, value_at_risk_paise=-delta,
+            evidence={"relation": rel, "payment": p.entity_id,
+                      "invoice_gross": str(to_rupees(inv.gross_paise)),
+                      "received": str(to_rupees(p.amount_paise)),
+                      "withheld": str(to_rupees(-delta)), "customer": inv.customer},
+            proposed_action=f"Book {to_rupees(-delta)} as TDS receivable against "
+                            f"{inv.customer} and collect Form 16A."))
+        return
+    short = delta < 0
+    res.findings.append(Finding(
+        key=inv.invoice_no, source="erp",
+        code=ExceptionCode.SHORT_PAYMENT if short else ExceptionCode.OVERPAYMENT,
+        disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=delta,
+        evidence={"payment": p.entity_id, "matched_on": "identifier",
+                  "invoice_gross": str(to_rupees(inv.gross_paise)),
+                  "paid": str(to_rupees(p.amount_paise)),
+                  "gap": str(to_rupees(delta)), "customer": inv.customer},
+        proposed_action=(
+            f"{inv.customer} paid {to_rupees(-delta)} less than {inv.invoice_no}. "
+            "Chase the balance, or raise a credit note if it was agreed."
+            if short else
+            f"{inv.customer} paid {to_rupees(delta)} more than {inv.invoice_no}. "
+            "Refund it or hold it as an advance against the next invoice.")))
 
 
 def _assign_one_to_one(*, left, right, left_amount, right_amount, left_date, right_date,
@@ -427,19 +524,7 @@ def reconcile_settlement_to_bank(batches: list[SettlementBatch], ds: Dataset,
                 {"on": "utr_amount_differs", "utr": batch.utr,
                  "bank_total": str(to_rupees(total)),
                  "batch_net": str(to_rupees(batch.net_paise))}))
-            res.findings.append(Finding(
-                key=batch.settlement_id, source="settlement",
-                code=ExceptionCode.SETTLEMENT_AMOUNT_MISMATCH,
-                disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=delta,
-                evidence={"utr": batch.utr, "batch_net": str(to_rupees(batch.net_paise)),
-                          "bank_credited": str(to_rupees(total)),
-                          "delta": str(to_rupees(delta)),
-                          "narration": hits[0].narration},
-                proposed_action=("Bank credited less than the batch netted to; check for a "
-                                 "correspondent charge or a recovery."
-                                 if delta < 0 else
-                                 "Bank credited more than the batch netted to; check for a "
-                                 "prior shortfall being made good.")))
+            res.findings.append(_classify_settlement_delta(batch, hits, total, delta))
         for l in hits:
             open_lines.pop(l.key, None)
         open_batches.pop(batch.settlement_id)
@@ -484,6 +569,49 @@ def reconcile_settlement_to_bank(batches: list[SettlementBatch], ds: Dataset,
                       "claims_settlement": looks_like_settlement(line.narration)},
             proposed_action="Identify the payer before this is swept into the settlement "
                             "control account; it is not gateway money on the evidence here."))
+
+
+def _classify_settlement_delta(batch: SettlementBatch, lines: list[BankLine],
+                               total: int, delta: int) -> Finding:
+    """Name the gap only when its size is consistent with a known cause.
+
+    Every delta used to become SETTLEMENT_AMOUNT_MISMATCH with a confident note
+    about a correspondent charge. Fed a foreign-currency settlement — a real
+    case the taxonomy has no code for — it reported a bank charge of ₹4,200,
+    which is a plausible sentence and the wrong answer. `UNCLASSIFIED` existed
+    to prevent exactly that and had never once fired, because nothing could
+    reach it.
+
+    A charge or recovery is small relative to the batch. Beyond that the engine
+    does not know what happened, and the honest output says so rather than
+    picking the nearest label.
+    """
+    ceiling = max(CHARGE_TOL_PAISE, round(abs(batch.net_paise) * CHARGE_TOL_FRAC))
+    evidence = {"utr": batch.utr, "batch_net": str(to_rupees(batch.net_paise)),
+                "bank_credited": str(to_rupees(total)),
+                "delta": str(to_rupees(delta)),
+                "plausible_charge_up_to": str(to_rupees(ceiling)),
+                "narration": lines[0].narration}
+    if abs(delta) <= ceiling:
+        return Finding(
+            key=batch.settlement_id, source="settlement",
+            code=ExceptionCode.SETTLEMENT_AMOUNT_MISMATCH,
+            disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=delta,
+            evidence=evidence,
+            proposed_action=("Bank credited less than the batch netted to, by an amount "
+                             "consistent with a correspondent charge; confirm with the bank."
+                             if delta < 0 else
+                             "Bank credited more than the batch netted to; check for a "
+                             "prior shortfall being made good."))
+    return Finding(
+        key=batch.settlement_id, source="settlement", code=ExceptionCode.UNCLASSIFIED,
+        disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=delta,
+        evidence={**evidence, "why_unclassified":
+                  "gap is too large to be a bank charge and matches no other known cause"},
+        proposed_action=f"The bank credit differs from the batch by "
+                        f"{to_rupees(abs(delta))}, which is more than a charge would "
+                        "explain. Likely a currency conversion, a partial recall or a "
+                        "netting the report does not show — needs the bank advice.")
 
 
 def _match_merged_payouts(open_batches: dict, open_lines: dict, res: ReconResult) -> None:
