@@ -47,13 +47,14 @@ forever):
 | `kosh sync` | Reconcile and fold the result into the running ledger |
 | `kosh pull --year --month [--day]` | Fetch a real settlement recon period from Razorpay |
 | `kosh exception list \| assign \| resolve \| link` | Work a break: own it, close it, or confirm a link |
-| `pytest -q` | 194 tests, no model loaded, ~2 s |
+| `pytest -q` | 205 tests, no model loaded, ~2 s |
 | `python scripts/benchmark.py --seeds 30 [--llm]` | Accuracy across 30 regenerated worlds |
 | `python scripts/ablation.py` | Does the model earn its place, and on which leg? |
 | `python scripts/adversarial.py [--llm]` | Score it on data written **against** it |
 | `python scripts/live_demo.py` | Three days of a close: a late credit clears yesterday's break |
 | `python scripts/verify_offline.py` | Run everything with all outbound sockets blocked |
 | `python scripts/check_docs.py` | Assert every figure in these documents is still true |
+| `python scripts/baseline.py [--llm]` | What this is worth against a spreadsheet |
 
 ```bash
 ./.venv/bin/kosh serve
@@ -152,7 +153,7 @@ Three bugs worth recording, since two of them only appear under use:
 | The ask | Where |
 |---|---|
 | One financial-operations workflow | Three-way settlement reconciliation, four legs |
-| 50+ synthetic data records | **347** per run (135 invoices, 151 gateway rows, 61 bank lines) — 10,393 across the benchmark |
+| 50+ synthetic data records | **347** per run (135 invoices, 151 gateway rows, 61 bank lines) — 10,388 across the benchmark |
 | Report match accuracy | Precision/recall/F1 per leg, scored against held-out ground truth |
 | Report unresolved exceptions | Every one, itemised, with evidence, exposure and a proposed action |
 | Throughput plus measured accuracy | See below — both, measured, not estimated |
@@ -167,12 +168,27 @@ itself takes **1.0 ms**; end to end including CSV parsing it is **5.0 ms**, or
 about **69,700 records/second**. With the model enabled, wall time is dominated
 entirely by the three adjudication calls — the arithmetic is unchanged.
 
+### What it is worth against a spreadsheet
+
+F1 is not money. The way these books get reconciled today is an exact-identifier
+lookup and then eyeballing the rest, so `scripts/baseline.py` reconciles the same
+corpus that way and reports the difference in rupees:
+
+| how the books get reconciled | links | recall | left to do by hand |
+|---|---:|---:|---:|
+| exact identifier only (a spreadsheet) | 145/173 | 83.8% | 3,62,069.84 |
+| deterministic tiers | 170/173 | 98.3% | 17,933.07 |
+| **with the model** | **173/173** | **100.0%** | **0.0** |
+
+**3,62,069.84 comes off the desk** of whoever
+would otherwise work through it by hand, on a corpus of 347 records.
+
 Across **30 regenerated corpora (10,383 records)**, each with independently
 jittered defect rates:
 
 | configuration | link F1 (mean) | link F1 (min) | exc P | exc R | exc F1 | auto-clear | records/s |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| deterministic only | 0.8898 | 0.7778 | 0.9120 | 0.9538 | 0.9324 | 82.8% | 68,202 |
+| deterministic only | 0.8898 | 0.7778 | 0.9017 | 0.9561 | 0.9280 | 82.5% | 68,342 |
 | **+ model on the legs it can help** | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 84.5% | 16 |
 
 Every seed is reproducible: `kosh generate --seed 13`.
@@ -183,19 +199,19 @@ The report leads with a cash bridge, not a match rate, because that is the
 question a controller is actually asking:
 
 ```
-  Captured at the gateway                  +7,24,300.88
-  Less funds on hold                         -19,919.85
-  Less captures not yet batched               -9,822.75
-= Gross entering settlement                 6,94,558.28
-  Less refunds settled                       -27,025.17
-  Less gateway fees                           -8,923.02
-  Less GST on fees                            -1,606.15
-  Less dispute adjustments                    -7,474.61
-= Net settled into batches                  6,49,529.33
-  Batches say                               6,49,529.33
-  Residual (must be zero)                         +0.00
-  Landed in the bank                        +6,13,210.61
-  Still in transit                            +36,318.72
+  Captured at the gateway                 +   7,24,300.88
+  Less funds on hold                      -     19,919.85
+  Less captures not yet batched           -      9,822.75
+  = Gross entering settlement                6,94,558.28
+  Less refunds settled                    -     26,511.62
+  Less gateway fees                       -      8,923.02
+  Less GST on fees                        -      1,606.15
+  Less dispute adjustments                -      7,474.61
+  = Net settled into batches                 6,50,042.88
+  Batches say                                6,50,042.88
+  Residual (must be zero)                 +          0.00
+  Landed in the bank                      +   6,25,607.82
+  Still in transit                        +     24,435.06
 ```
 
 The residual stays on the face of the report rather than being plugged into a
@@ -211,6 +227,7 @@ This is the full run with adjudication on — 56 findings, 42 needing a human:
 ```
 UNEXPECTED_BANK_CREDIT        7   needs review
 UNPAID_INVOICE                6   needs review
+AWAITING_SETTLEMENT           5   needs review
 FEE_VARIANCE                  5   auto-resolved
 UNBILLED_PAYMENT              5   needs review
 DUPLICATE_PAYMENT             4   needs review
@@ -263,7 +280,7 @@ It was wired into all four legs first, then measured (`scripts/ablation.py`):
 
 | configuration | link F1 | exception F1 | LLM calls | LLM seconds |
 |---|---:|---:|---:|---:|
-| deterministic only | 0.8889 | 0.9324 | 0 | 0.0 |
+| deterministic only | 0.8889 | 0.9280 | 0 | 0.0 |
 | model on every leg | 1.0000 | 1.0000 | 18 | 47.5 |
 | **model on the two legs it can help** | **1.0000** | **1.0000** | **6** | **21.2** |
 
@@ -408,6 +425,22 @@ Three payouts of the same amount on the same day, references in a statement
 format no pattern reads: amount and date are useless, so the reference is the
 only signal. **This is where the model stops being a garnish** — rules get one
 of four, reading the narration gets four of four.
+
+---
+
+## Properties, not just cases
+
+Every other test here checks a situation I imagined — the exact critique worth
+taking seriously. `tests/test_invariants.py` asserts properties that must hold
+for **any** input, over sixty randomly built and randomly damaged corpora:
+no record disappears silently, a match that hides a difference must say so, the
+bridge always balances, nothing is claimed twice, and the answer never depends
+on row order.
+
+It found three real defects on its first run — a blank identifier matching
+another blank identifier, a re-sent export row loaded twice, and an unsettled
+refund that nothing in the report mentioned. The disclosure invariant is the
+general form of the ₹9,900 hole that shipped for weeks.
 
 ---
 

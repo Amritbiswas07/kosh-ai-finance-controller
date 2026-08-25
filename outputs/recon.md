@@ -1,6 +1,6 @@
-# Reconciliation pack — synthetic period
+# Reconciliation pack — synthetic
 
-Generated 2026-08-26 03:02. 347 source records across three systems, reconciled in 23.4 ms of engine time plus 22.4 s of model adjudication.
+Generated 2026-08-26 03:24. 347 source records across three systems, reconciled in 20.8 ms of engine time plus 26.0 s of model adjudication.
 
 ## Where the money is
 
@@ -10,17 +10,17 @@ Generated 2026-08-26 03:02. 347 source records across three systems, reconciled 
 | Less funds on hold | -19,919.85 |
 | Less captures not yet batched | -9,822.75 |
 | **= Gross entering settlement** | **6,94,558.28** |
-| Less refunds settled | -27,025.17 |
+| Less refunds settled | -26,511.62 |
 | Less gateway fees | -8,923.02 |
 | Less GST on fees | -1,606.15 |
 | Less dispute adjustments | -7,474.61 |
-| **= Net settled into batches** | **6,49,529.33** |
-| Batches say | **6,49,529.33** |
+| **= Net settled into batches** | **6,50,042.88** |
+| Batches say | **6,50,042.88** |
 | Residual (must be zero) | +0.00 |
-| Landed in the bank | +6,13,210.61 |
-| Still in transit | +36,318.72 |
+| Landed in the bank | +6,25,607.82 |
+| Still in transit | +24,435.06 |
 
-Outside the settlement chain: **28,781.50** of invoices with no payment, **35,096.81** of payments with no invoice, **76,798.01** of bank credits nobody can place, and **358.65** of TDS withheld by customers.
+Outside the settlement chain: **28,781.50** of invoices with no payment, **35,096.81** of payments with no invoice, **55,273.81** of bank credits nobody can place, and **358.65** of TDS withheld by customers.
 
 ## What reconciled
 
@@ -43,37 +43,27 @@ The engine never reads `ground_truth.json`; only the evaluator does.
 | `settlement_to_bank` | 1.0000 | 1.0000 | 1.0000 | 41 |
 | `invoice_to_bank` | 1.0000 | 1.0000 | 1.0000 | 6 |
 
-Exception classification, scored strictly over (record, code) pairs: **precision 1.0000, recall 1.0000, F1 1.0000** on 64 true exceptions (64 correct, 0 false positives, 0 missed).
+Exception classification, scored strictly over (record, code) pairs: **precision 1.0000, recall 1.0000, F1 1.0000** on 69 true exceptions (69 correct, 0 false positives, 0 missed).
 
-Throughput: **15 records/second** end to end including CSV parsing. Auto-clear rate **84.2%** (292 of 347 records correctly linked and carrying nothing that needs a human).
+Throughput: **13 records/second** end to end including CSV parsing. Auto-clear rate **83.9%** (291 of 347 records correctly linked and carrying nothing that needs a human).
 
 ## Exceptions
 
-64 findings. **47 need a human**, carrying **2,38,230.57** of exposure. 17 were explained and closed automatically.
+69 findings. **52 need a human**, carrying **2,30,789.31** of exposure. 17 were explained and closed automatically.
 
-### UNEXPECTED_BANK_CREDIT — 7 item(s), 76,798.01 (needs review)
+### UNEXPECTED_BANK_CREDIT — 7 item(s), 55,273.81 (needs review)
 
 *Money arrived in the bank that no settlement batch accounts for.*
 
 | Record | Value (INR) | Evidence | Proposed action |
 |---|---:|---|---|
-| `bank:0030` | 16,188.64 | value_date=2026-07-25; narration=NEFT-CITIN25081200099-ANAND TRADERS-DIRECT; ref_no=60154839; amount=16188.64 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
-| `bank:0040` | 15,333.98 | value_date=2026-08-04; narration=NEFT-CITIN25081200099-ANAND TRADERS-DIRECT; ref_no=24407929; amount=15333.98 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
-| `bank:0041` | 11,075.35 | value_date=2026-08-04; narration=TERM LOAN DISBURSAL TL-99321; ref_no=33186094; amount=11075.35 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
-| `bank:0051` | 10,517.70 | value_date=2026-08-11; narration=CHQ PAID-004512; ref_no=49519355; amount=10517.70 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
-| `bank:0055` | 9,205.22 | value_date=2026-08-14; narration=INT.PD:12345678:01-08-2026 TO 31-08-2026; ref_no=57943619; amount=9205.22 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
-| `bank:0004` | 8,936.54 | value_date=2026-07-07; narration=TERM LOAN DISBURSAL TL-99321; ref_no=40751440; amount=8936.54 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
-| `bank:0045` | 5,540.58 | value_date=2026-08-06; narration=INT.PD:12345678:01-08-2026 TO 31-08-2026; ref_no=87715422; amount=5540.58 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
-
-### MISSING_IN_BANK — 3 item(s), 36,318.72 (needs review)
-
-*A settlement batch left the gateway but no matching bank credit has landed.*
-
-| Record | Value (INR) | Evidence | Proposed action |
-|---|---:|---|---|
-| `setl_82400025` | 20,402.61 | utr=SBIN0260728871951; settled_at=2026-07-28T11:00:00; net=20402.61; members=4 | Trace UTR SBIN0260728871951 with the bank. Until it lands, 20402.61 sits in gateway receivable, not in cash. |
-| `setl_82400034` | 14,270.59 | utr=HDFCN260806358365; settled_at=2026-08-06T11:00:00; net=14270.59; members=3 | Trace UTR HDFCN260806358365 with the bank. Until it lands, 14270.59 sits in gateway receivable, not in cash. |
-| `setl_82400020` | 1,645.52 | utr=ICICN260723723502; settled_at=2026-07-23T11:00:00; net=1645.52; members=2 | Trace UTR ICICN260723723502 with the bank. Until it lands, 1645.52 sits in gateway receivable, not in cash. |
+| `bank:0038` | 16,182.86 | value_date=2026-08-04; narration=TERM LOAN DISBURSAL TL-99321; ref_no=89448703; amount=16182.86 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
+| `bank:0058` | 9,684.65 | value_date=2026-08-16; narration=INT.PD:12345678:01-08-2026 TO 31-08-2026; ref_no=74133746; amount=9684.65 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
+| `bank:0046` | 6,876.63 | value_date=2026-08-09; narration=NEFT-CITIN25081200099-ANAND TRADERS-DIRECT; ref_no=66728391; amount=6876.63 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
+| `bank:0026` | 5,929.95 | value_date=2026-07-29; narration=INT.PD:12345678:01-08-2026 TO 31-08-2026; ref_no=86892032; amount=5929.95 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
+| `bank:0056` | 5,819.78 | value_date=2026-08-15; narration=NEFT-CITIN25081200099-ANAND TRADERS-DIRECT; ref_no=65404711; amount=5819.78 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
+| `bank:0041` | 5,540.58 | value_date=2026-08-06; narration=CHQ PAID-004512; ref_no=87715422; amount=5540.58 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
+| `bank:0048` | 5,239.36 | value_date=2026-08-10; narration=TERM LOAN DISBURSAL TL-99321; ref_no=70647722; amount=5239.36 | Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here. |
 
 ### UNBILLED_PAYMENT — 5 item(s), 35,096.81 (needs review)
 
@@ -99,6 +89,28 @@ Throughput: **15 records/second** end to end including CSV parsing. Auto-clear r
 | `INV-2627-1001` | 4,464.05 | order_id=order_8240000; customer=Vindhya Ceramics; invoice_date=2026-07-30; gross=4464.05 | Chase Vindhya Ceramics for 4464.05 against INV-2627-1001, or write it off if the order was cancelled. |
 | `INV-2627-1025` | 2,423.30 | order_id=order_8240024; customer=Quantum Fasteners; invoice_date=2026-07-11; gross=2423.30 | Chase Quantum Fasteners for 2423.30 against INV-2627-1025, or write it off if the order was cancelled. |
 | `INV-2627-1116` | 1,296.95 | order_id=order_8240115; customer=Prabhat Printers; invoice_date=2026-07-26; gross=1296.95 | Chase Prabhat Printers for 1296.95 against INV-2627-1116, or write it off if the order was cancelled. |
+
+### AWAITING_SETTLEMENT — 5 item(s), 25,953.40 (needs review)
+
+*A refund or adjustment exists that no payout has netted yet.*
+
+| Record | Value (INR) | Evidence | Proposed action |
+|---|---:|---|---|
+| `rfnd_82400000` | -9,426.51 | type=refund; amount=9426.51; created_at=2026-07-24T17:22:00; parent_payment_id=pay_82400014 | Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does. |
+| `rfnd_82400003` | -8,331.40 | type=refund; amount=8331.40; created_at=2026-08-09T15:35:00; parent_payment_id=pay_82400050 | Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does. |
+| `rfnd_82400007` | -4,987.24 | type=refund; amount=4987.24; created_at=2026-08-16T22:07:00; parent_payment_id=pay_82400088 | Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does. |
+| `rfnd_82400008` | -2,694.70 | type=refund; amount=2694.70; created_at=2026-07-19T07:52:00; parent_payment_id=pay_82400102 | Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does. |
+| `rfnd_82400002` | -513.55 | type=refund; amount=513.55; created_at=2026-08-17T15:13:00; parent_payment_id=pay_82400028 | Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does. |
+
+### MISSING_IN_BANK — 3 item(s), 24,435.06 (needs review)
+
+*A settlement batch left the gateway but no matching bank credit has landed.*
+
+| Record | Value (INR) | Evidence | Proposed action |
+|---|---:|---|---|
+| `setl_82400010` | 15,318.05 | utr=ICICN260713699100; settled_at=2026-07-13T11:00:00; net=15318.05; members=3 | Trace UTR ICICN260713699100 with the bank. Until it lands, 15318.05 sits in gateway receivable, not in cash. |
+| `setl_82400009` | 4,710.38 | utr=SBIN0260712168948; settled_at=2026-07-12T11:00:00; net=4710.38; members=2 | Trace UTR SBIN0260712168948 with the bank. Until it lands, 4710.38 sits in gateway receivable, not in cash. |
+| `setl_82400007` | 4,406.63 | utr=ICICN260710639127; settled_at=2026-07-10T11:00:00; net=4406.63; members=3 | Trace UTR ICICN260710639127 with the bank. Until it lands, 4406.63 sits in gateway receivable, not in cash. |
 
 ### DUPLICATE_PAYMENT — 4 item(s), 22,690.54 (needs review)
 
@@ -178,19 +190,19 @@ Throughput: **15 records/second** end to end including CSV parsing. Auto-clear r
 
 | Record | Value (INR) | Evidence | Proposed action |
 |---|---:|---|---|
-| `INV-2627-1095` | 158.95 | relation=net_of_tds_2pct; bank_line=bank:0009; invoice_gross=7947.72; received=7788.77 | Book 158.95 as TDS receivable against Meridian Labs and collect Form 16A for the quarter. |
-| `INV-2627-1020` | 131.32 | relation=net_of_tds_2pct; bank_line=bank:0038; invoice_gross=6566.17; received=6434.85 | Book 131.32 as TDS receivable against Everest Logistics and collect Form 16A for the quarter. |
-| `INV-2627-1033` | 68.38 | relation=net_of_tds_2pct; bank_line=bank:0011; invoice_gross=3419.18; received=3350.80 | Book 68.38 as TDS receivable against Prabhat Printers and collect Form 16A for the quarter. |
+| `INV-2627-1095` | 158.95 | relation=net_of_tds_2pct; bank_line=bank:0010; invoice_gross=7947.72; received=7788.77 | Book 158.95 as TDS receivable against Meridian Labs and collect Form 16A for the quarter. |
+| `INV-2627-1020` | 131.32 | relation=net_of_tds_2pct; bank_line=bank:0040; invoice_gross=6566.17; received=6434.85 | Book 131.32 as TDS receivable against Everest Logistics and collect Form 16A for the quarter. |
+| `INV-2627-1033` | 68.38 | relation=net_of_tds_2pct; bank_line=bank:0009; invoice_gross=3419.18; received=3350.80 | Book 68.38 as TDS receivable against Prabhat Printers and collect Form 16A for the quarter. |
 
-### SETTLEMENT_AMOUNT_MISMATCH — 3 item(s), 41.30 (needs review)
+### SETTLEMENT_AMOUNT_MISMATCH — 3 item(s), 54.50 (needs review)
 
 *The bank credited a different amount than the settlement batch netted to.*
 
 | Record | Value (INR) | Evidence | Proposed action |
 |---|---:|---|---|
-| `setl_82400017` | -23.60 | utr=SBIN0260720365068; batch_net=19766.88; bank_credited=19743.28; delta=-23.60 | Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank. |
-| `setl_82400042` | -11.80 | utr=SBIN0260814301778; batch_net=31258.73; bank_credited=31246.93; delta=-11.80 | Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank. |
-| `setl_82400014` | -5.90 | utr=KKBKN260717982508; batch_net=11743.41; bank_credited=11737.51; delta=-5.90 | Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank. |
+| `setl_82400034` | 25.00 | utr=HDFCN260806358365; batch_net=14270.59; bank_credited=14295.59; delta=25.00 | Bank credited more than the batch netted to; check for a prior shortfall being made good. |
+| `setl_82400022` | -23.60 | utr=AXISN260725327302; batch_net=16747.91; bank_credited=16724.31; delta=-23.60 | Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank. |
+| `setl_82400020` | -5.90 | utr=ICICN260723723502; batch_net=1645.52; bank_credited=1639.62; delta=-5.90 | Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank. |
 
 ### FEE_VARIANCE — 5 item(s), 36.23 (auto-resolved)
 
@@ -220,8 +232,8 @@ Throughput: **15 records/second** end to end including CSV parsing. Auto-clear r
 
 | Record | Value (INR) | Evidence | Proposed action |
 |---|---:|---|---|
-| `setl_82400012` | 0.00 | utr=KKBKN260715519995; parts=2; lines=['bank:0019', 'bank:0021']; dates=['2026-07-16', '2026-07-17'] | No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line. |
-| `setl_82400016` | 0.00 | utr=KKBKN260719311944; parts=2; lines=['bank:0023', 'bank:0025']; dates=['2026-07-19', '2026-07-20'] | No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line. |
+| `setl_82400025` | 0.00 | utr=SBIN0260728871951; parts=2; lines=['bank:0025', 'bank:0027']; dates=['2026-07-28', '2026-07-29'] | No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line. |
+| `setl_82400041` | 0.00 | utr=SBIN0260813364269; parts=2; lines=['bank:0051', 'bank:0054']; dates=['2026-08-13', '2026-08-14'] | No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line. |
 
 ### MERGED_PAYOUT — 4 item(s), 0.00 (auto-resolved)
 
@@ -240,9 +252,9 @@ Every residual the deterministic tiers could not settle, what the model proposed
 
 | Item | Candidates | Chose | Verdict | Model's reason |
 |---|---|---|---|---|
-| `setl_82400020` | 3 | `bank:0046` | rejected_by_arithmetic | The amounts (1645.52) match between the settlement batch and the NEFT transactions listed, indicating they represent the |
-| `setl_82400025` | 3 | `bank:0041` | rejected_by_arithmetic | The amounts (16188.64 vs 20402.61) and dates (2026-07-25 vs 2026-07-28) do not match any other transactions listed, maki |
-| `setl_82400034` | 3 | `bank:0041` | rejected_by_arithmetic | The amounts (14270.59 vs 11075.35) and dates (2026-08-06 vs 2026-08-04) match between the given settlement batch and opt |
-| `bank:0009` | 1 | `INV-2627-1095` | accepted | The narration mentions "MERIDIAN LBS-PMT AGST BILL", which corresponds to Meridian Labs as the customer with an invoice  |
-| `bank:0011` | 1 | `INV-2627-1033` | accepted | The narration mentions "BILL" which indicates it settles an unpaid invoice. |
-| `bank:0038` | 1 | `INV-2627-1020` | accepted | The narration mentions "EVEREST LGSTCS-PMT AGST BILL", which corresponds to an invoice for Everest Logistics with a gros |
+| `setl_82400007` | 3 | `bank:0009` | rejected_by_arithmetic | The settlement batch amount (INR 4406.63) matches with option C's amount (3350.80), and both have the same date (2026-07 |
+| `setl_82400009` | 3 | `—` | declined | The amounts (5003.96, 5239.36, and 5540.58) do not match the given net settlement amount of INR 4710.38. Additionally, t |
+| `setl_82400010` | 3 | `bank:0059` | rejected_by_arithmetic | The amounts (15318.05) match between the settlement batch and the NEFT transaction, and both have the same date (2026-07 |
+| `bank:0009` | 1 | `INV-2627-1033` | accepted | The narration mentions "PMT AGST BILL", which indicates an invoice payment settlement. The amount (INR 3350.80) matches  |
+| `bank:0010` | 1 | `INV-2627-1095` | accepted | The narration mentions "MERIDIAN LBS-PMT AGST BILL", which corresponds to Meridian Labs as the customer with an invoice  |
+| `bank:0040` | 1 | `INV-2627-1020` | accepted | The narration mentions "EVEREST LGSTCS-PMT AGST BILL", which indicates an invoice settlement with Everest Logistics. The |

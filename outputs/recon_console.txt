@@ -1,28 +1,29 @@
 
-Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 5.1s)
-347 records · engine 22427.2 ms · wall 22.44 s · model 22.4 s
+Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 6.5s)
+347 records · engine 26034.8 ms · wall 26.05 s · model 26.0 s
 
 Where the money is
   Captured at the gateway                  +7,24,300.88
   Less funds on hold                         -19,919.85
   Less captures not yet batched               -9,822.75
   = Gross entering settlement               6,94,558.28
-  Less refunds settled                       -27,025.17
+  Less refunds settled                       -26,511.62
   Less gateway fees                           -8,923.02
   Less GST on fees                            -1,606.15
   Less dispute adjustments                    -7,474.61
-  = Net settled into batches                6,49,529.33
-  Batches say                               6,49,529.33
+  = Net settled into batches                6,50,042.88
+  Batches say                               6,50,042.88
   Residual (must be zero)                         +0.00
-  Landed in the bank                       +6,13,210.61
-  Still in transit                           +36,318.72
+  Landed in the bank                       +6,25,607.82
+  Still in transit                           +24,435.06
 
 Matched 166 · T0_EXACT_ID=145 · T1_NORMALIZED_ID=3 · T2_AMOUNT_DATE=8 · T3_AGGREGATE=7 · T4_ADJUDICATED=3
-Findings 64 · 47 need review · 2,38,230.57 exposure
+Findings 69 · 52 need review · 2,30,789.31 exposure
   UNEXPECTED_BANK_CREDIT         7   needs review
   UNPAID_INVOICE                 6   needs review
   UNBILLED_PAYMENT               5   needs review
   FEE_VARIANCE                   5   auto-resolved
+  AWAITING_SETTLEMENT            5   needs review
   DUPLICATE_PAYMENT              4   needs review
   FUNDS_ON_HOLD                  4   needs review
   TAX_LINE_MISMATCH              4   needs review
@@ -37,7 +38,7 @@ Findings 64 · 47 need review · 2,38,230.57 exposure
   OVERPAYMENT                    2   needs review
   SPLIT_SETTLEMENT               2   auto-resolved
 
-Measured  link F1 1.0000 · exception P 1.0000 R 1.0000 F1 1.0000 · auto-clear 84.2% · 15 rec/s
+Measured  link F1 1.0000 · exception P 1.0000 R 1.0000 F1 1.0000 · auto-clear 83.9% · 13 rec/s
 
 wrote /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/recon.json
       /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/recon.md

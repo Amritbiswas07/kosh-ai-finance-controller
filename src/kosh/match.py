@@ -176,8 +176,8 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None,
 
     # Duplicates first: a second capture on an order is not a candidate for the
     # invoice, it is an exception in its own right. Earliest capture wins.
-    inv_by_order_pre = {i.order_id: i for i in ds.invoices}
-    inv_by_receipt_pre = {norm_id(i.invoice_no): i for i in ds.invoices}
+    inv_by_order_pre = _index(ds.invoices, lambda i: i.order_id)
+    inv_by_receipt_pre = _index(ds.invoices, lambda i: norm_id(i.invoice_no))
 
     def group_key(p: PGTxn) -> str:
         """Group captures that belong to the same sale.
@@ -206,8 +206,8 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None,
         # proposed action said "refund it", which would take back money the
         # customer legitimately owed.
         if len(group) > 1:
-            inv = (inv_by_order_pre.get(group[0].order_id or "")
-                   or inv_by_receipt_pre.get(norm_id(group[0].order_receipt)))
+            inv = (inv_by_order_pre.get(group[0].order_id or "\0")
+                   or inv_by_receipt_pre.get(norm_id(group[0].order_receipt) or "\0"))
             total = sum(g.amount_paise for g in group)
             if inv and abs(total - inv.gross_paise) <= AMOUNT_TOL:
                 res.matches.append(Match(
@@ -252,9 +252,9 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None,
     open_pay = {p.entity_id: p for p in primary if p.entity_id not in handled}
 
     # T0 — the order_id is on both sides.
-    inv_by_order = {i.order_id: i for i in ds.invoices}
+    inv_by_order = _index(ds.invoices, lambda i: i.order_id)
     for p in list(open_pay.values()):
-        inv = inv_by_order.get(p.order_id or "")
+        inv = inv_by_order.get(p.order_id or "\0")
         if inv and inv.invoice_no in open_inv:
             delta = p.amount_paise - inv.gross_paise
             res.matches.append(Match(
@@ -267,9 +267,9 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None,
             open_inv.pop(inv.invoice_no); open_pay.pop(p.entity_id)
 
     # T1 — the gateway carried the invoice number as the receipt.
-    inv_by_norm = {norm_id(i.invoice_no): i for i in open_inv.values()}
+    inv_by_norm = _index(open_inv.values(), lambda i: norm_id(i.invoice_no))
     for p in list(open_pay.values()):
-        inv = inv_by_norm.get(norm_id(p.order_receipt))
+        inv = inv_by_norm.get(norm_id(p.order_receipt) or "\0")
         if inv and inv.invoice_no in open_inv:
             delta = p.amount_paise - inv.gross_paise
             res.matches.append(Match(
@@ -311,6 +311,22 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None,
                       "amount": str(to_rupees(p.amount_paise))},
             proposed_action=f"Raise an invoice for {to_rupees(p.amount_paise)} against "
                             f"{p.order_id or 'the captured order'}; revenue is currently unrecognised."))
+
+
+def _index(rows, key) -> dict:
+    """Index rows by an identifier, ignoring the ones that have none.
+
+    An empty key is not an identifier. Indexing on it put every reference-less
+    invoice under `""`, so a payment that also had no reference matched
+    whichever of them the file happened to list last — two records that share
+    nothing but an absence, linked, and the answer changing with the row order.
+    """
+    out = {}
+    for row in rows:
+        k = key(row)
+        if k:
+            out.setdefault(k, row)
+    return out
 
 
 def _flag_amount_gap(inv: Invoice, p: PGTxn, delta: int, res: ReconResult) -> None:
@@ -520,6 +536,22 @@ def check_integrity(ds: Dataset, res: ReconResult) -> None:
                     proposed_action=("Recover " if drift > 0 else "Credit back ")
                                     + f"{to_rupees(abs(drift))} of MDR against {t.entity_id}."))
         elif t.type == "refund":
+            if not t.settlement_id and not t.on_hold:
+                # A refund that has not been netted into a payout yet is money
+                # about to leave. With a valid parent it raised nothing, and it
+                # belongs to no batch, so nothing in the report mentioned it at
+                # all — found by the conservation invariant, not by a case.
+                res.findings.append(Finding(
+                    key=t.entity_id, source="pg",
+                    code=ExceptionCode.AWAITING_SETTLEMENT,
+                    disposition=Disposition.NEEDS_REVIEW,
+                    value_at_risk_paise=t.amount_paise,
+                    evidence={"type": t.type, "amount": str(to_rupees(abs(t.amount_paise))),
+                              "created_at": t.created_at.isoformat(),
+                              "parent_payment_id": t.parent_payment_id},
+                    proposed_action="Not yet netted into a payout. Expect it to "
+                                    "reduce a forthcoming settlement; hold it out "
+                                    "of the cash position until it does."))
             if t.parent_payment_id and t.parent_payment_id not in payment_ids:
                 res.findings.append(Finding(
                     key=t.entity_id, source="pg", code=ExceptionCode.ORPHAN_REFUND,
@@ -531,6 +563,18 @@ def check_integrity(ds: Dataset, res: ReconResult) -> None:
                     proposed_action=f"Locate {t.parent_payment_id} — it is outside this "
                                     "report's period or was captured on another account."))
         elif t.type == "adjustment":
+            if not t.settlement_id and not t.on_hold:
+                res.findings.append(Finding(
+                    key=t.entity_id, source="pg",
+                    code=ExceptionCode.AWAITING_SETTLEMENT,
+                    disposition=Disposition.NEEDS_REVIEW,
+                    value_at_risk_paise=t.amount_paise,
+                    evidence={"type": t.type, "amount": str(to_rupees(abs(t.amount_paise))),
+                              "created_at": t.created_at.isoformat(),
+                              "dispute_id": t.dispute_id},
+                    proposed_action="Not yet netted into a payout. Expect it to "
+                                    "reduce a forthcoming settlement; hold it out "
+                                    "of the cash position until it does."))
             res.findings.append(Finding(
                 key=t.entity_id, source="pg", code=ExceptionCode.CHARGEBACK_ADJUSTMENT,
                 disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=abs(t.amount_paise),
@@ -1082,6 +1126,16 @@ def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
     if adjudicator is not None:
         _suggest_causes(res, adjudicator)
     t4 = time.perf_counter()
+
+    # A record can reach the same conclusion by two routes — a re-sent export
+    # row, or a leg that overlaps another. The controller should see it once.
+    unique, seen_findings = [], set()
+    for f in res.findings:
+        if (f.key, f.code) in seen_findings:
+            continue
+        seen_findings.add((f.key, f.code))
+        unique.append(f)
+    res.findings = unique
 
     res.timings = {"erp_to_gateway_s": round(t1 - t0, 4),
                    "integrity_s": round(t2 - t1, 4),

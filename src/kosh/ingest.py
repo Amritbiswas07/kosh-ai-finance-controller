@@ -55,7 +55,23 @@ def _yn(text: str) -> bool:
 
 
 def load(root: Path) -> tuple[Dataset, list[str]]:
+    """Read the three exports.
+
+    A record id appearing twice is a data error, not a duplicate transaction:
+    the second row is the same event re-sent, so it is reported and the first is
+    kept. Loading both would double every finding raised against it and, worse,
+    double the money.
+    """
     ds, errors = Dataset(), []
+    seen: set[tuple[str, str]] = set()
+
+    def first_time(kind: str, key: str, where: str, line: int) -> bool:
+        if (kind, key) in seen:
+            errors.append(f"{where}:{line}: {key} appears more than once; "
+                          "keeping the first and ignoring this copy")
+            return False
+        seen.add((kind, key))
+        return True
 
     with (root / "erp_invoices.csv").open(newline="") as fh:
         for n, row in enumerate(csv.DictReader(fh), start=2):
@@ -113,6 +129,9 @@ def load(root: Path) -> tuple[Dataset, list[str]]:
     with (root / "bank_statement.csv").open(newline="") as fh:
         for n, row in enumerate(csv.DictReader(fh), start=2):
             try:
+                if not first_time("bank", row["line_no"].strip(),
+                                  "bank_statement.csv", n):
+                    continue
                 credit = to_paise(row["credit"]) if _opt(row.get("credit")) else 0
                 debit = to_paise(row["debit"]) if _opt(row.get("debit")) else 0
                 ds.bank.append(BankLine(
