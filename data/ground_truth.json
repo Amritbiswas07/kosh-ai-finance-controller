@@ -1,12 +1,12 @@
 {
   "manifest": {
-    "seed": 20260824,
-    "generated_at": "2026-08-25T16:30:03",
+    "seed": 20260822,
+    "generated_at": "2026-08-25T18:03:31",
     "counts": {
       "erp_invoices": 135,
-      "pg_transactions": 151,
+      "pg_transactions": 148,
       "bank_lines": 61,
-      "total_records": 347
+      "total_records": 344
     },
     "injected": {
       "unpaid_invoice": 6,
@@ -24,796 +24,528 @@
       "merged_payout": 2,
       "missing_order_id": 5,
       "direct_bank_payment": 3,
-      "tds_deduction": 3,
-      "short_payment": 3,
-      "overpayment": 2,
-      "part_payment": 3
+      "tds_deduction": 3
     },
-    "injected_total": 67,
-    "ground_truth_exceptions": 64,
+    "injected_total": 59,
+    "ground_truth_exceptions": 56,
     "true_links": {
-      "invoice_to_payment": 126,
+      "invoice_to_payment": 123,
       "payment_to_batch": 141,
       "batch_to_bank": 41,
       "invoice_to_bank": 6
     }
   },
   "invoice_to_payment": {
-    "INV-2627-1002": [
-      "pay_82400001"
-    ],
-    "INV-2627-1003": [
-      "pay_82400002"
-    ],
-    "INV-2627-1004": [
-      "pay_82400003"
-    ],
-    "INV-2627-1005": [
-      "pay_82400004"
-    ],
-    "INV-2627-1006": [
-      "pay_82400005"
-    ],
-    "INV-2627-1007": [
-      "pay_82400006"
-    ],
-    "INV-2627-1008": [
-      "pay_82400007"
-    ],
-    "INV-2627-1009": [
-      "pay_82400008"
-    ],
-    "INV-2627-1011": [
-      "pay_82400009"
-    ],
-    "INV-2627-1012": [
-      "pay_82400010"
-    ],
-    "INV-2627-1013": [
-      "pay_82400011"
-    ],
-    "INV-2627-1014": [
-      "pay_82400012"
-    ],
-    "INV-2627-1015": [
-      "pay_82400013"
-    ],
-    "INV-2627-1016": [
-      "pay_82400014"
-    ],
-    "INV-2627-1017": [
-      "pay_82400015"
-    ],
-    "INV-2627-1018": [
-      "pay_82400016"
-    ],
-    "INV-2627-1019": [
-      "pay_82400018"
-    ],
-    "INV-2627-1021": [
-      "pay_82400019"
-    ],
-    "INV-2627-1022": [
-      "pay_82400020",
-      "pay_82400020b"
-    ],
-    "INV-2627-1023": [
-      "pay_82400021"
-    ],
-    "INV-2627-1024": [
-      "pay_82400022",
-      "pay_82400022b"
-    ],
-    "INV-2627-1026": [
-      "pay_82400023"
-    ],
-    "INV-2627-1027": [
-      "pay_82400024"
-    ],
-    "INV-2627-1028": [
-      "pay_82400025"
-    ],
-    "INV-2627-1029": [
-      "pay_82400026"
-    ],
-    "INV-2627-1030": [
-      "pay_82400027"
-    ],
-    "INV-2627-1031": [
-      "pay_82400028"
-    ],
-    "INV-2627-1032": [
-      "pay_82400029"
-    ],
-    "INV-2627-1036": [
-      "pay_82400030"
-    ],
-    "INV-2627-1037": [
-      "pay_82400031"
-    ],
-    "INV-2627-1038": [
-      "pay_82400032"
-    ],
-    "INV-2627-1039": [
-      "pay_82400033"
-    ],
-    "INV-2627-1040": [
-      "pay_82400034"
-    ],
-    "INV-2627-1041": [
-      "pay_82400035"
-    ],
-    "INV-2627-1042": [
-      "pay_82400036"
-    ],
-    "INV-2627-1044": [
-      "pay_82400038"
-    ],
-    "INV-2627-1045": [
-      "pay_82400039"
-    ],
-    "INV-2627-1046": [
-      "pay_82400040"
-    ],
-    "INV-2627-1047": [
-      "pay_82400041"
-    ],
-    "INV-2627-1048": [
-      "pay_82400042"
-    ],
-    "INV-2627-1049": [
-      "pay_82400043"
-    ],
-    "INV-2627-1050": [
-      "pay_82400044"
-    ],
-    "INV-2627-1051": [
-      "pay_82400045"
-    ],
-    "INV-2627-1052": [
-      "pay_82400046"
-    ],
-    "INV-2627-1053": [
-      "pay_82400047"
-    ],
-    "INV-2627-1055": [
-      "pay_82400048"
-    ],
-    "INV-2627-1056": [
-      "pay_82400049",
-      "pay_82400049b"
-    ],
-    "INV-2627-1057": [
-      "pay_82400050"
-    ],
-    "INV-2627-1058": [
-      "pay_82400051"
-    ],
-    "INV-2627-1061": [
-      "pay_82400053"
-    ],
-    "INV-2627-1062": [
-      "pay_82400054"
-    ],
-    "INV-2627-1063": [
-      "pay_82400055"
-    ],
-    "INV-2627-1064": [
-      "pay_82400056"
-    ],
-    "INV-2627-1065": [
-      "pay_82400057"
-    ],
-    "INV-2627-1066": [
-      "pay_82400058"
-    ],
-    "INV-2627-1067": [
-      "pay_82400059"
-    ],
-    "INV-2627-1068": [
-      "pay_82400060"
-    ],
-    "INV-2627-1069": [
-      "pay_82400061"
-    ],
-    "INV-2627-1070": [
-      "pay_82400062"
-    ],
-    "INV-2627-1071": [
-      "pay_82400063"
-    ],
-    "INV-2627-1072": [
-      "pay_82400064"
-    ],
-    "INV-2627-1073": [
-      "pay_82400065"
-    ],
-    "INV-2627-1074": [
-      "pay_82400066"
-    ],
-    "INV-2627-1075": [
-      "pay_82400067"
-    ],
-    "INV-2627-1076": [
-      "pay_82400068"
-    ],
-    "INV-2627-1077": [
-      "pay_82400069"
-    ],
-    "INV-2627-1078": [
-      "pay_82400070"
-    ],
-    "INV-2627-1080": [
-      "pay_82400072"
-    ],
-    "INV-2627-1081": [
-      "pay_82400073"
-    ],
-    "INV-2627-1082": [
-      "pay_82400074"
-    ],
-    "INV-2627-1083": [
-      "pay_82400075"
-    ],
-    "INV-2627-1084": [
-      "pay_82400077"
-    ],
-    "INV-2627-1085": [
-      "pay_82400078"
-    ],
-    "INV-2627-1086": [
-      "pay_82400079"
-    ],
-    "INV-2627-1087": [
-      "pay_82400080"
-    ],
-    "INV-2627-1088": [
-      "pay_82400081"
-    ],
-    "INV-2627-1089": [
-      "pay_82400082"
-    ],
-    "INV-2627-1090": [
-      "pay_82400083"
-    ],
-    "INV-2627-1091": [
-      "pay_82400084"
-    ],
-    "INV-2627-1092": [
-      "pay_82400085"
-    ],
-    "INV-2627-1093": [
-      "pay_82400086"
-    ],
-    "INV-2627-1094": [
-      "pay_82400088"
-    ],
-    "INV-2627-1096": [
-      "pay_82400089"
-    ],
-    "INV-2627-1097": [
-      "pay_82400090"
-    ],
-    "INV-2627-1098": [
-      "pay_82400091"
-    ],
-    "INV-2627-1099": [
-      "pay_82400092"
-    ],
-    "INV-2627-1100": [
-      "pay_82400093"
-    ],
-    "INV-2627-1101": [
-      "pay_82400094"
-    ],
-    "INV-2627-1102": [
-      "pay_82400095"
-    ],
-    "INV-2627-1103": [
-      "pay_82400096"
-    ],
-    "INV-2627-1104": [
-      "pay_82400098"
-    ],
-    "INV-2627-1105": [
-      "pay_82400099"
-    ],
-    "INV-2627-1106": [
-      "pay_82400100"
-    ],
-    "INV-2627-1107": [
-      "pay_82400101"
-    ],
-    "INV-2627-1108": [
-      "pay_82400102"
-    ],
-    "INV-2627-1109": [
-      "pay_82400103"
-    ],
-    "INV-2627-1110": [
-      "pay_82400104"
-    ],
-    "INV-2627-1111": [
-      "pay_82400105"
-    ],
-    "INV-2627-1112": [
-      "pay_82400106"
-    ],
-    "INV-2627-1113": [
-      "pay_82400107"
-    ],
-    "INV-2627-1114": [
-      "pay_82400108"
-    ],
-    "INV-2627-1115": [
-      "pay_82400109"
-    ],
-    "INV-2627-1118": [
-      "pay_82400111"
-    ],
-    "INV-2627-1119": [
-      "pay_82400112"
-    ],
-    "INV-2627-1120": [
-      "pay_82400113"
-    ],
-    "INV-2627-1122": [
-      "pay_82400114"
-    ],
-    "INV-2627-1123": [
-      "pay_82400115"
-    ],
-    "INV-2627-1124": [
-      "pay_82400116"
-    ],
-    "INV-2627-1125": [
-      "pay_82400117"
-    ],
-    "INV-2627-1126": [
-      "pay_82400118"
-    ],
-    "INV-2627-1127": [
-      "pay_82400119"
-    ],
-    "INV-2627-1128": [
-      "pay_82400120"
-    ],
-    "INV-2627-1130": [
-      "pay_82400122"
-    ],
-    "INV-2627-1131": [
-      "pay_82400123"
-    ],
-    "INV-2627-1132": [
-      "pay_82400124"
-    ],
-    "INV-2627-1133": [
-      "pay_82400125"
-    ],
-    "INV-2627-1134": [
-      "pay_82400126"
-    ],
-    "INV-2627-1135": [
-      "pay_82400127"
-    ],
-    "INV-2627-1136": [
-      "pay_82400128"
-    ],
-    "INV-2627-1137": [
-      "pay_82400129"
-    ],
-    "INV-2627-1138": [
-      "pay_82400130"
-    ],
-    "INV-2627-1139": [
-      "pay_82400131"
-    ],
-    "INV-2627-1140": [
-      "pay_82400132"
-    ]
+    "INV-2627-1001": "pay_82200001",
+    "INV-2627-1002": "pay_82200002",
+    "INV-2627-1003": "pay_82200003",
+    "INV-2627-1004": "pay_82200004",
+    "INV-2627-1005": "pay_82200005",
+    "INV-2627-1006": "pay_82200006",
+    "INV-2627-1007": "pay_82200007",
+    "INV-2627-1008": "pay_82200008",
+    "INV-2627-1009": "pay_82200009",
+    "INV-2627-1010": "pay_82200010",
+    "INV-2627-1011": "pay_82200011",
+    "INV-2627-1012": "pay_82200012",
+    "INV-2627-1014": "pay_82200013",
+    "INV-2627-1016": "pay_82200014",
+    "INV-2627-1017": "pay_82200015",
+    "INV-2627-1018": "pay_82200016",
+    "INV-2627-1019": "pay_82200017",
+    "INV-2627-1020": "pay_82200018",
+    "INV-2627-1021": "pay_82200019",
+    "INV-2627-1023": "pay_82200020",
+    "INV-2627-1024": "pay_82200021",
+    "INV-2627-1025": "pay_82200022",
+    "INV-2627-1027": "pay_82200023",
+    "INV-2627-1029": "pay_82200025",
+    "INV-2627-1030": "pay_82200026",
+    "INV-2627-1031": "pay_82200027",
+    "INV-2627-1032": "pay_82200028",
+    "INV-2627-1033": "pay_82200029",
+    "INV-2627-1034": "pay_82200030",
+    "INV-2627-1035": "pay_82200031",
+    "INV-2627-1036": "pay_82200033",
+    "INV-2627-1037": "pay_82200034",
+    "INV-2627-1038": "pay_82200035",
+    "INV-2627-1040": "pay_82200036",
+    "INV-2627-1041": "pay_82200037",
+    "INV-2627-1042": "pay_82200038",
+    "INV-2627-1043": "pay_82200039",
+    "INV-2627-1044": "pay_82200040",
+    "INV-2627-1045": "pay_82200041",
+    "INV-2627-1046": "pay_82200042",
+    "INV-2627-1047": "pay_82200043",
+    "INV-2627-1048": "pay_82200044",
+    "INV-2627-1049": "pay_82200045",
+    "INV-2627-1050": "pay_82200046",
+    "INV-2627-1051": "pay_82200047",
+    "INV-2627-1052": "pay_82200048",
+    "INV-2627-1053": "pay_82200049",
+    "INV-2627-1054": "pay_82200050",
+    "INV-2627-1056": "pay_82200052",
+    "INV-2627-1057": "pay_82200053",
+    "INV-2627-1059": "pay_82200054",
+    "INV-2627-1060": "pay_82200055",
+    "INV-2627-1061": "pay_82200056",
+    "INV-2627-1062": "pay_82200057",
+    "INV-2627-1063": "pay_82200058",
+    "INV-2627-1064": "pay_82200059",
+    "INV-2627-1065": "pay_82200060",
+    "INV-2627-1066": "pay_82200061",
+    "INV-2627-1067": "pay_82200062",
+    "INV-2627-1068": "pay_82200063",
+    "INV-2627-1069": "pay_82200064",
+    "INV-2627-1070": "pay_82200065",
+    "INV-2627-1071": "pay_82200066",
+    "INV-2627-1072": "pay_82200067",
+    "INV-2627-1073": "pay_82200068",
+    "INV-2627-1074": "pay_82200069",
+    "INV-2627-1075": "pay_82200070",
+    "INV-2627-1076": "pay_82200071",
+    "INV-2627-1077": "pay_82200072",
+    "INV-2627-1078": "pay_82200073",
+    "INV-2627-1079": "pay_82200075",
+    "INV-2627-1080": "pay_82200076",
+    "INV-2627-1081": "pay_82200077",
+    "INV-2627-1082": "pay_82200078",
+    "INV-2627-1083": "pay_82200079",
+    "INV-2627-1084": "pay_82200080",
+    "INV-2627-1085": "pay_82200081",
+    "INV-2627-1086": "pay_82200082",
+    "INV-2627-1087": "pay_82200083",
+    "INV-2627-1088": "pay_82200084",
+    "INV-2627-1089": "pay_82200085",
+    "INV-2627-1090": "pay_82200086",
+    "INV-2627-1091": "pay_82200087",
+    "INV-2627-1092": "pay_82200088",
+    "INV-2627-1094": "pay_82200090",
+    "INV-2627-1095": "pay_82200091",
+    "INV-2627-1096": "pay_82200092",
+    "INV-2627-1097": "pay_82200093",
+    "INV-2627-1098": "pay_82200094",
+    "INV-2627-1099": "pay_82200095",
+    "INV-2627-1100": "pay_82200096",
+    "INV-2627-1101": "pay_82200097",
+    "INV-2627-1105": "pay_82200100",
+    "INV-2627-1106": "pay_82200101",
+    "INV-2627-1107": "pay_82200102",
+    "INV-2627-1108": "pay_82200103",
+    "INV-2627-1109": "pay_82200104",
+    "INV-2627-1110": "pay_82200105",
+    "INV-2627-1111": "pay_82200106",
+    "INV-2627-1112": "pay_82200107",
+    "INV-2627-1113": "pay_82200108",
+    "INV-2627-1114": "pay_82200109",
+    "INV-2627-1115": "pay_82200110",
+    "INV-2627-1116": "pay_82200111",
+    "INV-2627-1118": "pay_82200112",
+    "INV-2627-1119": "pay_82200113",
+    "INV-2627-1120": "pay_82200114",
+    "INV-2627-1121": "pay_82200115",
+    "INV-2627-1122": "pay_82200116",
+    "INV-2627-1124": "pay_82200117",
+    "INV-2627-1125": "pay_82200118",
+    "INV-2627-1126": "pay_82200119",
+    "INV-2627-1127": "pay_82200120",
+    "INV-2627-1128": "pay_82200121",
+    "INV-2627-1129": "pay_82200122",
+    "INV-2627-1131": "pay_82200124",
+    "INV-2627-1132": "pay_82200125",
+    "INV-2627-1133": "pay_82200126",
+    "INV-2627-1134": "pay_82200127",
+    "INV-2627-1136": "pay_82200128",
+    "INV-2627-1137": "pay_82200129",
+    "INV-2627-1138": "pay_82200130",
+    "INV-2627-1140": "pay_82200132"
   },
   "payment_to_batch": {
-    "pay_82400023": "setl_82400000",
-    "pay_82400035": "setl_82400000",
-    "pay_82400092": "setl_82400000",
-    "pay_82400002": "setl_82400001",
-    "pay_82400026": "setl_82400001",
-    "pay_82400063": "setl_82400001",
-    "pay_82400070": "setl_82400001",
-    "pay_82400075": "setl_82400001",
-    "pay_82400076": "setl_82400001",
-    "pay_82400117": "setl_82400001",
-    "pay_82400048": "setl_82400002",
-    "pay_82400067": "setl_82400002",
-    "pay_82400034": "setl_82400003",
-    "pay_82400041": "setl_82400003",
-    "pay_82400064": "setl_82400003",
-    "pay_82400074": "setl_82400003",
-    "pay_82400126": "setl_82400003",
-    "rfnd_82400001": "setl_82400003",
-    "pay_82400016": "setl_82400004",
-    "pay_82400054": "setl_82400004",
-    "pay_82400007": "setl_82400005",
-    "pay_82400017": "setl_82400005",
-    "pay_82400040": "setl_82400005",
-    "pay_82400073": "setl_82400005",
-    "pay_82400095": "setl_82400005",
-    "pay_82400118": "setl_82400005",
-    "pay_82400125": "setl_82400005",
-    "rfnd_82400005": "setl_82400005",
-    "pay_82400024": "setl_82400006",
-    "pay_82400105": "setl_82400006",
-    "pay_82400119": "setl_82400006",
-    "pay_82400122": "setl_82400006",
-    "pay_82400030": "setl_82400007",
-    "pay_82400089": "setl_82400007",
-    "rfnd_82400004": "setl_82400007",
-    "pay_82400018": "setl_82400008",
-    "pay_82400060": "setl_82400008",
-    "pay_82400081": "setl_82400008",
-    "pay_82400110": "setl_82400008",
-    "pay_82400116": "setl_82400008",
-    "pay_82400103": "setl_82400009",
-    "pay_82400123": "setl_82400009",
-    "pay_82400027": "setl_82400010",
-    "pay_82400033": "setl_82400010",
-    "pay_82400078": "setl_82400010",
-    "pay_82400112": "setl_82400011",
-    "pay_82400065": "setl_82400012",
-    "pay_82400086": "setl_82400012",
-    "pay_82400025": "setl_82400013",
-    "pay_82400052": "setl_82400013",
-    "pay_82400057": "setl_82400013",
-    "pay_82400087": "setl_82400013",
-    "pay_82400091": "setl_82400013",
-    "pay_82400099": "setl_82400013",
-    "pay_82400020": "setl_82400014",
-    "pay_82400083": "setl_82400014",
-    "pay_82400022": "setl_82400015",
-    "pay_82400056": "setl_82400015",
-    "pay_82400102": "setl_82400015",
-    "pay_82400015": "setl_82400016",
-    "pay_82400068": "setl_82400016",
-    "pay_82400082": "setl_82400016",
-    "pay_82400013": "setl_82400017",
-    "pay_82400020b": "setl_82400017",
-    "pay_82400053": "setl_82400017",
-    "pay_82400085": "setl_82400017",
-    "pay_82400121": "setl_82400017",
-    "pay_82400124": "setl_82400017",
-    "pay_82400014": "setl_82400019",
-    "pay_82400022b": "setl_82400019",
-    "pay_82400100": "setl_82400020",
-    "rfnd_82400006": "setl_82400020",
-    "pay_82400032": "setl_82400021",
-    "pay_82400093": "setl_82400021",
-    "pay_82400096": "setl_82400021",
-    "pay_82400097": "setl_82400022",
-    "pay_82400132": "setl_82400022",
-    "pay_82400021": "setl_82400024",
-    "pay_82400029": "setl_82400024",
-    "pay_82400001": "setl_82400025",
-    "pay_82400009": "setl_82400025",
-    "pay_82400114": "setl_82400025",
-    "pay_82400127": "setl_82400025",
-    "pay_82400019": "setl_82400026",
-    "pay_82400061": "setl_82400026",
-    "pay_82400109": "setl_82400026",
-    "pay_82400003": "setl_82400027",
-    "pay_82400006": "setl_82400027",
-    "pay_82400045": "setl_82400027",
-    "pay_82400107": "setl_82400027",
-    "pay_82400043": "setl_82400028",
-    "pay_82400005": "setl_82400029",
-    "pay_82400008": "setl_82400029",
-    "pay_82400036": "setl_82400029",
-    "pay_82400046": "setl_82400029",
-    "pay_82400058": "setl_82400029",
-    "pay_82400037": "setl_82400030",
-    "pay_82400059": "setl_82400030",
-    "pay_82400130": "setl_82400030",
-    "pay_82400010": "setl_82400031",
-    "pay_82400080": "setl_82400031",
-    "pay_82400090": "setl_82400031",
-    "pay_82400131": "setl_82400031",
-    "rfnd_82490000": "setl_82400031",
-    "pay_82400042": "setl_82400032",
-    "pay_82400072": "setl_82400032",
-    "pay_82400113": "setl_82400032",
-    "rfnd_82490001": "setl_82400032",
-    "pay_82400047": "setl_82400033",
-    "pay_82400071": "setl_82400033",
-    "rfnd_82490002": "setl_82400033",
-    "adjs_82400000": "setl_82400033",
-    "pay_82400069": "setl_82400034",
-    "pay_82400108": "setl_82400034",
-    "pay_82400128": "setl_82400034",
-    "pay_82400011": "setl_82400035",
-    "pay_82400050": "setl_82400036",
-    "pay_82400004": "setl_82400037",
-    "pay_82400055": "setl_82400037",
-    "pay_82400111": "setl_82400037",
-    "adjs_82400001": "setl_82400037",
-    "pay_82400012": "setl_82400038",
-    "pay_82400101": "setl_82400038",
-    "pay_82400049": "setl_82400040",
-    "pay_82400077": "setl_82400040",
-    "pay_82400031": "setl_82400041",
-    "pay_82400066": "setl_82400041",
-    "pay_82400088": "setl_82400041",
-    "pay_82400094": "setl_82400041",
-    "pay_82400129": "setl_82400041",
-    "adjs_82400002": "setl_82400041",
-    "pay_82400028": "setl_82400042",
-    "pay_82400038": "setl_82400042",
-    "pay_82400044": "setl_82400042",
-    "pay_82400120": "setl_82400042",
-    "pay_82400062": "setl_82400043",
-    "pay_82400098": "setl_82400043",
-    "pay_82400104": "setl_82400043",
-    "rfnd_82400009": "setl_82400043",
-    "pay_82400049b": "setl_82400045",
-    "rfnd_82400002": "setl_82400045"
+    "pay_82200084": "setl_82200000",
+    "pay_82200076": "setl_82200001",
+    "pay_82200104": "setl_82200001",
+    "pay_82200126": "setl_82200001",
+    "pay_82200040": "setl_82200002",
+    "pay_82200066": "setl_82200002",
+    "pay_82200073": "setl_82200002",
+    "pay_82200097": "setl_82200002",
+    "pay_82200074": "setl_82200003",
+    "pay_82200098": "setl_82200003",
+    "pay_82200057": "setl_82200004",
+    "pay_82200069": "setl_82200004",
+    "pay_82200082": "setl_82200004",
+    "rfnd_82200005": "setl_82200004",
+    "pay_82200111": "setl_82200005",
+    "pay_82200132": "setl_82200005",
+    "pay_82200007": "setl_82200006",
+    "pay_82200120": "setl_82200006",
+    "pay_82200109": "setl_82200007",
+    "pay_82200033": "setl_82200008",
+    "pay_82200039": "setl_82200008",
+    "pay_82200087": "setl_82200008",
+    "pay_82200130": "setl_82200008",
+    "pay_82200131": "setl_82200008",
+    "pay_82200070": "setl_82200009",
+    "pay_82200115": "setl_82200009",
+    "pay_82200009": "setl_82200010",
+    "pay_82200018": "setl_82200010",
+    "pay_82200045": "setl_82200010",
+    "pay_82200064": "setl_82200010",
+    "pay_82200075": "setl_82200010",
+    "pay_82200088": "setl_82200010",
+    "pay_82200127": "setl_82200010",
+    "pay_82200035": "setl_82200011",
+    "pay_82200059": "setl_82200011",
+    "pay_82200081": "setl_82200011",
+    "pay_82200095": "setl_82200011",
+    "pay_82200096": "setl_82200011",
+    "pay_82200038": "setl_82200012",
+    "pay_82200106": "setl_82200012",
+    "rfnd_82200006": "setl_82200012",
+    "pay_82200093": "setl_82200014",
+    "pay_82200063": "setl_82200015",
+    "pay_82200086": "setl_82200015",
+    "pay_82200099": "setl_82200015",
+    "pay_82200014": "setl_82200016",
+    "pay_82200043": "setl_82200016",
+    "pay_82200060": "setl_82200016",
+    "pay_82200019": "setl_82200017",
+    "pay_82200025": "setl_82200017",
+    "pay_82200027": "setl_82200017",
+    "pay_82200052": "setl_82200017",
+    "pay_82200105": "setl_82200017",
+    "pay_82200042": "setl_82200018",
+    "pay_82200077": "setl_82200018",
+    "pay_82200108": "setl_82200018",
+    "pay_82200125": "setl_82200018",
+    "rfnd_82200000": "setl_82200018",
+    "pay_82200047": "setl_82200019",
+    "pay_82200015": "setl_82200020",
+    "pay_82200054": "setl_82200021",
+    "pay_82200085": "setl_82200021",
+    "pay_82200118": "setl_82200021",
+    "pay_82200005": "setl_82200022",
+    "pay_82200072": "setl_82200022",
+    "pay_82200078": "setl_82200022",
+    "pay_82200080": "setl_82200022",
+    "pay_82200008": "setl_82200023",
+    "pay_82200107": "setl_82200023",
+    "rfnd_82200002": "setl_82200023",
+    "pay_82200046": "setl_82200024",
+    "pay_82200068": "setl_82200024",
+    "pay_82200103": "setl_82200024",
+    "pay_82200129": "setl_82200024",
+    "pay_82200026": "setl_82200025",
+    "pay_82200012": "setl_82200026",
+    "pay_82200016": "setl_82200026",
+    "pay_82200022": "setl_82200026",
+    "pay_82200062": "setl_82200027",
+    "pay_82200090": "setl_82200027",
+    "pay_82200058": "setl_82200028",
+    "pay_82200112": "setl_82200028",
+    "rfnd_82200004": "setl_82200028",
+    "pay_82200037": "setl_82200029",
+    "pay_82200041": "setl_82200029",
+    "pay_82200124": "setl_82200029",
+    "pay_82200004": "setl_82200030",
+    "pay_82200034": "setl_82200030",
+    "rfnd_82290000": "setl_82200030",
+    "pay_82200011": "setl_82200031",
+    "pay_82200031": "setl_82200031",
+    "pay_82200032": "setl_82200031",
+    "pay_82200048": "setl_82200031",
+    "pay_82200051": "setl_82200031",
+    "rfnd_82290001": "setl_82200031",
+    "pay_82200001": "setl_82200032",
+    "pay_82200049": "setl_82200032",
+    "pay_82200100": "setl_82200032",
+    "pay_82200101": "setl_82200032",
+    "pay_82200117": "setl_82200032",
+    "pay_82200121": "setl_82200032",
+    "rfnd_82290002": "setl_82200032",
+    "adjs_82200000": "setl_82200032",
+    "pay_82200010": "setl_82200033",
+    "pay_82200102": "setl_82200033",
+    "pay_82200119": "setl_82200033",
+    "pay_82200092": "setl_82200034",
+    "pay_82200006": "setl_82200035",
+    "pay_82200024": "setl_82200035",
+    "pay_82200050": "setl_82200035",
+    "pay_82200056": "setl_82200035",
+    "pay_82200061": "setl_82200035",
+    "pay_82200067": "setl_82200036",
+    "pay_82200094": "setl_82200036",
+    "pay_82200114": "setl_82200036",
+    "adjs_82200001": "setl_82200036",
+    "pay_82200128": "setl_82200037",
+    "rfnd_82200007": "setl_82200037",
+    "pay_82200021": "setl_82200038",
+    "pay_82200023": "setl_82200038",
+    "pay_82200028": "setl_82200038",
+    "pay_82200003": "setl_82200039",
+    "pay_82200017": "setl_82200039",
+    "pay_82200029": "setl_82200039",
+    "pay_82200036": "setl_82200039",
+    "pay_82200071": "setl_82200039",
+    "pay_82200079": "setl_82200039",
+    "pay_82200083": "setl_82200039",
+    "pay_82200113": "setl_82200039",
+    "pay_82200116": "setl_82200039",
+    "pay_82200030": "setl_82200041",
+    "pay_82200089": "setl_82200041",
+    "pay_82200122": "setl_82200041",
+    "pay_82200055": "setl_82200042",
+    "pay_82200123": "setl_82200042",
+    "rfnd_82200009": "setl_82200042",
+    "pay_82200013": "setl_82200043",
+    "pay_82200053": "setl_82200043",
+    "pay_82200091": "setl_82200043",
+    "pay_82200110": "setl_82200043",
+    "rfnd_82200003": "setl_82200043"
   },
   "invoice_to_bank": {
-    "INV-2627-1035": "bank:0007",
-    "INV-2627-1095": "bank:0009",
-    "INV-2627-1033": "bank:0011",
-    "INV-2627-1020": "bank:0038",
-    "INV-2627-1010": "bank:0046",
-    "INV-2627-1121": "bank:0061"
+    "INV-2627-1135": "bank:0023",
+    "INV-2627-1058": "bank:0031",
+    "INV-2627-1039": "bank:0037",
+    "INV-2627-1026": "bank:0041",
+    "INV-2627-1123": "bank:0049",
+    "INV-2627-1022": "bank:0057"
   },
   "batch_to_bank": {
-    "setl_82400000": [
+    "setl_82200000": [
       "bank:0001"
     ],
-    "setl_82400001": [
+    "setl_82200001": [
       "bank:0001"
     ],
-    "setl_82400004": [
-      "bank:0002"
+    "setl_82200002": [
+      "bank:0004"
     ],
-    "setl_82400002": [
-      "bank:0003"
+    "setl_82200003": [
+      "bank:0004"
     ],
-    "setl_82400003": [
-      "bank:0003"
-    ],
-    "setl_82400005": [
+    "setl_82200004": [
       "bank:0005"
     ],
-    "setl_82400006": [
+    "setl_82200006": [
       "bank:0006"
     ],
-    "setl_82400007": [
-      "bank:0008"
+    "setl_82200005": [
+      "bank:0007"
     ],
-    "setl_82400008": [
-      "bank:0010"
+    "setl_82200007": [
+      "bank:0011"
     ],
-    "setl_82400010": [
+    "setl_82200009": [
       "bank:0012"
     ],
-    "setl_82400009": [
+    "setl_82200008": [
       "bank:0013"
     ],
-    "setl_82400011": [
+    "setl_82200010": [
       "bank:0014"
     ],
-    "setl_82400013": [
-      "bank:0018"
+    "setl_82200012": [
+      "bank:0017"
     ],
-    "setl_82400012": [
-      "bank:0019",
-      "bank:0021"
+    "setl_82200014": [
+      "bank:0019"
     ],
-    "setl_82400014": [
+    "setl_82200015": [
       "bank:0020"
     ],
-    "setl_82400015": [
+    "setl_82200017": [
+      "bank:0021"
+    ],
+    "setl_82200016": [
       "bank:0022"
     ],
-    "setl_82400016": [
-      "bank:0023",
+    "setl_82200018": [
       "bank:0025"
     ],
-    "setl_82400017": [
-      "bank:0024"
-    ],
-    "setl_82400019": [
+    "setl_82200019": [
       "bank:0026"
     ],
-    "setl_82400021": [
+    "setl_82200020": [
+      "bank:0027"
+    ],
+    "setl_82200021": [
       "bank:0028"
     ],
-    "setl_82400022": [
-      "bank:0029"
+    "setl_82200022": [
+      "bank:0030"
     ],
-    "setl_82400024": [
-      "bank:0031"
-    ],
-    "setl_82400026": [
-      "bank:0032"
-    ],
-    "setl_82400027": [
+    "setl_82200024": [
+      "bank:0032",
       "bank:0033"
     ],
-    "setl_82400028": [
+    "setl_82200025": [
       "bank:0034"
     ],
-    "setl_82400029": [
-      "bank:0036"
+    "setl_82200026": [
+      "bank:0035"
     ],
-    "setl_82400030": [
-      "bank:0037"
+    "setl_82200027": [
+      "bank:0038"
     ],
-    "setl_82400031": [
-      "bank:0039"
+    "setl_82200028": [
+      "bank:0042",
+      "bank:0045"
     ],
-    "setl_82400032": [
+    "setl_82200029": [
       "bank:0043"
     ],
-    "setl_82400033": [
+    "setl_82200030": [
       "bank:0044"
     ],
-    "setl_82400035": [
+    "setl_82200031": [
+      "bank:0046"
+    ],
+    "setl_82200032": [
       "bank:0047"
     ],
-    "setl_82400036": [
+    "setl_82200035": [
       "bank:0048"
     ],
-    "setl_82400037": [
-      "bank:0049"
-    ],
-    "setl_82400038": [
+    "setl_82200034": [
       "bank:0050"
     ],
-    "setl_82400040": [
-      "bank:0052"
+    "setl_82200036": [
+      "bank:0051"
     ],
-    "setl_82400042": [
+    "setl_82200037": [
+      "bank:0053"
+    ],
+    "setl_82200038": [
       "bank:0054"
     ],
-    "setl_82400041": [
+    "setl_82200039": [
+      "bank:0055"
+    ],
+    "setl_82200041": [
       "bank:0056"
     ],
-    "setl_82400043": [
-      "bank:0059"
+    "setl_82200042": [
+      "bank:0058"
     ],
-    "setl_82400045": [
+    "setl_82200043": [
       "bank:0060"
     ]
   },
   "exceptions": {
-    "INV-2627-1001": "UNPAID_INVOICE",
-    "pay_82400004": "FEE_VARIANCE",
-    "pay_82400017": "DUPLICATE_PAYMENT",
-    "INV-2627-1022": "PART_PAYMENT",
-    "INV-2627-1024": "PART_PAYMENT",
-    "INV-2627-1025": "UNPAID_INVOICE",
-    "INV-2627-1030": "SHORT_PAYMENT",
-    "pay_82400029": "FEE_VARIANCE",
-    "INV-2627-1034": "UNPAID_INVOICE",
-    "pay_82400037": "UNBILLED_PAYMENT",
-    "INV-2627-1044": "TAX_LINE_MISMATCH",
-    "pay_82400039": "FUNDS_ON_HOLD",
-    "pay_82400044": "FEE_VARIANCE",
-    "INV-2627-1054": "UNPAID_INVOICE",
-    "INV-2627-1056": "PART_PAYMENT",
-    "pay_82400051": "FUNDS_ON_HOLD",
-    "INV-2627-1059": "UNPAID_INVOICE",
-    "pay_82400052": "UNBILLED_PAYMENT",
-    "INV-2627-1066": "SHORT_PAYMENT",
-    "pay_82400071": "UNBILLED_PAYMENT",
-    "pay_82400076": "DUPLICATE_PAYMENT",
-    "INV-2627-1084": "TAX_LINE_MISMATCH",
-    "pay_82400079": "FUNDS_ON_HOLD",
-    "pay_82400087": "DUPLICATE_PAYMENT",
-    "INV-2627-1100": "SHORT_PAYMENT",
-    "INV-2627-1101": "OVERPAYMENT",
-    "pay_82400097": "DUPLICATE_PAYMENT",
-    "INV-2627-1110": "OVERPAYMENT",
-    "INV-2627-1112": "TAX_LINE_MISMATCH",
-    "INV-2627-1116": "UNPAID_INVOICE",
-    "pay_82400110": "UNBILLED_PAYMENT",
-    "pay_82400115": "FUNDS_ON_HOLD",
-    "INV-2627-1128": "TAX_LINE_MISMATCH",
-    "pay_82400121": "UNBILLED_PAYMENT",
-    "pay_82400122": "FEE_VARIANCE",
-    "pay_82400132": "FEE_VARIANCE",
-    "rfnd_82490000": "ORPHAN_REFUND",
-    "rfnd_82490001": "ORPHAN_REFUND",
-    "rfnd_82490002": "ORPHAN_REFUND",
-    "adjs_82400000": "CHARGEBACK_ADJUSTMENT",
-    "adjs_82400001": "CHARGEBACK_ADJUSTMENT",
-    "adjs_82400002": "CHARGEBACK_ADJUSTMENT",
-    "setl_82400012": "SPLIT_SETTLEMENT",
-    "setl_82400014": "SETTLEMENT_AMOUNT_MISMATCH",
-    "setl_82400016": "SPLIT_SETTLEMENT",
-    "setl_82400017": "SETTLEMENT_AMOUNT_MISMATCH",
-    "setl_82400020": "MISSING_IN_BANK",
-    "setl_82400025": "MISSING_IN_BANK",
-    "setl_82400034": "MISSING_IN_BANK",
-    "setl_82400042": "SETTLEMENT_AMOUNT_MISMATCH",
-    "setl_82400000": "MERGED_PAYOUT",
-    "setl_82400001": "MERGED_PAYOUT",
-    "setl_82400002": "MERGED_PAYOUT",
-    "setl_82400003": "MERGED_PAYOUT",
-    "INV-2627-1020": "TDS_WITHHELD",
-    "INV-2627-1033": "TDS_WITHHELD",
-    "INV-2627-1095": "TDS_WITHHELD",
-    "bank:0004": "UNEXPECTED_BANK_CREDIT",
-    "bank:0030": "UNEXPECTED_BANK_CREDIT",
+    "pay_82200002": "FUNDS_ON_HOLD",
+    "pay_82200008": "FEE_VARIANCE",
+    "INV-2627-1013": "UNPAID_INVOICE",
+    "INV-2627-1014": "TAX_LINE_MISMATCH",
+    "INV-2627-1015": "UNPAID_INVOICE",
+    "pay_82200020": "FUNDS_ON_HOLD",
+    "pay_82200024": "UNBILLED_PAYMENT",
+    "INV-2627-1031": "TAX_LINE_MISMATCH",
+    "pay_82200032": "DUPLICATE_PAYMENT",
+    "pay_82200044": "FUNDS_ON_HOLD",
+    "pay_82200051": "UNBILLED_PAYMENT",
+    "INV-2627-1056": "TAX_LINE_MISMATCH",
+    "pay_82200054": "FEE_VARIANCE",
+    "pay_82200065": "FUNDS_ON_HOLD",
+    "pay_82200074": "DUPLICATE_PAYMENT",
+    "pay_82200085": "FEE_VARIANCE",
+    "pay_82200089": "UNBILLED_PAYMENT",
+    "INV-2627-1094": "TAX_LINE_MISMATCH",
+    "pay_82200095": "FEE_VARIANCE",
+    "pay_82200098": "DUPLICATE_PAYMENT",
+    "pay_82200099": "UNBILLED_PAYMENT",
+    "INV-2627-1103": "UNPAID_INVOICE",
+    "INV-2627-1104": "UNPAID_INVOICE",
+    "INV-2627-1117": "UNPAID_INVOICE",
+    "pay_82200119": "FEE_VARIANCE",
+    "pay_82200123": "UNBILLED_PAYMENT",
+    "pay_82200131": "DUPLICATE_PAYMENT",
+    "INV-2627-1139": "UNPAID_INVOICE",
+    "rfnd_82290000": "ORPHAN_REFUND",
+    "rfnd_82290001": "ORPHAN_REFUND",
+    "rfnd_82290002": "ORPHAN_REFUND",
+    "adjs_82200000": "CHARGEBACK_ADJUSTMENT",
+    "adjs_82200001": "CHARGEBACK_ADJUSTMENT",
+    "adjs_82200002": "CHARGEBACK_ADJUSTMENT",
+    "setl_82200011": "MISSING_IN_BANK",
+    "setl_82200023": "MISSING_IN_BANK",
+    "setl_82200024": "SPLIT_SETTLEMENT",
+    "setl_82200026": "SETTLEMENT_AMOUNT_MISMATCH",
+    "setl_82200028": "SPLIT_SETTLEMENT",
+    "setl_82200029": "SETTLEMENT_AMOUNT_MISMATCH",
+    "setl_82200033": "MISSING_IN_BANK",
+    "setl_82200037": "SETTLEMENT_AMOUNT_MISMATCH",
+    "setl_82200000": "MERGED_PAYOUT",
+    "setl_82200001": "MERGED_PAYOUT",
+    "setl_82200002": "MERGED_PAYOUT",
+    "setl_82200003": "MERGED_PAYOUT",
+    "INV-2627-1058": "TDS_WITHHELD",
+    "INV-2627-1123": "TDS_WITHHELD",
+    "INV-2627-1135": "TDS_WITHHELD",
+    "bank:0003": "UNEXPECTED_BANK_CREDIT",
+    "bank:0009": "UNEXPECTED_BANK_CREDIT",
+    "bank:0015": "UNEXPECTED_BANK_CREDIT",
+    "bank:0018": "UNEXPECTED_BANK_CREDIT",
+    "bank:0036": "UNEXPECTED_BANK_CREDIT",
     "bank:0040": "UNEXPECTED_BANK_CREDIT",
-    "bank:0041": "UNEXPECTED_BANK_CREDIT",
-    "bank:0045": "UNEXPECTED_BANK_CREDIT",
-    "bank:0051": "UNEXPECTED_BANK_CREDIT",
-    "bank:0055": "UNEXPECTED_BANK_CREDIT"
+    "bank:0061": "UNEXPECTED_BANK_CREDIT"
   },
   "notes": {
-    "INV-2627-1001": "Invoice raised; no payment was ever captured for this order.",
-    "pay_82400004": "Fee charged deviates from the contracted 300bps MDR.",
-    "pay_82400017": "Second capture on order order_8240017, already paid by pay_82400016.",
-    "INV-2627-1022": "Invoice settled by two captures adding to 811789p.",
-    "INV-2627-1024": "Invoice settled by two captures adding to 299987p.",
-    "INV-2627-1025": "Invoice raised; no payment was ever captured for this order.",
-    "INV-2627-1030": "Customer paid 190806p against a 205168p invoice.",
-    "pay_82400029": "Fee charged deviates from the contracted 180bps MDR.",
-    "INV-2627-1034": "Invoice raised; no payment was ever captured for this order.",
-    "pay_82400037": "Payment captured against an order with no invoice in the ERP.",
-    "INV-2627-1044": "GST on the invoice is not 18% of taxable value 778046p.",
-    "pay_82400039": "Gateway is holding these funds; the batch will not carry them.",
-    "pay_82400044": "Fee charged deviates from the contracted 150bps MDR.",
-    "INV-2627-1054": "Invoice raised; no payment was ever captured for this order.",
-    "INV-2627-1056": "Invoice settled by two captures adding to 210414p.",
-    "pay_82400051": "Gateway is holding these funds; the batch will not carry them.",
-    "INV-2627-1059": "Invoice raised; no payment was ever captured for this order.",
-    "pay_82400052": "Payment captured against an order with no invoice in the ERP.",
-    "INV-2627-1066": "Customer paid 845427p against a 971755p invoice.",
-    "pay_82400071": "Payment captured against an order with no invoice in the ERP.",
-    "pay_82400076": "Second capture on order order_8240082, already paid by pay_82400075.",
-    "INV-2627-1084": "GST on the invoice is not 18% of taxable value 575956p.",
-    "pay_82400079": "Gateway is holding these funds; the batch will not carry them.",
-    "pay_82400087": "Second capture on order order_8240092, already paid by pay_82400086.",
-    "INV-2627-1100": "Customer paid 803040p against a 845305p invoice.",
-    "INV-2627-1101": "Customer paid 170787p against a 156685p invoice.",
-    "pay_82400097": "Second capture on order order_8240102, already paid by pay_82400096.",
-    "INV-2627-1110": "Customer paid 460165p against a 422170p invoice.",
-    "INV-2627-1112": "GST on the invoice is not 18% of taxable value 129765p.",
-    "INV-2627-1116": "Invoice raised; no payment was ever captured for this order.",
-    "pay_82400110": "Payment captured against an order with no invoice in the ERP.",
-    "pay_82400115": "Gateway is holding these funds; the batch will not carry them.",
-    "INV-2627-1128": "GST on the invoice is not 18% of taxable value 921253p.",
-    "pay_82400121": "Payment captured against an order with no invoice in the ERP.",
-    "pay_82400122": "Fee charged deviates from the contracted 200bps MDR.",
-    "pay_82400132": "Fee charged deviates from the contracted 200bps MDR.",
-    "rfnd_82490000": "Refund references payment pay_82490000, which is not present in the report.",
-    "rfnd_82490001": "Refund references payment pay_82490001, which is not present in the report.",
-    "rfnd_82490002": "Refund references payment pay_82490002, which is not present in the report.",
-    "adjs_82400000": "Dispute adjustment debited by the gateway; no matching ERP entry.",
-    "adjs_82400001": "Dispute adjustment debited by the gateway; no matching ERP entry.",
-    "adjs_82400002": "Dispute adjustment debited by the gateway; no matching ERP entry.",
-    "setl_82400012": "Batch arrived as two separate bank credits on consecutive days.",
-    "setl_82400014": "Bank credited 1173751p against a batch of 1174341p.",
-    "setl_82400016": "Batch arrived as two separate bank credits on consecutive days.",
-    "setl_82400017": "Bank credited 1974328p against a batch of 1976688p.",
-    "setl_82400020": "Batch of 164552p settled on 2026-07-23; no bank credit found.",
-    "setl_82400025": "Batch of 2040261p settled on 2026-07-28; no bank credit found.",
-    "setl_82400034": "Batch of 1427059p settled on 2026-08-06; no bank credit found.",
-    "setl_82400042": "Bank credited 3124693p against a batch of 3125873p.",
-    "setl_82400000": "Paid to the bank inside a consolidated credit with no UTR reference.",
-    "setl_82400001": "Paid to the bank inside a consolidated credit with no UTR reference.",
-    "setl_82400002": "Paid to the bank inside a consolidated credit with no UTR reference.",
-    "setl_82400003": "Paid to the bank inside a consolidated credit with no UTR reference.",
-    "INV-2627-1020": "Customer paid 643485p against a 656617p invoice, withholding 2% TDS u/s 194C.",
-    "INV-2627-1033": "Customer paid 335080p against a 341918p invoice, withholding 2% TDS u/s 194C.",
-    "INV-2627-1095": "Customer paid 778877p against a 794772p invoice, withholding 2% TDS u/s 194C.",
-    "bank:0004": "Credit in the bank with no settlement batch behind it.",
-    "bank:0030": "Credit in the bank with no settlement batch behind it.",
+    "pay_82200002": "Gateway is holding these funds; the batch will not carry them.",
+    "pay_82200008": "Fee charged deviates from the contracted 0bps MDR.",
+    "INV-2627-1013": "Invoice raised; no payment was ever captured for this order.",
+    "INV-2627-1014": "GST on the invoice is not 18% of taxable value 175959p.",
+    "INV-2627-1015": "Invoice raised; no payment was ever captured for this order.",
+    "pay_82200020": "Gateway is holding these funds; the batch will not carry them.",
+    "pay_82200024": "Payment captured against an order with no invoice in the ERP.",
+    "INV-2627-1031": "GST on the invoice is not 18% of taxable value 891339p.",
+    "pay_82200032": "Second capture on order order_8220034, already paid by pay_82200031.",
+    "pay_82200044": "Gateway is holding these funds; the batch will not carry them.",
+    "pay_82200051": "Payment captured against an order with no invoice in the ERP.",
+    "INV-2627-1056": "GST on the invoice is not 18% of taxable value 663928p.",
+    "pay_82200054": "Fee charged deviates from the contracted 300bps MDR.",
+    "pay_82200065": "Gateway is holding these funds; the batch will not carry them.",
+    "pay_82200074": "Second capture on order order_8220077, already paid by pay_82200073.",
+    "pay_82200085": "Fee charged deviates from the contracted 200bps MDR.",
+    "pay_82200089": "Payment captured against an order with no invoice in the ERP.",
+    "INV-2627-1094": "GST on the invoice is not 18% of taxable value 843430p.",
+    "pay_82200095": "Fee charged deviates from the contracted 150bps MDR.",
+    "pay_82200098": "Second capture on order order_8220100, already paid by pay_82200097.",
+    "pay_82200099": "Payment captured against an order with no invoice in the ERP.",
+    "INV-2627-1103": "Invoice raised; no payment was ever captured for this order.",
+    "INV-2627-1104": "Invoice raised; no payment was ever captured for this order.",
+    "INV-2627-1117": "Invoice raised; no payment was ever captured for this order.",
+    "pay_82200119": "Fee charged deviates from the contracted 350bps MDR.",
+    "pay_82200123": "Payment captured against an order with no invoice in the ERP.",
+    "pay_82200131": "Second capture on order order_8220137, already paid by pay_82200130.",
+    "INV-2627-1139": "Invoice raised; no payment was ever captured for this order.",
+    "rfnd_82290000": "Refund references payment pay_82290000, which is not present in the report.",
+    "rfnd_82290001": "Refund references payment pay_82290001, which is not present in the report.",
+    "rfnd_82290002": "Refund references payment pay_82290002, which is not present in the report.",
+    "adjs_82200000": "Dispute adjustment debited by the gateway; no matching ERP entry.",
+    "adjs_82200001": "Dispute adjustment debited by the gateway; no matching ERP entry.",
+    "adjs_82200002": "Dispute adjustment debited by the gateway; no matching ERP entry.",
+    "setl_82200011": "Batch of 3737692p settled on 2026-07-14; no bank credit found.",
+    "setl_82200023": "Batch of 1036320p settled on 2026-07-27; no bank credit found.",
+    "setl_82200024": "Batch arrived as two separate bank credits on consecutive days.",
+    "setl_82200026": "Bank credited 1769687p against a batch of 1767187p.",
+    "setl_82200028": "Batch arrived as two separate bank credits on consecutive days.",
+    "setl_82200029": "Bank credited 2336832p against a batch of 2337422p.",
+    "setl_82200033": "Batch of 2243355p settled on 2026-08-06; no bank credit found.",
+    "setl_82200037": "Bank credited 254761p against a batch of 257121p.",
+    "setl_82200000": "Paid to the bank inside a consolidated credit with no UTR reference.",
+    "setl_82200001": "Paid to the bank inside a consolidated credit with no UTR reference.",
+    "setl_82200002": "Paid to the bank inside a consolidated credit with no UTR reference.",
+    "setl_82200003": "Paid to the bank inside a consolidated credit with no UTR reference.",
+    "INV-2627-1058": "Customer paid 348076p against a 355180p invoice, withholding 2% TDS u/s 194C.",
+    "INV-2627-1123": "Customer paid 1007829p against a 1028397p invoice, withholding 2% TDS u/s 194C.",
+    "INV-2627-1135": "Customer paid 444585p against a 453658p invoice, withholding 2% TDS u/s 194C.",
+    "bank:0003": "Credit in the bank with no settlement batch behind it.",
+    "bank:0009": "Credit in the bank with no settlement batch behind it.",
+    "bank:0015": "Credit in the bank with no settlement batch behind it.",
+    "bank:0018": "Credit in the bank with no settlement batch behind it.",
+    "bank:0036": "Credit in the bank with no settlement batch behind it.",
     "bank:0040": "Credit in the bank with no settlement batch behind it.",
-    "bank:0041": "Credit in the bank with no settlement batch behind it.",
-    "bank:0045": "Credit in the bank with no settlement batch behind it.",
-    "bank:0051": "Credit in the bank with no settlement batch behind it.",
-    "bank:0055": "Credit in the bank with no settlement batch behind it."
+    "bank:0061": "Credit in the bank with no settlement batch behind it."
   }
 }

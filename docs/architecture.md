@@ -304,7 +304,55 @@ find. Against unfamiliar formats the same call earns its place.
 
 ---
 
-## 9. Known limitations
+## 9. State, and why reconciliation is not a report
+
+Everything above is stateless: point it at three files and it says what it
+found. Real reconciliation is not like that, and the reason is timing. A
+settlement sent on Monday reaches the bank on Wednesday, so **an exception
+raised today is routinely answered by data that does not exist yet**. A tool
+that starts from nothing every morning cannot tell you that yesterday's break
+has cleared — which is the one thing a controller most wants to know.
+
+`kosh.store` keeps three things between runs, in SQLite:
+
+- **records** — a content fingerprint of every source row, so re-loading the
+  same export is a no-op rather than a double count
+- **links** — matches already made, and the run that made them
+- **exceptions** — an open/resolved lifecycle with an age
+
+`kosh sync` reconciles the current snapshot and folds the result into that
+ledger. `scripts/live_demo.py` runs three days of it:
+
+```
+─── Day 1 · settlements sent, money still in flight ───
+  343 records, 343 new, 166 new links
+    opened   setl_82400041   MISSING_IN_BANK   23,733.74
+    …and 56 more opened
+
+─── Day 2 · the bank statement catches up ───
+  347 records, 4 new or amended, 4 new links
+    CLEARED  setl_82400041   MISSING_IN_BANK   23,733.74  (matched once the data arrived)
+    53 still open, oldest 1 run(s) old
+
+─── Day 3 · the same file is loaded twice ───
+  347 records, 0 new or amended, 0 new links
+    nothing changed
+    53 still open, oldest 2 run(s) old
+```
+
+Day 2 is the point: **the engine did not change between those runs.** The data
+caught up, the break answered itself, and the ledger recorded that it had. Day 3
+is the quiet one, and the reason fingerprints exist — a reconciliation you can
+safely re-run is a reconciliation somebody can automate.
+
+**The matching engine still knows nothing about any of this.** Reconciliation
+runs over the whole current snapshot and the store diffs one run against the
+last, which keeps hidden state out of the part that gets audited. A test asserts
+the engine never reads the store.
+
+---
+
+## 10. Known limitations
 
 - **Single currency.** Everything is INR paise. Multi-currency settlement would
   need an FX rate table and a revaluation line in the bridge; neither exists.
@@ -315,7 +363,15 @@ find. Against unfamiliar formats the same call earns its place.
   into one credit would not be found.
 - **The corpus is synthetic.** It was written to be hard in the ways real data
   is hard, but it was written by the same person as the matcher. The multi-seed
-  benchmark reduces that risk; it does not eliminate it.
+  benchmark reduces that risk and the adversarial corpus (§8) attacks it
+  directly; neither eliminates it.
+- **State is a ledger, not a workflow.** Exceptions open, age and clear, but
+  nobody can be assigned one, nothing is approved by a second pair of eyes, and
+  a human resolution teaches the matcher nothing. Those are the next things a
+  real deployment would need.
+- **Ingest is a snapshot, not a feed.** There is no webhook listener and no bank
+  connection; `sync` reads the same three files. The state model is what a feed
+  would need, but the feed is not written.
 - **One false link survives**, on the adversarial corpus: when a bank reuses a
   single reference across two payouts, the engine matches the credit to one of
   them rather than declining. Reported rather than fixed.

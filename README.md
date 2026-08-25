@@ -44,9 +44,12 @@ forever):
 | `kosh evaluate` | Print precision/recall/F1 against ground truth as JSON |
 | `kosh ask "…" [--llm on]` | Question the completed run (settlement Q&A) |
 | `kosh serve` | Browse and work the run in a local web UI |
+| `kosh sync` | Reconcile and fold the result into the running ledger |
 | `pytest -q` | 117 tests, no model loaded, ~1.2 s |
 | `python scripts/benchmark.py --seeds 30 [--llm]` | Accuracy across 30 regenerated worlds |
 | `python scripts/ablation.py` | Does the model earn its place, and on which leg? |
+| `python scripts/adversarial.py [--llm]` | Score it on data written **against** it |
+| `python scripts/live_demo.py` | Three days of a close: a late credit clears yesterday's break |
 | `python scripts/verify_offline.py` | Run everything with all outbound sockets blocked |
 
 ```bash
@@ -282,6 +285,49 @@ residual is records with no counterparty *in the data at all* — an invoice
 nobody paid, a batch the bank has not sent — so there is nothing to find and
 every answer is a false positive. Of its 15 calls there, 13 were declines and 2
 were wrong picks the arithmetic gate caught.
+
+---
+
+## It keeps state, so a late credit clears yesterday's break
+
+A settlement sent on Monday reaches the bank on Wednesday. An exception raised
+today is routinely answered by data that does not exist yet, so a tool that
+starts from nothing every morning cannot tell you a break has cleared.
+
+```bash
+./.venv/bin/python scripts/live_demo.py
+```
+
+```
+Day 1  343 records, 343 new      opened  setl_82400041  MISSING_IN_BANK  23,733.74
+Day 2  347 records,   4 new      CLEARED setl_82400041  MISSING_IN_BANK  23,733.74
+                                         (matched once the data arrived)
+Day 3  347 records,   0 new      nothing changed
+```
+
+The engine did not change between day 1 and day 2 — the data caught up. Day 3
+loads the same export again and nothing moves, because every row carries a
+content fingerprint. The matching engine still knows nothing about the store; a
+test asserts it never reads it.
+
+---
+
+## Scored on data written against it
+
+`generate.py` cannot escape being written by the same author as the matcher.
+`kosh.adversary` is built to be unfair — cases chosen by asking what actually
+breaks a close, most with no code in the taxonomy:
+
+| | deterministic | + model |
+|---|---:|---:|
+| links recovered | **1 / 4** | **4 / 4** |
+| false links created | 1 / 8 | 1 / 8 |
+| **invented a cause it could not know** | **0 %** | **0 %** |
+
+Three payouts of the same amount on the same day, references in a statement
+format no pattern reads: amount and date are useless, so the reference is the
+only signal. **This is where the model stops being a garnish** — rules get one
+of four, reading the narration gets four of four.
 
 ---
 
