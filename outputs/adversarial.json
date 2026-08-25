@@ -4,7 +4,7 @@
   "seconds": 0.0,
   "links_recovered": 1,
   "links_total": 4,
-  "false_links": 1,
+  "false_links": 0,
   "no_link_cases": 8,
   "unknowns_admitted": 1,
   "unknowns_total": 3,
@@ -32,8 +32,7 @@
   ],
   "tiers": {
     "T0_EXACT_ID": 2,
-    "T1_NORMALIZED_ID": 1,
-    "T2_AMOUNT_DATE": 1
+    "T1_NORMALIZED_ID": 1
   },
   "cases": [
     {
@@ -166,9 +165,10 @@
     {
       "case": "utr_reuse",
       "kind": "no_link",
-      "verdict": "false link",
+      "verdict": "correctly declined",
       "codes": [
-        "MISSING_IN_BANK"
+        "AMBIGUOUS_REFERENCE",
+        "UNEXPECTED_BANK_CREDIT"
       ],
       "why": "one reference on two batches; only one credit exists"
     },

@@ -26,6 +26,7 @@ from .generate import build, write
 from .ingest import build_batches, load
 from .match import reconcile
 from .position import bridge_rows, build_position
+from .money import to_rupees
 from .report import TIER_MEANING, json_report
 from .schema import EXCEPTION_MEANING
 
@@ -65,8 +66,9 @@ _MODEL_LOCK = threading.Lock()
 class Session:
     """Whatever the last run produced, plus the lazily-loaded model."""
 
-    def __init__(self, data_dir: Path) -> None:
+    def __init__(self, data_dir: Path, db: Path | None = None) -> None:
         self.data_dir = data_dir
+        self.db = db
         self.state: dict | None = None
         self.seed = 20260824
         self._adjudicator = None
@@ -106,8 +108,19 @@ class Session:
         ds, errors = load(self.data_dir)
         batches = build_batches(ds)
 
+        # Decisions a person already made are replayed before any tier runs, so
+        # the browser sees the same picture the CLI does.
+        confirmed = set()
+        if self.db is not None:
+            from .store import Store
+            st = Store(self.db)
+            confirmed = st.manual_links()
+            st.close()
+            if confirmed:
+                emit("confirmed", f"Replaying {len(confirmed)} confirmed link(s)")
+
         emit("match", f"Reconciling {len(ds):,} records across four legs")
-        res = reconcile(ds, batches, adj)
+        res = reconcile(ds, batches, adj, confirmed=confirmed)
         wall = time.perf_counter() - t0
 
         emit("position", "Building the cash position")
@@ -185,6 +198,8 @@ def make_handler(session: Session):
                         else "image/png" if name.endswith(".png")
                         else "application/octet-stream")
                 self._send(200, target.read_bytes(), kind)
+            elif path == "/api/ledger":
+                self._json(self._ledger())
             elif path == "/api/state":
                 if session.state is None:
                     self._json({"ready": False})
@@ -209,6 +224,48 @@ def make_handler(session: Session):
                 self._ask()
             else:
                 self._json({"error": "not found"}, 404)
+
+        def _ledger(self) -> dict:
+            """The accumulated picture: what is open, who has it, how old it is."""
+            if session.db is None:
+                return {"enabled": False,
+                        "why": "started without a ledger; run `kosh serve --db …`"}
+            from .store import Store
+            st = Store(session.db)
+            try:
+                rows = st.db.execute(
+                    "SELECT key, code, status, value_at_risk, assignee, note, "
+                    "opened_run, opened_at, resolution FROM exception "
+                    "ORDER BY status, ABS(value_at_risk) DESC").fetchall()
+                runs = st.db.execute(
+                    "SELECT id, started_at, records, new_records, opened, resolved "
+                    "FROM run ORDER BY id DESC LIMIT 10").fetchall()
+                history = st.history(25)
+                counts = st.counts()
+                links = st.db.execute(
+                    "SELECT leg, left_key, right_key, confirmed_by, note, confirmed_at "
+                    "FROM manual_link ORDER BY confirmed_at DESC").fetchall()
+            finally:
+                st.close()
+            latest = max((r[0] for r in runs), default=0)
+            return {
+                "enabled": True, "counts": counts,
+                "exceptions": [
+                    {"key": k, "code": c, "status": stt,
+                     "value": str(to_rupees(v or 0)), "assignee": who,
+                     "note": note, "age_runs": max(0, latest - (opened or latest)),
+                     "opened_at": at, "resolution": resn}
+                    for k, c, stt, v, who, note, opened, at, resn in rows],
+                "runs": [{"id": i, "at": a, "records": rc, "new": nw,
+                          "opened": op, "resolved": rs}
+                         for i, a, rc, nw, op, rs in runs],
+                "confirmed_links": [
+                    {"leg": lg, "left": l, "right": r, "by": by, "note": n, "at": at}
+                    for lg, l, r, by, n, at in links],
+                "history": [{"at": a, "actor": ac, "action": act,
+                             "subject": sub, "detail": d}
+                            for a, ac, act, sub, d in history],
+            }
 
         def _ask(self) -> None:
             body = self._read_json()
@@ -270,8 +327,8 @@ def make_handler(session: Session):
 
 
 def serve(data_dir: Path, host: str = "127.0.0.1", port: int = 8000,
-          preload: bool = True) -> None:
-    session = Session(data_dir)
+          preload: bool = True, db: Path | None = None) -> None:
+    session = Session(data_dir, db)
     if not (data_dir / "erp_invoices.csv").exists():
         print(f"No corpus at {data_dir} — generating seed {session.seed}")
         ds, gt, inj = build(seed=session.seed)
@@ -280,6 +337,8 @@ def serve(data_dir: Path, host: str = "127.0.0.1", port: int = 8000,
         session.run(None, False, lambda *a: None)          # first paint is instant
     httpd = ThreadingHTTPServer((host, port), make_handler(session))
     print(f"Kosh is running at http://{host}:{port}")
+    if db is not None:
+        print(f"Ledger: {db}")
     print("The first view is a deterministic run. Toggle the model in the header.")
     print("Ctrl-C to stop.")
     try:

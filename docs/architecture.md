@@ -368,7 +368,59 @@ the engine never reads the store.
 
 ---
 
-## 10. Known limitations
+## 10. From ledger to control
+
+Keeping state told you a break had cleared. It did not let anyone *work* one, and
+a reconciliation nobody can act on inside the tool is still a report.
+
+- **Assignment.** An exception gets an owner and moves `open → investigating`.
+- **Maker–checker.** Closing a break above ₹10,000 needs a second name, and it
+  cannot be the same name. Below it, one signature — demanding two for a ₹23
+  bank charge is how controls get routed around rather than followed.
+- **`written_off` is a decision, not a disappearance.** The money is still gone;
+  somebody chose to stop chasing it, and their name is on that.
+- **An audit trail.** Every assign, note, resolution and confirmation records
+  who, when and why.
+- **A decision outlives the run.** What a person closed is not reopened by the
+  next reconciliation.
+
+**And a feedback loop.** When a controller links two records the engine could
+not, `kosh exception link` records it, and every later run replays it at a tier
+above every other — because a person decided, and asking again each morning is
+not diligence, it is the tool forgetting. The confirmations are *passed into*
+`reconcile()` rather than read by it, so the engine keeps no hidden state and
+the call that used them shows exactly which ones applied.
+
+```
+$ kosh exception link --key setl_82400020 --to bank:0004 --by amrit \
+      --note "gateway confirmed by email"
+$ kosh sync
+  replaying 1 link(s) a person already confirmed
+    - bank:0004      UNEXPECTED_BANK_CREDIT   8,936.54   matched once the data arrived
+    - setl_82400020  MISSING_IN_BANK          1,645.52   matched once the data arrived
+```
+
+---
+
+## 11. Reading what banks actually send
+
+The bank side was a CSV of my own devising, which is a weak claim: a parser that
+only reads its author's format has not met reality. `kosh.feeds` reads **MT940**,
+the SWIFT statement format Indian banks export from corporate net-banking, and
+it is awkward in ways a hand-rolled CSV never is — comma decimals, two-digit
+years, dates split across two fields, narrations continued across lines, and a
+debit/credit marker that is a letter inside a field rather than a column. `RC`
+and `RD` reverse a credit and a debit respectively, so the sign flips.
+
+Drop a `bank_statement.sta` beside the other files and it is used instead of the
+CSV; nothing else changes. The parser also checks the statement against **its
+own opening and closing balances** — one that does not add up has been truncated
+or edited, which is worth knowing before reconciling any of it against anything
+else.
+
+---
+
+## 12. Known limitations
 
 - **Single currency.** Everything is INR paise. Multi-currency settlement would
   need an FX rate table and a revaluation line in the bridge; neither exists.
@@ -381,18 +433,17 @@ the engine never reads the store.
   is hard, but it was written by the same person as the matcher. The multi-seed
   benchmark reduces that risk and the adversarial corpus (§8) attacks it
   directly; neither eliminates it.
-- **State is a ledger, not a workflow.** Exceptions open, age and clear, but
-  nobody can be assigned one, nothing is approved by a second pair of eyes, and
-  a human resolution teaches the matcher nothing. Those are the next things a
-  real deployment would need.
-- **Ingest is a snapshot, not a feed.** `kosh pull` reads the settlement recon
-  API, but there is no webhook listener and no bank connection, so the ERP and
-  bank sides are still files. The state model is what a feed would need; two of
-  the three feeds are not written.
-- **The API path is verified against the documented shape, not a live
-  account.** I have no merchant credentials. The mapping, paging, unit handling
-  and error paths are all tested against a recorded fixture; the HTTP call
-  itself has never run against a real key.
+- **Ingest is pull, not push.** The gateway comes from its API and the bank from
+  an MT940 download, but both are fetched on demand; there is no webhook
+  listener, so nothing reacts the moment a payment is captured. The ERP side is
+  still a CSV, because there is no single ERP format to read.
+- **The API has never run against a live key.** I have no merchant credentials.
+  The Authorization header, paging, every error branch and the whole mapping are
+  exercised through an injected transport, so the only untested thing is the
+  socket itself — but that is still untested.
+- **The model is small.** Qwen2.5-1.5B is reliable at choosing among candidates
+  and unreliable at prose (§7). A larger local model would likely widen what
+  T4 can recover; it has not been tried.
 - **One false link survives**, on the adversarial corpus: when a bank reuses a
   single reference across two payouts, the engine matches the credit to one of
   them rather than declining. Reported rather than fixed.

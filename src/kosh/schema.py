@@ -65,6 +65,7 @@ class ExceptionCode(str, Enum):
     OVERPAYMENT = "OVERPAYMENT"
     PART_PAYMENT = "PART_PAYMENT"
     DUPLICATE_BANK_LINE = "DUPLICATE_BANK_LINE"
+    AMBIGUOUS_REFERENCE = "AMBIGUOUS_REFERENCE"
     UNCLASSIFIED = "UNCLASSIFIED"
 
 
@@ -88,6 +89,7 @@ EXCEPTION_MEANING: dict[ExceptionCode, str] = {
     ExceptionCode.OVERPAYMENT: "More was paid against an invoice than it was raised for.",
     ExceptionCode.PART_PAYMENT: "One invoice was settled by several captures that add up to it exactly.",
     ExceptionCode.DUPLICATE_BANK_LINE: "The same bank credit appears more than once in the statement.",
+    ExceptionCode.AMBIGUOUS_REFERENCE: "One settlement reference identifies more than one payout, so it identifies none of them.",
     ExceptionCode.UNCLASSIFIED: "The engine could not place this residual in any known category.",
 }
 

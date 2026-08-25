@@ -60,9 +60,31 @@ CREATE TABLE IF NOT EXISTS exception (
   value_at_risk INTEGER, evidence TEXT, proposed_action TEXT,
   opened_run INTEGER NOT NULL, opened_at TEXT NOT NULL,
   resolved_run INTEGER, resolved_at TEXT, resolution TEXT,
+  assignee TEXT, note TEXT,
+  resolved_by TEXT, approved_by TEXT, approved_at TEXT,
   PRIMARY KEY (key, code)
 );
+-- A link a person confirmed by hand. Replayed into every later run so the
+-- same question is never asked twice, and kept append-only so the decision
+-- and who made it survive.
+CREATE TABLE IF NOT EXISTS manual_link (
+  leg TEXT NOT NULL, left_key TEXT NOT NULL, right_key TEXT NOT NULL,
+  confirmed_by TEXT NOT NULL, note TEXT, confirmed_at TEXT NOT NULL,
+  PRIMARY KEY (leg, left_key, right_key)
+);
+CREATE TABLE IF NOT EXISTS audit (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  at TEXT NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL,
+  subject TEXT NOT NULL, detail TEXT
+);
 """
+
+#: Statuses an exception moves through. `written_off` is a decision, not a
+#: disappearance — the money is still gone, somebody chose to stop chasing it.
+STATUSES = ("open", "investigating", "resolved", "written_off")
+#: Above this, a resolution needs a second person. Self-approving a large
+#: write-off is the control this exists to prevent.
+APPROVAL_THRESHOLD_PAISE = 10_000_00
 
 
 def _fingerprint(obj) -> str:
@@ -113,7 +135,8 @@ class Store:
     def open_exceptions(self) -> dict[tuple[str, str], sqlite3.Row]:
         self.db.row_factory = sqlite3.Row
         rows = self.db.execute(
-            "SELECT * FROM exception WHERE status = 'open'").fetchall()
+            "SELECT * FROM exception WHERE status IN ('open','investigating')"
+        ).fetchall()
         return {(r["key"], r["code"]): r for r in rows}
 
     def counts(self) -> dict:
@@ -122,9 +145,97 @@ class Store:
                 "records": q("SELECT COUNT(*) FROM record"),
                 "links": q("SELECT COUNT(*) FROM link"),
                 "open_exceptions": q(
-                    "SELECT COUNT(*) FROM exception WHERE status='open'"),
+                    "SELECT COUNT(*) FROM exception "
+                    "WHERE status IN ('open','investigating')"),
+                "assigned": q(
+                    "SELECT COUNT(*) FROM exception WHERE assignee IS NOT NULL "
+                    "AND status IN ('open','investigating')"),
+                "confirmed_links": q("SELECT COUNT(*) FROM manual_link"),
                 "resolved_exceptions": q(
-                    "SELECT COUNT(*) FROM exception WHERE status='resolved'")}
+                    "SELECT COUNT(*) FROM exception "
+                    "WHERE status IN ('resolved','written_off')")}
+
+    def manual_links(self) -> set[tuple[str, str, str]]:
+        """Confirmations to replay into the next reconciliation."""
+        return {(r[0], r[1], r[2]) for r in self.db.execute(
+            "SELECT leg, left_key, right_key FROM manual_link")}
+
+    def history(self, limit: int = 20) -> list[tuple]:
+        return self.db.execute(
+            "SELECT at, actor, action, subject, detail FROM audit "
+            "ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+
+    # ---------------------------------------------------------------- actions
+    def _audit(self, actor: str, action: str, subject: str, detail: str = "") -> None:
+        self.db.execute(
+            "INSERT INTO audit (at, actor, action, subject, detail) VALUES (?,?,?,?,?)",
+            (datetime.now().isoformat(timespec="seconds"), actor, action, subject, detail))
+
+    def _row(self, key: str, code: str):
+        self.db.row_factory = sqlite3.Row
+        row = self.db.execute(
+            "SELECT * FROM exception WHERE key=? AND code=?", (key, code)).fetchone()
+        if row is None:
+            raise KeyError(f"no exception {key}/{code}")
+        return row
+
+    def assign(self, key: str, code: str, to: str, by: str) -> None:
+        self._row(key, code)
+        self.db.execute("UPDATE exception SET assignee=?, status=CASE WHEN "
+                        "status='open' THEN 'investigating' ELSE status END "
+                        "WHERE key=? AND code=?", (to, key, code))
+        self._audit(by, "assign", f"{key}/{code}", f"to {to}")
+        self.db.commit()
+
+    def annotate(self, key: str, code: str, note: str, by: str) -> None:
+        self._row(key, code)
+        self.db.execute("UPDATE exception SET note=? WHERE key=? AND code=?",
+                        (note, key, code))
+        self._audit(by, "note", f"{key}/{code}", note[:200])
+        self.db.commit()
+
+    def resolve(self, key: str, code: str, by: str, note: str,
+                status: str = "resolved", approved_by: str | None = None) -> None:
+        """Close a break by decision rather than by the data changing.
+
+        A resolution above the threshold needs a second name, and it cannot be
+        the same name: a control that one person can satisfy alone is not a
+        control. Below it, one person suffices — requiring two signatures for a
+        ₹23 bank charge is how controls get routed around.
+        """
+        if status not in STATUSES:
+            raise ValueError(f"status must be one of {STATUSES}")
+        row = self._row(key, code)
+        exposure = abs(row["value_at_risk"] or 0)
+        if exposure >= APPROVAL_THRESHOLD_PAISE:
+            if not approved_by:
+                raise PermissionError(
+                    f"{key}/{code} carries {to_rupees(exposure)}, at or above the "
+                    f"{to_rupees(APPROVAL_THRESHOLD_PAISE)} threshold, so it needs "
+                    "a second approver.")
+            if approved_by.strip().lower() == by.strip().lower():
+                raise PermissionError(
+                    f"{by} cannot approve their own resolution of {key}/{code}.")
+        now = datetime.now().isoformat(timespec="seconds")
+        self.db.execute(
+            "UPDATE exception SET status=?, resolution=?, resolved_by=?, "
+            "approved_by=?, approved_at=?, resolved_at=?, resolved_run=("
+            "SELECT MAX(id) FROM run) WHERE key=? AND code=?",
+            (status, note, by, approved_by, now if approved_by else None,
+             now, key, code))
+        self._audit(by, status, f"{key}/{code}",
+                    f"{note}" + (f" · approved by {approved_by}" if approved_by else ""))
+        self.db.commit()
+
+    def confirm_link(self, leg: str, left: str, right: str, by: str,
+                     note: str = "") -> None:
+        """Record that a person matched two records the engine could not."""
+        self.db.execute(
+            "INSERT OR REPLACE INTO manual_link VALUES (?,?,?,?,?,?)",
+            (leg, left, right, by, note,
+             datetime.now().isoformat(timespec="seconds")))
+        self._audit(by, "confirm_link", f"{left} -> {right}", f"{leg} · {note}")
+        self.db.commit()
 
     # ------------------------------------------------------------------ write
     def sync(self, ds: Dataset, res: ReconResult) -> SyncReport:
@@ -168,11 +279,15 @@ class Store:
 
         # --- exceptions: open, carry, or clear ------------------------------
         was_open = self.open_exceptions()
+        decided = {(r[0], r[1]) for r in self.db.execute(
+            "SELECT key, code FROM exception WHERE status IN ('resolved','written_off')")}
         now_present = {(f.key, f.code.value): f for f in res.findings
                        if f.disposition is Disposition.NEEDS_REVIEW}
 
         opened, carried = [], []
         for (key, code), f in now_present.items():
+            if (key, code) in decided:
+                continue      # a person closed this; the run does not reopen it
             if (key, code) in was_open:
                 row = was_open[(key, code)]
                 age = run_id - row["opened_run"]

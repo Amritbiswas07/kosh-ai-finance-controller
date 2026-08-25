@@ -31,12 +31,12 @@ def _adjudicator(mode: str):
     return adj, f"{adj.name} on {adj.device} (loaded in {took:.1f}s)"
 
 
-def _run(data: Path, llm: str) -> tuple:
+def _run(data: Path, llm: str, confirmed=None) -> tuple:
     adj, label = _adjudicator(llm)
     t = time.perf_counter()
     ds, errs = load(data)
     batches = build_batches(ds)
-    res = reconcile(ds, batches, adj)
+    res = reconcile(ds, batches, adj, confirmed=confirmed)
     wall = time.perf_counter() - t
     pos = build_position(ds, batches, res)
     return ds, batches, res, pos, wall, errs, adj, label
@@ -164,8 +164,11 @@ def cmd_pull(a) -> int:
 
 def cmd_sync(a) -> int:
     from .store import Store
-    ds, batches, res, pos, wall, errs, adj, label = _run(a.data, a.llm)
     store = Store(a.db)
+    confirmed = store.manual_links()
+    ds, batches, res, pos, wall, errs, adj, label = _run(a.data, a.llm, confirmed)
+    if confirmed:
+        print(f"  replaying {len(confirmed)} link(s) a person already confirmed")
     rep = store.sync(ds, res)
     before = store.counts()
     store.close()
@@ -194,9 +197,56 @@ def cmd_sync(a) -> int:
     return 0
 
 
+def cmd_exception(a) -> int:
+    """Work an exception: assign it, note it, close it, or link it by hand."""
+    from .store import APPROVAL_THRESHOLD_PAISE, Store
+    store = Store(a.db)
+    try:
+        if a.action == "list":
+            rows = store.db.execute(
+                "SELECT key, code, status, value_at_risk, assignee, note FROM exception "
+                "WHERE status IN ('open','investigating') "
+                "ORDER BY ABS(value_at_risk) DESC LIMIT ?", (a.top,)).fetchall()
+            if not rows:
+                print("  nothing open")
+            for key, code, status, val, who, note in rows:
+                print(f"  {key:<22} {code:<26} {fmt(val or 0):>13}  {status:<14}"
+                      f"{('→ ' + who) if who else ''}")
+                if note:
+                    print(f"      note: {note}")
+        elif a.action == "assign":
+            store.assign(a.key, a.code, a.to, a.by)
+            print(f"  {a.key}/{a.code} assigned to {a.to}")
+        elif a.action == "note":
+            store.annotate(a.key, a.code, a.note, a.by)
+            print(f"  noted on {a.key}/{a.code}")
+        elif a.action in ("resolve", "write-off"):
+            status = "resolved" if a.action == "resolve" else "written_off"
+            store.resolve(a.key, a.code, a.by, a.note, status, a.approved_by)
+            print(f"  {a.key}/{a.code} {status} by {a.by}"
+                  + (f", approved by {a.approved_by}" if a.approved_by else ""))
+        elif a.action == "link":
+            store.confirm_link(a.leg, a.key, a.to, a.by, a.note)
+            print(f"  confirmed {a.key} -> {a.to} on {a.leg}")
+            print("  later runs replay this; the engine will not ask again.")
+        elif a.action == "history":
+            for at, actor, action, subject, detail in store.history(a.top):
+                print(f"  {at}  {actor:<12} {action:<14} {subject:<30} {detail or ''}")
+    except (KeyError, ValueError, PermissionError) as exc:
+        print(f"\n  {exc}\n")
+        if isinstance(exc, PermissionError):
+            print(f"  Resolutions at or above {fmt(APPROVAL_THRESHOLD_PAISE)} need "
+                  "--approved-by, and it cannot be the same person.")
+        store.close()
+        return 1
+    store.close()
+    return 0
+
+
 def cmd_serve(a) -> int:
     from .server import serve
-    serve(a.data, host=a.host, port=a.port, preload=not a.no_preload)
+    serve(a.data, host=a.host, port=a.port, preload=not a.no_preload,
+          db=None if a.no_ledger else a.db)
     return 0
 
 
@@ -229,7 +279,9 @@ def main(argv: list[str] | None = None) -> int:
                                ("sync", cmd_sync,
                                 "reconcile and fold the result into the running ledger"),
                                ("pull", cmd_pull,
-                                "fetch a real settlement recon period from Razorpay")):
+                                "fetch a real settlement recon period from Razorpay"),
+                               ("exception", cmd_exception,
+                                "work an exception: assign, note, resolve, link")):
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--data", type=Path, default=DATA)
         p.add_argument("--out", type=Path, default=OUT)
@@ -250,9 +302,23 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--month", type=int, required=True)
             p.add_argument("--day", type=int, default=None)
             p.add_argument("--limit", type=int, default=None)
-        if name == "sync":
+        if name == "serve":
+            p.add_argument("--db", type=Path, default=ROOT / "outputs" / "kosh.db")
+            p.add_argument("--no-ledger", action="store_true",
+                           help="run without the accumulated ledger")
+        if name in ("sync", "exception"):
             p.add_argument("--db", type=Path, default=ROOT / "outputs" / "kosh.db")
             p.add_argument("--top", type=int, default=8)
+        if name == "exception":
+            p.add_argument("action", choices=("list", "assign", "note", "resolve",
+                                              "write-off", "link", "history"))
+            p.add_argument("--key", default="")
+            p.add_argument("--code", default="")
+            p.add_argument("--to", default="", help="assignee, or the far side of a link")
+            p.add_argument("--leg", default="settlement_to_bank")
+            p.add_argument("--by", default="", help="who is doing this")
+            p.add_argument("--note", default="")
+            p.add_argument("--approved-by", dest="approved_by", default=None)
         if name == "serve":
             p.add_argument("--host", default="127.0.0.1")
             p.add_argument("--port", type=int, default=8000)
