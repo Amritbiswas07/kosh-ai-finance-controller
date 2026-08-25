@@ -63,9 +63,8 @@ def test_debits_and_credits_collapse_to_one_signed_amount(tmp_path):
     assert all(l.amount_paise != 0 for l in ds.bank)
 
 
-def test_a_foreign_currency_invoice_is_carried_in_its_own_denomination(tmp_path):
-    """It used to be refused. Now it is reconciled, and the currency travels
-    with it rather than being flattened into rupees at the door."""
+def test_a_foreign_currency_invoice_is_refused(tmp_path):
+    """Invoice.currency was parsed and then never looked at by anything."""
     root = _corpus(tmp_path)
     path = root / "erp_invoices.csv"
     rows = list(csv.reader(path.open()))
@@ -74,41 +73,11 @@ def test_a_foreign_currency_invoice_is_carried_in_its_own_denomination(tmp_path)
     with path.open("w", newline="") as fh:
         csv.writer(fh).writerows(rows)
     ds, errors = load(root)
-    assert not errors
-    inv = next(i for i in ds.invoices if i.invoice_no == "INV-USD-1")
-    assert inv.currency == "USD" and inv.gross_paise == 118000
+    assert len(errors) == 1 and "USD" in errors[0]
+    assert all(i.invoice_no != "INV-USD-1" for i in ds.invoices)
 
 
-def test_a_zero_decimal_currency_is_not_scaled_as_if_it_had_two(tmp_path):
-    """1,000 yen is 1,000 minor units, not 100,000."""
-    root = _corpus(tmp_path)
-    path = root / "erp_invoices.csv"
-    rows = list(csv.reader(path.open()))
-    rows.append(["INV-JPY-1", "o_jpy", "Tokyo Buyer", "2026-07-04",
-                 "1000", "0", "1000", "JPY"])
-    with path.open("w", newline="") as fh:
-        csv.writer(fh).writerows(rows)
-    ds, errors = load(root)
-    assert not errors
-    inv = next(i for i in ds.invoices if i.invoice_no == "INV-JPY-1")
-    assert inv.currency == "JPY" and inv.gross_paise == 1000
-
-
-def test_a_currency_with_unknown_minor_units_is_still_refused(tmp_path):
-    """Decimal places are what turn digits into money; two is not a safe guess."""
-    root = _corpus(tmp_path)
-    path = root / "erp_invoices.csv"
-    rows = list(csv.reader(path.open()))
-    rows.append(["INV-XYZ-1", "o_x", "Nowhere Ltd", "2026-07-04",
-                 "1000.00", "0.00", "1000.00", "XYZ"])
-    with path.open("w", newline="") as fh:
-        csv.writer(fh).writerows(rows)
-    ds, errors = load(root)
-    assert len(errors) == 1 and "XYZ" in errors[0]
-    assert all(i.invoice_no != "INV-XYZ-1" for i in ds.invoices)
-
-
-def test_a_foreign_currency_gateway_row_is_carried(tmp_path):
+def test_a_foreign_currency_gateway_row_is_refused(tmp_path):
     root = _corpus(tmp_path)
     path = root / "pg_settlement_report.csv"
     rows = list(csv.reader(path.open()))
@@ -118,6 +87,5 @@ def test_a_foreign_currency_gateway_row_is_carried(tmp_path):
     with path.open("w", newline="") as fh:
         csv.writer(fh).writerows(rows)
     ds, errors = load(root)
-    assert not errors
-    pay = next(t for t in ds.pg if t.entity_id == "pay_usd1")
-    assert pay.currency == "USD" and pay.amount_paise == 150000
+    assert len(errors) == 1 and "USD" in errors[0]
+    assert all(t.entity_id != "pay_usd1" for t in ds.pg)

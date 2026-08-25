@@ -1,6 +1,6 @@
 
-Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 8.5s)
-347 records · engine 25457.9 ms · wall 25.47 s · model 25.4 s
+Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 10.1s)
+347 records · engine 23423.0 ms · wall 23.43 s · model 23.4 s
 
 Where the money is
   Captured at the gateway                  +7,24,300.88
@@ -37,7 +37,7 @@ Findings 64 · 47 need review · 2,38,230.57 exposure
   OVERPAYMENT                    2   needs review
   SPLIT_SETTLEMENT               2   auto-resolved
 
-Measured  link F1 1.0000 · exception P 1.0000 R 1.0000 F1 1.0000 · auto-clear 84.2% · 14 rec/s
+Measured  link F1 1.0000 · exception P 1.0000 R 1.0000 F1 1.0000 · auto-clear 84.2% · 15 rec/s
 
 wrote /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/recon.json
       /Users/amritbiswas/Downloads/razorpay-buildathon-track4/outputs/recon.md

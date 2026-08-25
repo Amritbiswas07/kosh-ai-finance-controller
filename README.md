@@ -297,36 +297,6 @@ were wrong picks the arithmetic gate caught.
 
 ---
 
-## It handles more than one currency
-
-`Money` carries its denomination, and refuses to add ₹100 to $100 — a total that
-silently mixes currencies *reconciles*, which is what makes it dangerous. Minor
-units are per currency, so ¥1,000 is a thousand whole yen and not ten (getting
-that wrong is a hundredfold error that looks correct). A currency whose decimal
-places aren't known is still refused rather than assumed to have two.
-
-A foreign invoice enters the books at the rate on the day it was raised and is
-received at whatever the rate is later. That gap is **not a break** — both sides
-are right — so it gets its own line rather than being absorbed into a settlement
-variance where it would read as the bank short-paying:
-
-```
-  Landed in the bank                       +5,26,997.09
-  Still in transit                           +81,875.98
-  Exchange gain / loss on foreign invoices        +96.12
-```
-
-Rates live in a dated file (`data/fx_rates.csv`) versioned beside the statements
-they applied to, so a run reproduces months later. **A missing rate is an error,
-not a stale fallback** — `FX_RATE_MISSING` is raised and nothing is estimated.
-
-Two things this exposed, both already wrong the moment a foreign invoice
-existed: exports are zero-rated, so the 18% GST check now applies to domestic
-invoices only; and a payout is per day *and* per currency, because a batch
-summing dollars and rupees has a net that is not a quantity.
-
----
-
 ## It is a control, not a report
 
 Exceptions have an owner and a lifecycle, closing a large one needs a second

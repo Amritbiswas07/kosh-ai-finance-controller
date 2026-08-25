@@ -135,34 +135,22 @@ def test_paging_follows_skip_until_the_last_short_page(monkeypatch):
     assert out[-1]["entity_id"] == "pay_last"
 
 
-def _row(**over):
-    base = {"entity_id": "pay_X", "type": "payment", "debit": 0, "credit": 150000,
-            "amount": 150000, "currency": "USD", "fee": 3000, "tax": 540,
-            "on_hold": False, "settled": True, "created_at": 1783944600,
-            "settled_at": 1784117400, "settlement_id": "setl_x",
-            "settlement_utr": "HDFCN1", "order_id": "o1", "order_receipt": "INV-9",
-            "method": "card", "dispute_id": None, "payment_id": None}
-    return {**base, **over}
-
-
-def test_a_foreign_currency_row_keeps_its_currency():
-    """It used to be refused outright. The minor units of USD and INR happen to
-    match, so the figure is the same — but calling it rupees was the bug."""
-    txn = to_pg_txn(_row())
-    assert txn.currency == "USD" and txn.amount_paise == 150000
-
-
-def test_a_zero_decimal_currency_survives_the_mapper():
-    txn = to_pg_txn(_row(currency="JPY", credit=1570, amount=1570, fee=0, tax=0))
-    assert txn.currency == "JPY" and txn.amount_paise == 1570
-
-
-def test_a_currency_with_unknown_minor_units_is_refused():
+def test_a_foreign_currency_row_is_refused_not_silently_treated_as_rupees():
+    """The live report carries a currency the CSV path never had. Ignoring it
+    maps a USD settlement as INR paise — wrong by about 83x, and wrong with no
+    line anywhere saying so."""
     from kosh.schema import CurrencyMismatch
-    with pytest.raises(CurrencyMismatch, match="minor-unit"):
-        to_pg_txn(_row(currency="XYZ"))
-    rows, errors = to_pg_txns([_row(currency="XYZ")])
-    assert rows == [] and len(errors) == 1 and "XYZ" in errors[0]
+    usd = {"entity_id": "pay_USD1", "type": "payment", "debit": 0, "credit": 150000,
+           "amount": 150000, "currency": "USD", "fee": 3000, "tax": 540,
+           "on_hold": False, "settled": True, "created_at": 1783944600,
+           "settled_at": 1784117400, "settlement_id": "setl_x",
+           "settlement_utr": "HDFCN1", "order_id": "o1", "order_receipt": "INV-9",
+           "method": "card", "dispute_id": None, "payment_id": None}
+    with pytest.raises(CurrencyMismatch):
+        to_pg_txn(usd)
+    rows, errors = to_pg_txns([usd])
+    assert rows == [] and len(errors) == 1
+    assert "USD" in errors[0] and "INR" in errors[0]
 
 
 def test_a_missing_currency_is_assumed_to_be_the_base_one(items):

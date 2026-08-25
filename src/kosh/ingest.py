@@ -13,7 +13,6 @@ import csv
 from datetime import date, datetime
 from pathlib import Path
 
-from .currency import CurrencyError, exponent, parse
 from .money import to_paise
 from .schema import (BASE_CURRENCY, BankLine, CurrencyMismatch, Dataset,
                      Invoice, PGTxn, SettlementBatch)
@@ -24,21 +23,6 @@ _DT_FORMATS = ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%
 
 class IngestError(Exception):
     pass
-
-
-def _known(raw: str | None, key: str) -> str:
-    """Accept any currency whose minor units are defined; refuse the rest.
-
-    Refusing an unknown code is not squeamishness — the number of decimal
-    places is what turns digits into money, and defaulting it to two is how a
-    yen figure becomes a hundred times too small.
-    """
-    code = (raw or BASE_CURRENCY).strip().upper()
-    try:
-        exponent(code)
-    except CurrencyError:
-        raise CurrencyMismatch(key, code) from None
-    return code
 
 
 def _date(text: str) -> date:
@@ -76,28 +60,29 @@ def load(root: Path) -> tuple[Dataset, list[str]]:
     with (root / "erp_invoices.csv").open(newline="") as fh:
         for n, row in enumerate(csv.DictReader(fh), start=2):
             try:
-                cur = _known(row.get("currency"), row.get("invoice_no", "?"))
-                taxable = parse(row["taxable_amount"], cur).minor
-                tax = parse(row["tax_amount"], cur).minor
+                cur = (row.get("currency") or BASE_CURRENCY).strip().upper()
+                if cur != BASE_CURRENCY:
+                    raise CurrencyMismatch(row.get("invoice_no", "?"), cur)
+                taxable, tax = to_paise(row["taxable_amount"]), to_paise(row["tax_amount"])
                 ds.invoices.append(Invoice(
                     invoice_no=row["invoice_no"].strip(), order_id=row["order_id"].strip(),
                     customer=row["customer"].strip(), invoice_date=_date(row["invoice_date"]),
                     taxable_paise=taxable, tax_paise=tax,
-                    gross_paise=parse(row["gross_amount"], cur).minor,
-                    currency=cur))
+                    gross_paise=to_paise(row["gross_amount"]),
+                    currency=(row.get("currency") or "INR").strip()))
             except (IngestError, ValueError, KeyError) as exc:
                 errors.append(f"erp_invoices.csv:{n}: {exc}")
 
     with (root / "pg_settlement_report.csv").open(newline="") as fh:
         for n, row in enumerate(csv.DictReader(fh), start=2):
             try:
-                cur = _known(row.get("currency"), row.get("entity_id", "?"))
+                cur = (row.get("currency") or BASE_CURRENCY).strip().upper()
+                if cur != BASE_CURRENCY:
+                    raise CurrencyMismatch(row.get("entity_id", "?"), cur)
                 ds.pg.append(PGTxn(
                     entity_id=row["entity_id"].strip(), type=row["type"].strip().lower(),
-                    amount_paise=parse(row["amount"], cur).minor,
-                    fee_paise=parse(row["fee"], cur).minor,
-                    tax_paise=parse(row["tax"], cur).minor,
-                    currency=cur, created_at=_dt(row["created_at"]),
+                    amount_paise=to_paise(row["amount"]), fee_paise=to_paise(row["fee"]),
+                    tax_paise=to_paise(row["tax"]), created_at=_dt(row["created_at"]),
                     method=row["method"].strip().lower(),
                     order_id=_opt(row.get("order_id")),
                     order_receipt=_opt(row.get("order_receipt")),
@@ -157,10 +142,6 @@ def build_batches(ds: Dataset) -> list[SettlementBatch]:
     batches = []
     for sid, members in sorted(groups.items()):
         first = members[0]
-        # A batch settles in one currency. If the gateway ever mixed them the
-        # net would be a meaningless sum, so the batch takes the currency of its
-        # rows and `reconcile` raises the mixture separately.
-        currencies = {m.currency for m in members}
         batches.append(SettlementBatch(
             settlement_id=sid,
             utr=(first.settlement_utr or "").upper(),
@@ -169,6 +150,5 @@ def build_batches(ds: Dataset) -> list[SettlementBatch]:
             gross_paise=sum(m.amount_paise for m in members),
             fee_paise=sum(m.fee_paise for m in members),
             tax_paise=sum(m.tax_paise for m in members),
-            net_paise=sum(m.net_paise for m in members),
-            currency=first.currency if len(currencies) == 1 else "MIXED"))
+            net_paise=sum(m.net_paise for m in members)))
     return batches

@@ -34,5 +34,5 @@ def test_in_transit_plus_landed_equals_settled(run):
 def test_bridge_rows_render_every_line(run):
     ds, _gt, batches, res = run
     rows = bridge_rows(build_position(ds, batches, res))
-    assert len(rows) == 14
+    assert len(rows) == 13
     assert all(isinstance(a, int) for _, a, _ in rows)

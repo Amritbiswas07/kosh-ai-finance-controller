@@ -30,7 +30,6 @@ from itertools import combinations
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-from .currency import BASE, Money, RateMissing, RateTable
 from .money import to_rupees
 from .normalize import extract_utrs, looks_like_settlement, norm_id, token_overlap
 from .schema import (FEE_GST_BPS, MDR_BPS, BankLine, Dataset, ExceptionCode,
@@ -499,21 +498,7 @@ def _adjudicate_erp(open_inv: dict, open_pay: dict, res: ReconResult, adjudicato
 #  Leg B — gateway and ERP internal integrity
 # --------------------------------------------------------------------------- #
 
-def check_integrity(ds: Dataset, res: ReconResult,
-                    batches: "list[SettlementBatch] | None" = None) -> None:
-    for b in batches or []:
-        if b.currency != "MIXED":
-            continue
-        res.findings.append(Finding(
-            key=b.settlement_id, source="settlement",
-            code=ExceptionCode.MIXED_CURRENCY_BATCH,
-            disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=0,
-            evidence={"utr": b.utr, "members": len(b.members),
-                      "settled_at": b.settled_at.isoformat()},
-            proposed_action="This batch sums rows in more than one currency, so "
-                            "its net is not a quantity. Ask the gateway to split "
-                            "the payout by currency before reconciling it."))
-
+def check_integrity(ds: Dataset, res: ReconResult) -> None:
     payment_ids = {t.entity_id for t in ds.pg if t.type == "payment"}
 
     for t in ds.pg:
@@ -565,11 +550,6 @@ def check_integrity(ds: Dataset, res: ReconResult,
                                 "decide whether to contest before the representment window closes."))
 
     for inv in ds.invoices:
-        if inv.currency != BASE:
-            # An export is zero-rated. Charging GST on it would be the error;
-            # expecting 18% of a dollar invoice flagged every foreign sale as a
-            # tax break the moment multi-currency arrived.
-            continue
         due = round(inv.taxable_paise * 1800 / 10_000)
         if abs(inv.tax_paise - due) > TAX_TOL:
             res.findings.append(Finding(
@@ -1084,76 +1064,9 @@ def _suggest_causes(res: ReconResult, adjudicator) -> None:
             f.evidence["hypothesis"] = guess
 
 
-def _revalue(ds: Dataset, res: ReconResult, rates: RateTable, base: str) -> None:
-    """Book a foreign-currency invoice twice and report the difference.
-
-    An invoice raised in dollars enters the books at the rate on the day it was
-    raised. The money arrives later, at whatever the rate is then. The gap
-    between those two figures is not a reconciliation break — both sides are
-    correct — it is an exchange difference, and it belongs in the accounts as
-    one rather than being absorbed into a settlement variance where it looks
-    like the bank short-paid.
-
-    Where no rate is held for a day, nothing is estimated: the item is raised as
-    FX_RATE_MISSING and left in its own currency.
-    """
-    inv_by_no = {i.invoice_no: i for i in ds.invoices}
-    pay_by_id = {t.entity_id: t for t in ds.pg}
-    for m in res.matches:
-        if m.leg is not Leg.ERP_PG:
-            continue
-        inv = inv_by_no.get(m.left)
-        if inv is None or inv.currency == base:
-            continue
-        received_on = None
-        for key in m.right:
-            p = pay_by_id.get(key)
-            if p is not None:
-                received_on = (p.settled_at or p.created_at).date()
-        if received_on is None:
-            continue
-        booked_amount = Money(inv.gross_paise, inv.currency)
-        try:
-            booked = rates.convert(booked_amount, base, inv.invoice_date)
-            realised = rates.convert(booked_amount, base, received_on)
-        except RateMissing as exc:
-            res.findings.append(Finding(
-                key=inv.invoice_no, source="erp",
-                code=ExceptionCode.FX_RATE_MISSING,
-                disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=0,
-                evidence={"currency": inv.currency, "amount": booked_amount.format(),
-                          "invoice_date": inv.invoice_date.isoformat(),
-                          "received_on": received_on.isoformat(),
-                          "why": str(exc)},
-                proposed_action=f"Load a {inv.currency}->{base} rate covering "
-                                f"{exc.on} before this invoice can be revalued."))
-            continue
-        delta = realised.amount.minor - booked.amount.minor
-        if delta == 0:
-            continue
-        gain = delta > 0
-        res.findings.append(Finding(
-            key=inv.invoice_no, source="erp", code=ExceptionCode.FX_REVALUATION,
-            disposition=Disposition.AUTO_RESOLVED, value_at_risk_paise=delta,
-            evidence={"currency": inv.currency,
-                      "invoiced": booked_amount.format(),
-                      "booked_at_invoice_date": booked.amount.format(),
-                      "booked_rate": booked.rate.describe(),
-                      "value_when_received": realised.amount.format(),
-                      "received_rate": realised.rate.describe(),
-                      "difference": Money(delta, base).format(sign=True),
-                      "customer": inv.customer},
-            proposed_action=(
-                f"Exchange {'gain' if gain else 'loss'} of "
-                f"{Money(abs(delta), base).format()} on {inv.invoice_no}. Post it "
-                f"to foreign exchange {'gain' if gain else 'loss'}; the customer "
-                "paid what they owed.")))
-
-
 def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
               adjudicate_legs: frozenset | None = None,
-              confirmed: "set[tuple[str, str, str]] | None" = None,
-              rates: RateTable | None = None, base: str = BASE) -> ReconResult:
+              confirmed: "set[tuple[str, str, str]] | None" = None) -> ReconResult:
     """`adjudicate_legs` selects which legs may consult the model. Defaults to
     the one leg where a model answer can be verified against arithmetic; see
     docs/architecture.md for the measurement behind that default."""
@@ -1168,14 +1081,12 @@ def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
     _apply_confirmed(ds, batches, confirmed, res)
     reconcile_erp_to_gateway(ds, res, pick(Leg.ERP_PG), res.confirmed_keys)
     t1 = time.perf_counter()
-    check_integrity(ds, res, batches)
+    check_integrity(ds, res)
     t2 = time.perf_counter()
     reconcile_settlement_to_bank(batches, ds, res, pick(Leg.BATCH_BANK))
     t3 = time.perf_counter()
     # Runs last: it consumes the exceptions the first three legs produced.
     reconcile_direct_receipts(ds, res, pick(Leg.INVOICE_BANK))
-    if rates is not None:
-        _revalue(ds, res, rates, base)
     if adjudicator is not None:
         _suggest_causes(res, adjudicator)
     t4 = time.perf_counter()

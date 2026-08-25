@@ -32,16 +32,11 @@ def _adjudicator(mode: str):
 
 
 def _run(data: Path, llm: str, confirmed=None) -> tuple:
-    from .currency import load_rates
     adj, label = _adjudicator(llm)
     t = time.perf_counter()
     ds, errs = load(data)
     batches = build_batches(ds)
-    # Rates are an input to the run, versioned beside the statements they
-    # applied to, so the same figures come out months later.
-    rates = load_rates(data / "fx_rates.csv")
-    res = reconcile(ds, batches, adj, confirmed=confirmed,
-                    rates=rates if len(rates) else None)
+    res = reconcile(ds, batches, adj, confirmed=confirmed)
     wall = time.perf_counter() - t
     pos = build_position(ds, batches, res)
     return ds, batches, res, pos, wall, errs, adj, label
@@ -77,10 +72,6 @@ def cmd_recon(a) -> int:
             "llm_seconds": round(getattr(adj, "seconds", 0.0), 3) if adj else 0.0}
 
     print(f"\n{label}")
-    fx = [f for f in res.findings if f.code.value.startswith("FX_")]
-    if fx:
-        print(f"{len({i.currency for i in ds.invoices})} currencies · "
-              f"{len(fx)} exchange item(s)")
     print(f"{res.counts['total_records']:,} records · engine "
           f"{res.timings['total_s'] * 1000:.1f} ms · wall {wall:.2f} s"
           + (f" · model {meta['llm_seconds']:.1f} s" if meta["llm_seconds"] else ""))

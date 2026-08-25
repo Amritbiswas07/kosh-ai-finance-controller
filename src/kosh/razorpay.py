@@ -36,7 +36,6 @@ import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from .currency import CurrencyError, exponent
 from .schema import BASE_CURRENCY, CurrencyMismatch, PGTxn
 
 BASE = "https://api.razorpay.com/v1"
@@ -163,10 +162,11 @@ def to_pg_txn(item: dict) -> PGTxn:
     through that would multiply every figure by a hundred.
     """
     currency = (item.get("currency") or BASE_CURRENCY).strip().upper()
-    try:
-        exponent(currency)          # minor units must be known, not assumed
-    except CurrencyError:
-        raise CurrencyMismatch(str(item.get("entity_id", "?")), currency) from None
+    if currency != BASE_CURRENCY:
+        # The live report carries a currency column that the CSV path never
+        # used. Dropping it here would map a USD settlement as INR paise —
+        # wrong by roughly a factor of 83, and wrong silently.
+        raise CurrencyMismatch(str(item.get("entity_id", "?")), currency)
 
     kind = (item.get("type") or "").lower()
     credit = int(item.get("credit") or 0)
@@ -197,7 +197,6 @@ def to_pg_txn(item: dict) -> PGTxn:
         # For a refund the report points at the payment it reverses.
         parent_payment_id=(item.get("payment_id")
                            if kind == "refund" else None) or None,
-        currency=currency,
     )
 
 
@@ -227,7 +226,7 @@ def write_csv(rows: list[PGTxn], path) -> None:
                 t.entity_id, t.type,
                 f"{-t.amount_paise / 100:.2f}" if t.amount_paise < 0 else "0.00",
                 f"{t.amount_paise / 100:.2f}" if t.amount_paise > 0 else "0.00",
-                f"{t.amount_paise / 100:.2f}", t.currency,
+                f"{t.amount_paise / 100:.2f}", "INR",
                 f"{t.fee_paise / 100:.2f}", f"{t.tax_paise / 100:.2f}",
                 "Y" if t.on_hold else "N", "Y" if t.settled else "N",
                 t.created_at.isoformat(sep=" "),
