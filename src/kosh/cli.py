@@ -12,7 +12,7 @@ from .ask import answer
 from .evaluate import evaluate
 from .generate import Injections, build, write
 from .ingest import build_batches, load
-from .match import Disposition, reconcile
+from .match import reconcile
 from .money import fmt
 from .position import bridge_rows, build_position
 from .report import html_report, json_report, markdown_report

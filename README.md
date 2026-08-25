@@ -47,12 +47,13 @@ forever):
 | `kosh sync` | Reconcile and fold the result into the running ledger |
 | `kosh pull --year --month [--day]` | Fetch a real settlement recon period from Razorpay |
 | `kosh exception list \| assign \| resolve \| link` | Work a break: own it, close it, or confirm a link |
-| `pytest -q` | 117 tests, no model loaded, ~1.2 s |
+| `pytest -q` | 194 tests, no model loaded, ~2 s |
 | `python scripts/benchmark.py --seeds 30 [--llm]` | Accuracy across 30 regenerated worlds |
 | `python scripts/ablation.py` | Does the model earn its place, and on which leg? |
 | `python scripts/adversarial.py [--llm]` | Score it on data written **against** it |
 | `python scripts/live_demo.py` | Three days of a close: a late credit clears yesterday's break |
 | `python scripts/verify_offline.py` | Run everything with all outbound sockets blocked |
+| `python scripts/check_docs.py` | Assert every figure in these documents is still true |
 
 ```bash
 ./.venv/bin/kosh serve
@@ -151,7 +152,7 @@ Three bugs worth recording, since two of them only appear under use:
 | The ask | Where |
 |---|---|
 | One financial-operations workflow | Three-way settlement reconciliation, four legs |
-| 50+ synthetic data records | **345** per run (135 invoices, 148 gateway rows, 62 bank lines) — 10,277 across the benchmark |
+| 50+ synthetic data records | **347** per run (135 invoices, 151 gateway rows, 61 bank lines) — 10,393 across the benchmark |
 | Report match accuracy | Precision/recall/F1 per leg, scored against held-out ground truth |
 | Report unresolved exceptions | Every one, itemised, with evidence, exposure and a proposed action |
 | Throughput plus measured accuracy | See below — both, measured, not estimated |
@@ -161,38 +162,18 @@ Three bugs worth recording, since two of them only appear under use:
 
 ## Results
 
-**345 records, reconciled in under 5 milliseconds.** The deterministic engine
-itself takes **0.8 ms**; end to end including CSV parsing it is **5.0 ms**, or
-about **69,000 records/second**. With the model enabled, wall time is dominated
+**347 records, reconciled in five milliseconds.** The deterministic engine
+itself takes **1.0 ms**; end to end including CSV parsing it is **5.0 ms**, or
+about **69,700 records/second**. With the model enabled, wall time is dominated
 entirely by the three adjudication calls — the arithmetic is unchanged.
 
-Across **30 regenerated corpora (10,277 records)**, each with independently
+Across **30 regenerated corpora (10,383 records)**, each with independently
 jittered defect rates:
 
 | configuration | link F1 (mean) | link F1 (min) | exc P | exc R | exc F1 | auto-clear | records/s |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| deterministic only | 0.8898 | 0.7778 | 0.9004 | 0.9474 | 0.9232 | 84.0% | 72,999 |
-| **+ model on invoice→bank** | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 85.7% | 42 |
-
-Accuracy is also insensitive to how *dense* the defects are. Scaling every
-defect rate up (`benchmark.py --scale N`, 12 seeds each) does not degrade
-matching — what falls is how much can be cleared, which is correct, because
-more of the corpus is genuinely broken:
-
-| defect scale | defects / records | link F1 | exc P | exc R | auto-clear |
-|---:|---|---:|---:|---:|---:|
-| 1× | 61 / 340 | 0.8767 | 0.8972 | 0.9456 | 83.7% |
-| 2× | 122 / 340 | 0.8798 | 0.8935 | 0.9435 | 71.4% |
-| 3× | 179 / 337 | 0.8833 | 0.8926 | 0.9429 | 59.5% |
-| 4× | 215 / 332 | 0.9639 | 0.9640 | 0.9811 | 53.2% |
-| 6× | 241 / 327 | 1.0000 | 1.0000 | 1.0000 | 39.5% |
-
-Accuracy *rising* past 3× is not the engine getting better — it is the
-generator saturating. Beyond about 3× the order pool is exhausted, so the
-hardest defect type (a direct bank payment with a mangled counterparty name)
-stops being generated at all, leaving only cases the deterministic tiers handle
-exactly. **Defect density is not the axis that stresses this engine.** I did not
-find a density at which it produces a wrong match; see the limitations.
+| deterministic only | 0.8898 | 0.7778 | 0.9120 | 0.9538 | 0.9324 | 82.8% | 68,202 |
+| **+ model on the legs it can help** | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 84.5% | 16 |
 
 Every seed is reproducible: `kosh generate --seed 13`.
 
@@ -202,19 +183,19 @@ The report leads with a cash bridge, not a match rate, because that is the
 question a controller is actually asking:
 
 ```
-  Captured at the gateway                  7,26,213.94
-  Less funds on hold                        -19,919.85
-  Less captures not yet batched                  +0.00
-= Gross entering settlement                7,06,294.09
-  Less refunds settled                      -40,711.41
-  Less gateway fees                          -8,967.77
-  Less GST on fees                           -1,614.19
-  Less dispute adjustments                   -3,751.34
-= Net settled into batches                 6,51,249.38
-  Batches say                              6,51,249.38
-  Residual (must be zero)                        +0.00
-  Landed in the bank                       5,79,299.00
-  Still in transit                            71,950.38
+  Captured at the gateway                  +7,24,300.88
+  Less funds on hold                         -19,919.85
+  Less captures not yet batched               -9,822.75
+= Gross entering settlement                 6,94,558.28
+  Less refunds settled                       -27,025.17
+  Less gateway fees                           -8,923.02
+  Less GST on fees                            -1,606.15
+  Less dispute adjustments                    -7,474.61
+= Net settled into batches                  6,49,529.33
+  Batches say                               6,49,529.33
+  Residual (must be zero)                         +0.00
+  Landed in the bank                        +6,13,210.61
+  Still in transit                            +36,318.72
 ```
 
 The residual stays on the face of the report rather than being plugged into a
@@ -228,27 +209,31 @@ carries its evidence, its rupee exposure, and what a controller should do.
 This is the full run with adjudication on — 56 findings, 42 needing a human:
 
 ```
-UNEXPECTED_BANK_CREDIT         7   needs review
-UNPAID_INVOICE                 6   needs review
-UNBILLED_PAYMENT               5   needs review
-FEE_VARIANCE                   5   auto-resolved
-DUPLICATE_PAYMENT              4   needs review
-FUNDS_ON_HOLD                  4   needs review
-TAX_LINE_MISMATCH              4   needs review
-MERGED_PAYOUT                  4   auto-resolved
-ORPHAN_REFUND                  3   needs review
-CHARGEBACK_ADJUSTMENT          3   needs review
-SETTLEMENT_AMOUNT_MISMATCH     3   needs review
-MISSING_IN_BANK                3   needs review
-TDS_WITHHELD                   3   auto-resolved
-SPLIT_SETTLEMENT               2   auto-resolved
+UNEXPECTED_BANK_CREDIT        7   needs review
+UNPAID_INVOICE                6   needs review
+FEE_VARIANCE                  5   auto-resolved
+UNBILLED_PAYMENT              5   needs review
+DUPLICATE_PAYMENT             4   needs review
+FUNDS_ON_HOLD                 4   needs review
+MERGED_PAYOUT                 4   auto-resolved
+TAX_LINE_MISMATCH             4   needs review
+CHARGEBACK_ADJUSTMENT         3   needs review
+MISSING_IN_BANK               3   needs review
+ORPHAN_REFUND                 3   needs review
+PART_PAYMENT                  3   auto-resolved
+SETTLEMENT_AMOUNT_MISMATCH    3   needs review
+SHORT_PAYMENT                 3   needs review
+TDS_WITHHELD                  3   auto-resolved
+OVERPAYMENT                   2   needs review
+SPLIT_SETTLEMENT              2   auto-resolved
 ```
 
 A worked example, straight out of `outputs/recon.md`:
 
-> **`setl_82400005`** · `MISSING_IN_BANK` · **₹44,994.34**
-> utr=`KKBKN260708563337`; settled_at=`2026-07-08T11:00:00`; members=`7`
-> *Trace UTR KKBKN260708563337 with the bank. Until it lands, 44994.34 sits in
+> **`setl_82400025`** · `MISSING_IN_BANK` · **₹20,402.61**
+> utr=`SBIN0260728871951`; settled_at=`2026-07-28T11:00:00`; members=`4`;
+> gross=`21,042.99`; fee_and_gst=`640.38`
+> *Trace UTR SBIN0260728871951 with the bank. Until it lands, 20402.61 sits in
 > gateway receivable, not in cash.*
 
 ---
@@ -278,7 +263,7 @@ It was wired into all four legs first, then measured (`scripts/ablation.py`):
 
 | configuration | link F1 | exception F1 | LLM calls | LLM seconds |
 |---|---:|---:|---:|---:|
-| deterministic only | 0.8889 | 0.9313 | 0 | 0.0 |
+| deterministic only | 0.8889 | 0.9324 | 0 | 0.0 |
 | model on every leg | 1.0000 | 1.0000 | 18 | 47.5 |
 | **model on the two legs it can help** | **1.0000** | **1.0000** | **6** | **21.2** |
 

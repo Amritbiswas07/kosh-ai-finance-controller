@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .match import Disposition, Leg, ReconResult
+from .match import Leg, ReconResult
 from .money import to_rupees
 from .schema import Dataset, ExceptionCode, SettlementBatch
 

@@ -23,7 +23,7 @@ from __future__ import annotations
 import bisect
 import time
 from dataclasses import dataclass, field
-from datetime import date, timedelta
+from datetime import date
 from enum import Enum
 from itertools import combinations
 
@@ -449,14 +449,6 @@ def _emit_assignment(r, c, left, right, left_amount, right_amount, left_date,
         {"on": "amount+date", "amount": str(to_rupees(right_amount(b))),
          "date_gap_days": dday, **extra(a, b)}))
     on_match(a, b)
-
-
-def _unused_dense_path(left, right, cost, res):     # pragma: no cover
-    rows, cols = linear_sum_assignment(cost)
-    for r, c in zip(rows, cols):
-        if cost[r, c] >= 10**9:
-            continue
-        pass
 
 
 def _adjudicate_erp(open_inv: dict, open_pay: dict, res: ReconResult, adjudicator) -> None:

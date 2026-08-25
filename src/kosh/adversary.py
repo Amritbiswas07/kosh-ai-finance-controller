@@ -20,7 +20,7 @@ Each case declares what an honest engine should do, and the categories matter:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 from .schema import Dataset, Invoice, PGTxn, BankLine
 

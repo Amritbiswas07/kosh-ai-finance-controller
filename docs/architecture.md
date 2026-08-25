@@ -122,7 +122,7 @@ It was wired into all four legs first, then measured — `scripts/ablation.py`:
 
 | configuration | link F1 | exception F1 | LLM calls | LLM seconds |
 |---|---:|---:|---:|---:|
-| deterministic only | 0.8889 | 0.9313 | 0 | 0.0 |
+| deterministic only | 0.8889 | 0.9324 | 0 | 0.0 |
 | model on every leg | 1.0000 | 1.0000 | 18 | 47.5 |
 | **model on the two legs it can help** | **1.0000** | **1.0000** | **6** | **21.2** |
 
