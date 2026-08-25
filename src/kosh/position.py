@@ -44,6 +44,7 @@ class Position:
     open_receivables: int = 0
     unbilled_revenue: int = 0
     tds_receivable: int = 0
+    fx_revaluation: int = 0          # gain positive, loss negative
 
     def to_json(self) -> dict:
         return {k: str(to_rupees(v)) for k, v in self.__dict__.items()}
@@ -102,6 +103,8 @@ def build_position(ds: Dataset, batches: list[SettlementBatch],
             p.unbilled_revenue += f.value_at_risk_paise
         elif f.code is ExceptionCode.TDS_WITHHELD:
             p.tds_receivable += f.value_at_risk_paise
+        elif f.code is ExceptionCode.FX_REVALUATION:
+            p.fx_revaluation += f.value_at_risk_paise
 
     return p
 
@@ -122,4 +125,6 @@ def bridge_rows(p: Position) -> list[tuple[str, int, str]]:
         ("Residual (must be zero)", p.residual, "warn" if p.residual else "ok"),
         ("Landed in the bank", p.landed_in_bank, "in"),
         ("Still in transit", p.in_transit, "warn"),
+        ("Exchange gain / loss on foreign invoices", p.fx_revaluation,
+         "ok" if p.fx_revaluation >= 0 else "warn"),
     ]

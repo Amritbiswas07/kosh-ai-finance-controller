@@ -30,7 +30,9 @@ def run(label: str, adj, legs) -> dict:
     if adj is not None:
         adj.calls, adj.seconds = 0, 0.0
     t = time.perf_counter()
-    res = reconcile(ds, batches, adj, legs)
+    from kosh.currency import load_rates
+    rates = load_rates(DATA / "fx_rates.csv")
+    res = reconcile(ds, batches, adj, legs, rates=rates if len(rates) else None)
     wall = time.perf_counter() - t
     m = evaluate(res, ds, DATA / "ground_truth.json", wall)
     verdicts: dict[str, int] = {}

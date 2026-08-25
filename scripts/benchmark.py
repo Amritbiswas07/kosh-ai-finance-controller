@@ -39,7 +39,12 @@ def one_seed(seed: int, adj, jitter: bool = True, scale: float = 1.0) -> dict:
         write(ds, gt, inj, root, seed)
         t = time.perf_counter()
         ds, errs = load(root)
-        res = reconcile(ds, build_batches(ds), adj)
+        # The corpus now spans currencies, and its answer key contains the
+        # exchange differences, so the run has to be given the same rates the
+        # generator used.
+        from kosh.currency import load_rates
+        res = reconcile(ds, build_batches(ds), adj,
+                        rates=load_rates(root / "fx_rates.csv") or None)
         wall = time.perf_counter() - t
         m = evaluate(res, ds, root / "ground_truth.json", wall)
     return {"seed": seed, "records": m["records"], "defects": inj.total(),

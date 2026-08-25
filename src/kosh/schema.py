@@ -15,21 +15,25 @@ from datetime import date, datetime
 from enum import Enum
 
 
-#: Every amount in Kosh is integer paise of one currency. Nothing in the engine
-#: revalues, so a row in another currency cannot be reconciled — it can only be
-#: mishandled. A USD settlement read as INR is wrong by a factor of about 83,
-#: silently, with no line anywhere saying so. Rows that are not in this currency
-#: are refused at ingest rather than converted on a guess.
+#: The books are kept in this. Records may arrive in any known currency; they
+#: are carried in their own denomination and revalued into this one, at a dated
+#: rate, only where a comparison genuinely crosses currencies.
 BASE_CURRENCY = "INR"
 
 
 class CurrencyMismatch(ValueError):
+    """A currency this build has no minor-unit definition for.
+
+    Amounts in a *known* foreign currency are now reconciled. What is still
+    refused is one whose decimal places are unknown, because guessing two is
+    how yen ends up wrong by a hundredfold.
+    """
+
     def __init__(self, key: str, found: str) -> None:
         super().__init__(
-            f"{key} is denominated in {found}, but this engine reconciles "
-            f"{BASE_CURRENCY} only. Multi-currency needs an FX rate table and a "
-            "revaluation line in the cash bridge; neither exists, so the row is "
-            "refused rather than silently treated as " + BASE_CURRENCY + ".")
+            f"{key} is denominated in {found}, which this build has no minor-unit "
+            "definition for. Add it to kosh.currency.MINOR_UNITS with its number "
+            "of decimal places rather than assuming two.")
         self.key, self.found = key, found
 
 
@@ -66,6 +70,9 @@ class ExceptionCode(str, Enum):
     PART_PAYMENT = "PART_PAYMENT"
     DUPLICATE_BANK_LINE = "DUPLICATE_BANK_LINE"
     AMBIGUOUS_REFERENCE = "AMBIGUOUS_REFERENCE"
+    FX_REVALUATION = "FX_REVALUATION"
+    FX_RATE_MISSING = "FX_RATE_MISSING"
+    MIXED_CURRENCY_BATCH = "MIXED_CURRENCY_BATCH"
     UNCLASSIFIED = "UNCLASSIFIED"
 
 
@@ -90,6 +97,9 @@ EXCEPTION_MEANING: dict[ExceptionCode, str] = {
     ExceptionCode.PART_PAYMENT: "One invoice was settled by several captures that add up to it exactly.",
     ExceptionCode.DUPLICATE_BANK_LINE: "The same bank credit appears more than once in the statement.",
     ExceptionCode.AMBIGUOUS_REFERENCE: "One settlement reference identifies more than one payout, so it identifies none of them.",
+    ExceptionCode.FX_REVALUATION: "A foreign-currency invoice was settled at a different rate than it was booked at.",
+    ExceptionCode.FX_RATE_MISSING: "No exchange rate is held for the day this amount needs converting on.",
+    ExceptionCode.MIXED_CURRENCY_BATCH: "One settlement batch contains rows in more than one currency.",
     ExceptionCode.UNCLASSIFIED: "The engine could not place this residual in any known category.",
 }
 
@@ -142,6 +152,7 @@ class PGTxn:
     on_hold: bool = False
     dispute_id: str | None = None
     parent_payment_id: str | None = None
+    currency: str = BASE_CURRENCY
 
     @property
     def key(self) -> str:
@@ -167,6 +178,7 @@ class BankLine:
     ref_no: str
     amount_paise: int         # signed: credit positive, debit negative
     balance_paise: int
+    currency: str = BASE_CURRENCY
 
     @property
     def key(self) -> str:
@@ -189,6 +201,7 @@ class SettlementBatch:
     fee_paise: int
     tax_paise: int
     net_paise: int
+    currency: str = BASE_CURRENCY
 
     @property
     def key(self) -> str:
