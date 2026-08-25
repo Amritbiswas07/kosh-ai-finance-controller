@@ -1,46 +1,45 @@
 {
   "meta": {
     "seed": 20260824,
-    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 16.8s)",
+    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 10.1s)",
     "period": "synthetic",
-    "llm_seconds": 24.908
+    "llm_seconds": 23.378
   },
   "counts": {
     "erp_invoices": 135,
     "pg_transactions": 151,
-    "bank_lines": 69,
-    "total_records": 355,
-    "settlement_batches": 50,
-    "matches": 174,
-    "findings": 68,
+    "bank_lines": 61,
+    "total_records": 347,
+    "settlement_batches": 42,
+    "matches": 166,
+    "findings": 64,
     "unresolved": 47
   },
   "timings": {
-    "erp_to_gateway_s": 0.0018,
+    "erp_to_gateway_s": 0.0063,
     "integrity_s": 0.0001,
-    "settlement_to_bank_s": 14.364,
-    "direct_receipts_s": 10.5851,
-    "total_s": 24.9511
+    "settlement_to_bank_s": 12.8115,
+    "direct_receipts_s": 10.6051,
+    "total_s": 23.423
   },
   "position": {
-    "captured": "690123.54",
+    "captured": "724300.88",
     "on_hold_gross": "19919.85",
-    "unbatched_gross": "0.00",
-    "gross_entering_settlement": "670203.69",
-    "refunds_settled": "45804.90",
-    "gateway_fees": "8581.83",
-    "fee_gst": "1544.73",
-    "dispute_adjustments": "5399.16",
-    "settled_net": "608873.07",
-    "batch_net": "608873.07",
+    "unbatched_gross": "9822.75",
+    "gross_entering_settlement": "694558.28",
+    "refunds_settled": "27025.17",
+    "gateway_fees": "8923.02",
+    "fee_gst": "1606.15",
+    "dispute_adjustments": "7474.61",
+    "settled_net": "649529.33",
+    "batch_net": "649529.33",
     "residual": "0.00",
-    "landed_in_bank": "543640.06",
-    "in_transit": "65233.01",
-    "unexplained_credits": "85011.72",
+    "landed_in_bank": "613210.61",
+    "in_transit": "36318.72",
+    "unexplained_credits": "76798.01",
     "open_receivables": "28781.50",
     "unbilled_revenue": "35096.81",
-    "tds_receivable": "358.65",
-    "fx_revaluation": "96.12"
+    "tds_receivable": "358.65"
   },
   "matches": [
     {
@@ -121,22 +120,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1099",
-      "right": [
-        "pay_82400092"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240098",
-        "invoice_gross": "8189.34",
-        "payment_amount": "8189.34"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1041",
       "right": [
         "pay_82400035"
@@ -153,34 +136,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1029",
+      "left": "INV-2627-1099",
       "right": [
-        "pay_82400026"
+        "pay_82400092"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240028",
-        "invoice_gross": "12.58",
-        "payment_amount": "12.58"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1078",
-      "right": [
-        "pay_82400070"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240077",
-        "invoice_gross": "2435.19",
-        "payment_amount": "2435.19"
+        "order_id": "order_8240098",
+        "invoice_gross": "8189.34",
+        "payment_amount": "8189.34"
       }
     },
     {
@@ -201,6 +168,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1071",
+      "right": [
+        "pay_82400063"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240070",
+        "invoice_gross": "3976.29",
+        "payment_amount": "3976.29"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1125",
       "right": [
         "pay_82400117"
@@ -213,6 +196,22 @@
         "order_id": "order_8240124",
         "invoice_gross": "3844.19",
         "payment_amount": "3844.19"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1078",
+      "right": [
+        "pay_82400070"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240077",
+        "invoice_gross": "2435.19",
+        "payment_amount": "2435.19"
       }
     },
     {
@@ -233,34 +232,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1071",
+      "left": "INV-2627-1029",
       "right": [
-        "pay_82400063"
+        "pay_82400026"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240070",
-        "invoice_gross": "3976.29",
-        "payment_amount": "3976.29"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1075",
-      "right": [
-        "pay_82400067"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240074",
-        "invoice_gross": "6111.41",
-        "payment_amount": "6111.41"
+        "order_id": "order_8240028",
+        "invoice_gross": "1187.91",
+        "payment_amount": "1187.91"
       }
     },
     {
@@ -281,18 +264,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1082",
+      "left": "INV-2627-1075",
       "right": [
-        "pay_82400074"
+        "pay_82400067"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240081",
-        "invoice_gross": "965.09",
-        "payment_amount": "965.09"
+        "order_id": "order_8240074",
+        "invoice_gross": "6111.41",
+        "payment_amount": "6111.41"
       }
     },
     {
@@ -307,8 +290,8 @@
       "evidence": {
         "on": "order_id",
         "order_id": "order_8240071",
-        "invoice_gross": "104.92",
-        "payment_amount": "104.92"
+        "invoice_gross": "9904.92",
+        "payment_amount": "9904.92"
       }
     },
     {
@@ -345,18 +328,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1062",
+      "left": "INV-2627-1082",
       "right": [
-        "pay_82400054"
+        "pay_82400074"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240061",
-        "invoice_gross": "8942.26",
-        "payment_amount": "8942.26"
+        "order_id": "order_8240081",
+        "invoice_gross": "965.09",
+        "payment_amount": "965.09"
       }
     },
     {
@@ -377,6 +360,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1062",
+      "right": [
+        "pay_82400054"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240061",
+        "invoice_gross": "8942.26",
+        "payment_amount": "8942.26"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1046",
       "right": [
         "pay_82400040"
@@ -389,6 +388,22 @@
         "order_id": "order_8240045",
         "invoice_gross": "6789.96",
         "payment_amount": "6789.96"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1081",
+      "right": [
+        "pay_82400073"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240080",
+        "invoice_gross": "5532.85",
+        "payment_amount": "5532.85"
       }
     },
     {
@@ -425,22 +440,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1081",
-      "right": [
-        "pay_82400073"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240080",
-        "invoice_gross": "5532.85",
-        "payment_amount": "5532.85"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1102",
       "right": [
         "pay_82400095"
@@ -457,18 +456,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1130",
+      "left": "INV-2627-1127",
       "right": [
-        "pay_82400122"
+        "pay_82400119"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240129",
-        "invoice_gross": "4343.79",
-        "payment_amount": "4343.79"
+        "order_id": "order_8240126",
+        "invoice_gross": "5544.81",
+        "payment_amount": "5544.81"
       }
     },
     {
@@ -489,18 +488,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1127",
+      "left": "INV-2627-1130",
       "right": [
-        "pay_82400119"
+        "pay_82400122"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240126",
-        "invoice_gross": "5544.81",
-        "payment_amount": "5544.81"
+        "order_id": "order_8240129",
+        "invoice_gross": "4343.79",
+        "payment_amount": "4343.79"
       }
     },
     {
@@ -569,6 +568,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1068",
+      "right": [
+        "pay_82400060"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240067",
+        "invoice_gross": "9823.04",
+        "payment_amount": "9823.04"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1124",
       "right": [
         "pay_82400116"
@@ -601,22 +616,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1068",
-      "right": [
-        "pay_82400060"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240067",
-        "invoice_gross": "9823.04",
-        "payment_amount": "9823.04"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1109",
       "right": [
         "pay_82400103"
@@ -629,22 +628,6 @@
         "order_id": "order_8240108",
         "invoice_gross": "2033.81",
         "payment_amount": "2033.81"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1131",
-      "right": [
-        "pay_82400123"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240130",
-        "invoice_gross": "2785.51",
-        "payment_amount": "2785.51"
       }
     },
     {
@@ -665,6 +648,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1131",
+      "right": [
+        "pay_82400123"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240130",
+        "invoice_gross": "2785.51",
+        "payment_amount": "2785.51"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1085",
       "right": [
         "pay_82400078"
@@ -681,22 +680,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1030",
-      "right": [
-        "pay_82400027"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 0.92,
-      "delta": "-266.72",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240029",
-        "invoice_gross": "2051.68",
-        "payment_amount": "1784.96"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1039",
       "right": [
         "pay_82400033"
@@ -709,6 +692,22 @@
         "order_id": "order_8240038",
         "invoice_gross": "7364.64",
         "payment_amount": "7364.64"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1030",
+      "right": [
+        "pay_82400027"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 0.92,
+      "delta": "-143.62",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240029",
+        "invoice_gross": "2051.68",
+        "payment_amount": "1908.06"
       }
     },
     {
@@ -745,22 +744,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1093",
-      "right": [
-        "pay_82400086"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240092",
-        "invoice_gross": "4504.64",
-        "payment_amount": "4504.64"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1073",
       "right": [
         "pay_82400065"
@@ -773,6 +756,22 @@
         "order_id": "order_8240072",
         "invoice_gross": "6056.69",
         "payment_amount": "6056.69"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1093",
+      "right": [
+        "pay_82400086"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240092",
+        "invoice_gross": "4504.64",
+        "payment_amount": "4504.64"
       }
     },
     {
@@ -841,22 +840,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1064",
-      "right": [
-        "pay_82400056"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240063",
-        "invoice_gross": "7129.54",
-        "payment_amount": "7129.54"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1108",
       "right": [
         "pay_82400102"
@@ -869,6 +852,22 @@
         "order_id": "order_8240107",
         "invoice_gross": "5389.40",
         "payment_amount": "5389.40"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1064",
+      "right": [
+        "pay_82400056"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240063",
+        "invoice_gross": "7129.54",
+        "payment_amount": "7129.54"
       }
     },
     {
@@ -905,6 +904,38 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1092",
+      "right": [
+        "pay_82400085"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240091",
+        "invoice_gross": "779.41",
+        "payment_amount": "779.41"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1058",
+      "right": [
+        "pay_82400051"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240057",
+        "invoice_gross": "1546.78",
+        "payment_amount": "1546.78"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1061",
       "right": [
         "pay_82400053"
@@ -937,22 +968,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1058",
-      "right": [
-        "pay_82400051"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240057",
-        "invoice_gross": "1546.78",
-        "payment_amount": "1546.78"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1015",
       "right": [
         "pay_82400013"
@@ -965,22 +980,6 @@
         "order_id": "order_8240014",
         "invoice_gross": "1553.10",
         "payment_amount": "1553.10"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1092",
-      "right": [
-        "pay_82400085"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240091",
-        "invoice_gross": "8.26",
-        "payment_amount": "8.26"
       }
     },
     {
@@ -1011,8 +1010,8 @@
       "evidence": {
         "on": "order_id",
         "order_id": "order_8240015",
-        "invoice_gross": "99.86",
-        "payment_amount": "99.86"
+        "invoice_gross": "9426.51",
+        "payment_amount": "9426.51"
       }
     },
     {
@@ -1029,22 +1028,6 @@
         "order_id": "order_8240105",
         "invoice_gross": "2477.56",
         "payment_amount": "2477.56"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1100",
-      "right": [
-        "pay_82400093"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 0.92,
-      "delta": "-1098.90",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240099",
-        "invoice_gross": "8453.05",
-        "payment_amount": "7354.15"
       }
     },
     {
@@ -1081,6 +1064,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1100",
+      "right": [
+        "pay_82400093"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 0.92,
+      "delta": "-422.65",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240099",
+        "invoice_gross": "8453.05",
+        "payment_amount": "8030.40"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1140",
       "right": [
         "pay_82400132"
@@ -1113,22 +1112,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1023",
-      "right": [
-        "pay_82400021"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240022",
-        "invoice_gross": "9677.64",
-        "payment_amount": "9677.64"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1032",
       "right": [
         "pay_82400029"
@@ -1145,34 +1128,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1122",
+      "left": "INV-2627-1023",
       "right": [
-        "pay_82400114"
+        "pay_82400021"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240121",
-        "invoice_gross": "2798.06",
-        "payment_amount": "2798.06"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1002",
-      "right": [
-        "pay_82400001"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240001",
-        "invoice_gross": "1737.83",
-        "payment_amount": "1737.83"
+        "order_id": "order_8240022",
+        "invoice_gross": "9677.64",
+        "payment_amount": "9677.64"
       }
     },
     {
@@ -1193,6 +1160,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1002",
+      "right": [
+        "pay_82400001"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240001",
+        "invoice_gross": "1737.83",
+        "payment_amount": "1737.83"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1011",
       "right": [
         "pay_82400009"
@@ -1205,6 +1188,22 @@
         "order_id": "order_8240010",
         "invoice_gross": "5811.98",
         "payment_amount": "5811.98"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1122",
+      "right": [
+        "pay_82400114"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240121",
+        "invoice_gross": "2798.06",
+        "payment_amount": "2798.06"
       }
     },
     {
@@ -1257,18 +1256,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1051",
+      "left": "INV-2627-1113",
       "right": [
-        "pay_82400045"
+        "pay_82400107"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240050",
-        "invoice_gross": "1508.03",
-        "payment_amount": "1508.03"
+        "order_id": "order_8240112",
+        "invoice_gross": "8818.87",
+        "payment_amount": "8818.87"
       }
     },
     {
@@ -1289,6 +1288,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1051",
+      "right": [
+        "pay_82400045"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240050",
+        "invoice_gross": "1508.03",
+        "payment_amount": "1508.03"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1007",
       "right": [
         "pay_82400006"
@@ -1301,22 +1316,6 @@
         "order_id": "order_8240006",
         "invoice_gross": "3506.19",
         "payment_amount": "3506.19"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1113",
-      "right": [
-        "pay_82400107"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240112",
-        "invoice_gross": "8818.87",
-        "payment_amount": "8818.87"
       }
     },
     {
@@ -1337,34 +1336,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1042",
-      "right": [
-        "pay_82400036"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240041",
-        "invoice_gross": "1651.37",
-        "payment_amount": "1651.37"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1066",
       "right": [
         "pay_82400058"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 0.92,
-      "delta": "-485.88",
+      "delta": "-1263.28",
       "evidence": {
         "on": "order_id",
         "order_id": "order_8240065",
         "invoice_gross": "9717.55",
-        "payment_amount": "9231.67"
+        "payment_amount": "8454.27"
       }
     },
     {
@@ -1381,6 +1364,22 @@
         "order_id": "order_8240005",
         "invoice_gross": "2843.26",
         "payment_amount": "2843.26"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1042",
+      "right": [
+        "pay_82400036"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240041",
+        "invoice_gross": "1651.37",
+        "payment_amount": "1651.37"
       }
     },
     {
@@ -1417,22 +1416,6 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1067",
-      "right": [
-        "pay_82400059"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240066",
-        "invoice_gross": "9011.01",
-        "payment_amount": "9011.01"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
       "left": "INV-2627-1138",
       "right": [
         "pay_82400130"
@@ -1449,18 +1432,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1087",
+      "left": "INV-2627-1067",
       "right": [
-        "pay_82400080"
+        "pay_82400059"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240086",
-        "invoice_gross": "550.26",
-        "payment_amount": "550.26"
+        "order_id": "order_8240066",
+        "invoice_gross": "9011.01",
+        "payment_amount": "9011.01"
       }
     },
     {
@@ -1497,6 +1480,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1087",
+      "right": [
+        "pay_82400080"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240086",
+        "invoice_gross": "550.26",
+        "payment_amount": "550.26"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1097",
       "right": [
         "pay_82400090"
@@ -1513,18 +1512,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1045",
+      "left": "INV-2627-1048",
       "right": [
-        "pay_82400039"
+        "pay_82400042"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240044",
-        "invoice_gross": "7218.46",
-        "payment_amount": "7218.46"
+        "order_id": "order_8240047",
+        "invoice_gross": "3514.51",
+        "payment_amount": "3514.51"
       }
     },
     {
@@ -1545,6 +1544,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1045",
+      "right": [
+        "pay_82400039"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240044",
+        "invoice_gross": "7218.46",
+        "payment_amount": "7218.46"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1120",
       "right": [
         "pay_82400113"
@@ -1557,22 +1572,6 @@
         "order_id": "order_8240119",
         "invoice_gross": "9261.41",
         "payment_amount": "9261.41"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1048",
-      "right": [
-        "pay_82400042"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240047",
-        "invoice_gross": "3514.51",
-        "payment_amount": "3514.51"
       }
     },
     {
@@ -1753,34 +1752,34 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1094",
+      "left": "INV-2627-1137",
       "right": [
-        "pay_82400088"
+        "pay_82400129"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240093",
-        "invoice_gross": "105.66",
-        "payment_amount": "105.66"
+        "order_id": "order_8240136",
+        "invoice_gross": "9081.11",
+        "payment_amount": "9081.11"
       }
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1037",
+      "left": "INV-2627-1101",
       "right": [
-        "pay_82400031"
+        "pay_82400094"
       ],
       "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
+      "confidence": 0.92,
+      "delta": "141.02",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240036",
-        "invoice_gross": "889.93",
-        "payment_amount": "889.93"
+        "order_id": "order_8240100",
+        "invoice_gross": "1566.85",
+        "payment_amount": "1707.87"
       }
     },
     {
@@ -1801,34 +1800,50 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1101",
+      "left": "INV-2627-1094",
       "right": [
-        "pay_82400094"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 0.92,
-      "delta": "62.67",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240100",
-        "invoice_gross": "1566.85",
-        "payment_amount": "1629.52"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1137",
-      "right": [
-        "pay_82400129"
+        "pay_82400088"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240136",
-        "invoice_gross": "9081.11",
-        "payment_amount": "9081.11"
+        "order_id": "order_8240093",
+        "invoice_gross": "9974.47",
+        "payment_amount": "9974.47"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1037",
+      "right": [
+        "pay_82400031"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240036",
+        "invoice_gross": "889.93",
+        "payment_amount": "889.93"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
+      "left": "INV-2627-1128",
+      "right": [
+        "pay_82400120"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240127",
+        "invoice_gross": "11792.04",
+        "payment_amount": "11792.04"
       }
     },
     {
@@ -1849,6 +1864,22 @@
     },
     {
       "leg": "erp_to_gateway",
+      "left": "INV-2627-1031",
+      "right": [
+        "pay_82400028"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "order_id",
+        "order_id": "order_8240030",
+        "invoice_gross": "1027.10",
+        "payment_amount": "1027.10"
+      }
+    },
+    {
+      "leg": "erp_to_gateway",
       "left": "INV-2627-1050",
       "right": [
         "pay_82400044"
@@ -1865,50 +1896,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1128",
+      "left": "INV-2627-1104",
       "right": [
-        "pay_82400120"
+        "pay_82400098"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240127",
-        "invoice_gross": "9673.16",
-        "payment_amount": "9673.16"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1031",
-      "right": [
-        "pay_82400028"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240030",
-        "invoice_gross": "10.88",
-        "payment_amount": "10.88"
-      }
-    },
-    {
-      "leg": "erp_to_gateway",
-      "left": "INV-2627-1070",
-      "right": [
-        "pay_82400062"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "order_id",
-        "order_id": "order_8240069",
-        "invoice_gross": "5807.85",
-        "payment_amount": "5807.85"
+        "order_id": "order_8240103",
+        "invoice_gross": "3433.59",
+        "payment_amount": "3433.59"
       }
     },
     {
@@ -1929,18 +1928,18 @@
     },
     {
       "leg": "erp_to_gateway",
-      "left": "INV-2627-1104",
+      "left": "INV-2627-1070",
       "right": [
-        "pay_82400098"
+        "pay_82400062"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "order_id",
-        "order_id": "order_8240103",
-        "invoice_gross": "3433.59",
-        "payment_amount": "3433.59"
+        "order_id": "order_8240069",
+        "invoice_gross": "5807.85",
+        "payment_amount": "5807.85"
       }
     },
     {
@@ -2032,6 +2031,40 @@
       "leg": "settlement_to_bank",
       "left": "setl_82400004",
       "right": [
+        "bank:0002"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "AXISN260707292243",
+        "net": "15942.21",
+        "members": 2,
+        "narration": "ACH/C/AXISN260707292243/RAZORPAY SOFTWARE"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400005",
+      "right": [
+        "bank:0005"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "AXISN260708114011",
+        "net": "40041.88",
+        "members": 8,
+        "narration": "MB:NEFT CR-AXISN260708114011-RAZORPAY-SETTLEMENT"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400006",
+      "right": [
         "bank:0006"
       ],
       "tier": "T0_EXACT_ID",
@@ -2039,99 +2072,49 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "KKBKN260706982508",
-        "net": "102.44",
-        "members": 1,
-        "narration": "RTGS KKBKN260706982508 RAZORPAY SOFTWARE PRIVATE LIMITED"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400005",
-      "right": [
-        "bank:0004"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "AXISN260706601680",
-        "net": "16488.60",
+        "utr": "AXISN260709707695",
+        "net": "12359.62",
         "members": 4,
-        "narration": "NEFT CR AXISN260706601680 RAZORPAY SOFTWARE  PVT  LTD"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400006",
-      "right": [
-        "bank:0003"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260707311944",
-        "net": "15942.21",
-        "members": 2,
-        "narration": "MB:NEFT CR-KKBKN260707311944-RAZORPAY-SETTLEMENT"
+        "narration": "MB:NEFT CR-AXISN260709707695-RAZORPAY-SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400007",
       "right": [
-        "bank:0007"
+        "bank:0008"
       ],
-      "tier": "T1_NORMALIZED_ID",
-      "confidence": 0.8,
-      "delta": "-11.80",
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
       "evidence": {
-        "on": "utr_amount_differs",
-        "utr": "SBIN0260708365068",
-        "bank_total": "44982.54",
-        "batch_net": "44994.34"
+        "on": "utr",
+        "utr": "ICICN260710639127",
+        "net": "4406.63",
+        "members": 3,
+        "narration": "RTGS ICICN260710639127 RAZORPAY SOFTWARE PRIVATE LIMITED"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400008",
+      "right": [
+        "bank:0010"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "AXISN260711986167",
+        "net": "18180.01",
+        "members": 5,
+        "narration": "ACH/C/AXISN260711986167/RAZORPAY SOFTWARE"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400009",
-      "right": [
-        "bank:0012"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "SBIN0260710478478",
-        "net": "8877.76",
-        "members": 2,
-        "narration": "RTGS SBIN0260710478478 RAZORPAY SOFTWARE PRIVATE LIMITED"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400010",
-      "right": [
-        "bank:0014"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "ICICN260711723502",
-        "net": "9237.75",
-        "members": 6,
-        "narration": "rtgs icicn260711723502 razorpay software private limited"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400011",
       "right": [
         "bank:0013"
       ],
@@ -2140,27 +2123,64 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "KKBKN260712840714",
+        "utr": "SBIN0260712168948",
         "net": "4710.38",
         "members": 2,
-        "narration": "NEFT CR KKBKN260712840714 RAZORPAY SOFTWARE  PVT  LTD"
+        "narration": "RTGS SBIN0260712168948 RAZORPAY SOFTWARE PRIVATE LIMITED"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400012",
+      "left": "setl_82400010",
       "right": [
-        "bank:0015"
+        "bank:0012"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "AXISN260713327302",
-        "net": "14340.66",
-        "members": 4,
-        "narration": "ACH/C/AXISN260713327302/RAZORPAY SOFTWARE"
+        "utr": "ICICN260713699100",
+        "net": "15318.05",
+        "members": 3,
+        "narration": "MB:NEFT CR-ICICN260713699100-RAZORPAY-SETTLEMENT"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400011",
+      "right": [
+        "bank:0014"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "HDFCN260714855545",
+        "net": "4196.34",
+        "members": 1,
+        "narration": "MB:NEFT CR-HDFCN260714855545-RAZORPAY-SETTLEMENT"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400012",
+      "right": [
+        "bank:0019",
+        "bank:0021"
+      ],
+      "tier": "T3_AGGREGATE",
+      "confidence": 0.97,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr+aggregate",
+        "utr": "KKBKN260715519995",
+        "parts": 2,
+        "part_amounts": [
+          "5730.12",
+          "4688.28"
+        ]
       }
     },
     {
@@ -2174,44 +2194,63 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "HDFCN260714758214",
-        "net": "4196.34",
-        "members": 1,
-        "narration": "RTGS HDFCN260714758214 RAZORPAY SOFTWARE PRIVATE LIMITED"
+        "utr": "ICICN260716844352",
+        "net": "43233.74",
+        "members": 6,
+        "narration": "NEFT CR ICICN260716844352 RAZORPAY SOFTWARE  PVT  LTD"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400014",
       "right": [
-        "bank:0019"
+        "bank:0020"
+      ],
+      "tier": "T1_NORMALIZED_ID",
+      "confidence": 0.8,
+      "delta": "-5.90",
+      "evidence": {
+        "on": "utr_amount_differs",
+        "utr": "KKBKN260717982508",
+        "bank_total": "11737.51",
+        "batch_net": "11743.41"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400015",
+      "right": [
+        "bank:0022"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "ICICN260715729956",
-        "net": "10418.40",
-        "members": 2,
-        "narration": "RTGS ICICN260715729956 RAZORPAY SOFTWARE PRIVATE LIMITED"
+        "utr": "AXISN260718601680",
+        "net": "13755.92",
+        "members": 3,
+        "narration": "ACH/C/AXISN260718601680/RAZORPAY SOFTWARE"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400016",
       "right": [
-        "bank:0023"
+        "bank:0023",
+        "bank:0025"
       ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
+      "tier": "T3_AGGREGATE",
+      "confidence": 0.97,
       "delta": "0.00",
       "evidence": {
-        "on": "utr",
-        "utr": "AXISN260717282728",
-        "net": "11743.41",
-        "members": 2,
-        "narration": "RTGS AXISN260717282728 RAZORPAY SOFTWARE PRIVATE LIMITED"
+        "on": "utr+aggregate",
+        "utr": "KKBKN260719311944",
+        "parts": 2,
+        "part_amounts": [
+          "8664.56",
+          "7089.18"
+        ]
       }
     },
     {
@@ -2220,57 +2259,19 @@
       "right": [
         "bank:0024"
       ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
+      "tier": "T1_NORMALIZED_ID",
+      "confidence": 0.8,
+      "delta": "-23.60",
       "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260718211485",
-        "net": "6391.28",
-        "members": 4,
-        "narration": "MB:NEFT CR-KKBKN260718211485-RAZORPAY-SETTLEMENT"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400018",
-      "right": [
-        "bank:0025"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "SBIN0260719143610",
-        "net": "15753.74",
-        "members": 3,
-        "narration": "MB:NEFT CR-SBIN0260719143610-RAZORPAY-SETTLEMENT"
+        "on": "utr_amount_differs",
+        "utr": "SBIN0260720365068",
+        "bank_total": "19743.28",
+        "batch_net": "19766.88"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400019",
-      "right": [
-        "bank:0027",
-        "bank:0028"
-      ],
-      "tier": "T3_AGGREGATE",
-      "confidence": 0.97,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr+aggregate",
-        "utr": "KKBKN260720891036",
-        "parts": 2,
-        "part_amounts": [
-          "4.54",
-          "3.72"
-        ]
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400020",
       "right": [
         "bank:0026"
       ],
@@ -2279,15 +2280,32 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "ICICN260720376886",
-        "net": "13598.07",
-        "members": 6,
-        "narration": "IMPS/ICICN260720376886/RAZORPAYSOFT/SETTLEMENT"
+        "utr": "SBIN0260722478478",
+        "net": "10577.74",
+        "members": 2,
+        "narration": "neft cr sbin0260722478478 razorpay software  pvt  ltd"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400021",
+      "right": [
+        "bank:0028"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "KKBKN260724840714",
+        "net": "22447.70",
+        "members": 3,
+        "narration": "MB:NEFT CR-KKBKN260724840714-RAZORPAY-SETTLEMENT"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400022",
       "right": [
         "bank:0029"
       ],
@@ -2296,43 +2314,10 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "AXISN260721485862",
-        "net": "1338.41",
-        "members": 1,
-        "narration": "RTGS AXISN260721485862 RAZORPAY SOFTWARE PRIVATE LIMITED"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400022",
-      "right": [
-        "bank:0033"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260722906235",
-        "net": "98.09",
-        "members": 1,
-        "narration": "NEFT CR KKBKN260722906235 RAZORPAY SOFTWARE  PVT  LTD"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400023",
-      "right": [
-        "bank:0030"
-      ],
-      "tier": "T1_NORMALIZED_ID",
-      "confidence": 0.8,
-      "delta": "-5.90",
-      "evidence": {
-        "on": "utr_amount_differs",
-        "utr": "AXISN260722597259",
-        "bank_total": "1312.18",
-        "batch_net": "1318.08"
+        "utr": "AXISN260725327302",
+        "net": "16747.91",
+        "members": 2,
+        "narration": "IMPS/AXISN260725327302/RAZORPAYSOFT/SETTLEMENT"
       }
     },
     {
@@ -2346,15 +2331,49 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "HDFCN260723358365",
-        "net": "2424.93",
-        "members": 1,
-        "narration": "MB:NEFT CR-HDFCN260723358365-RAZORPAY-SETTLEMENT"
+        "utr": "ICICN260727729956",
+        "net": "17665.41",
+        "members": 2,
+        "narration": "imps/icicn260727729956/razorpaysoft/settlement"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400025",
+      "left": "setl_82400026",
+      "right": [
+        "bank:0032"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "AXISN260729282728",
+        "net": "11627.79",
+        "members": 3,
+        "narration": "RTGS AXISN260729282728 RAZORPAY SOFTWARE PRIVATE LIMITED"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400027",
+      "right": [
+        "bank:0033"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "KKBKN260730211485",
+        "net": "19645.23",
+        "members": 4,
+        "narration": "NEFT CR KKBKN260730211485 RAZORPAY SOFTWARE  PVT  LTD"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400028",
       "right": [
         "bank:0034"
       ],
@@ -2363,32 +2382,15 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "ICICN260724333918",
-        "net": "30714.23",
-        "members": 4,
-        "narration": "MB:NEFT CR-ICICN260724333918-RAZORPAY-SETTLEMENT"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400026",
-      "right": [
-        "bank:0035"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "SBIN0260725945715",
-        "net": "7821.63",
+        "utr": "SBIN0260731143610",
+        "net": "7310.81",
         "members": 1,
-        "narration": "NEFT CR SBIN0260725945715 RAZORPAY SOFTWARE  PVT  LTD"
+        "narration": "NEFT-SBIN0260731143610-RAZORPAY SOFTWARE PVT LTD-KKBK0001412"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400027",
+      "left": "setl_82400029",
       "right": [
         "bank:0036"
       ],
@@ -2397,15 +2399,15 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "KKBKN260726944541",
-        "net": "8460.22",
-        "members": 1,
-        "narration": "imps/kkbkn260726944541/razorpaysoft/settlement"
+        "utr": "KKBKN260801891036",
+        "net": "22412.29",
+        "members": 5,
+        "narration": "IMPS/KKBKN260801891036/RAZORPAYSOFT/SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400028",
+      "left": "setl_82400030",
       "right": [
         "bank:0037"
       ],
@@ -2414,66 +2416,32 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "HDFCN260727304429",
-        "net": "17665.41",
-        "members": 2,
-        "narration": "NEFT-HDFCN260727304429-RAZORPAY SOFTWARE PVT LTD-AXIS0009187"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400029",
-      "right": [
-        "bank:0038"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260728628644",
-        "net": "20402.61",
-        "members": 4,
-        "narration": "mb:neft cr-kkbkn260728628644-razorpay-settlement"
+        "utr": "ICICN260802376886",
+        "net": "23470.35",
+        "members": 3,
+        "narration": "RTGS ICICN260802376886 RAZORPAY SOFTWARE PRIVATE LIMITED"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400031",
       "right": [
-        "bank:0041"
+        "bank:0039"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "SBIN0260730364269",
-        "net": "15415.12",
+        "utr": "AXISN260803485862",
+        "net": "16422.68",
         "members": 5,
-        "narration": "neft cr sbin0260730364269 razorpay software  pvt  ltd"
+        "narration": "NEFT CR AXISN260803485862 RAZORPAY SOFTWARE  PVT  LTD"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400032",
-      "right": [
-        "bank:0042"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "SBIN0260731301778",
-        "net": "7310.81",
-        "members": 1,
-        "narration": "MB:NEFT CR-SBIN0260731301778-RAZORPAY-SETTLEMENT"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400033",
       "right": [
         "bank:0043"
       ],
@@ -2482,32 +2450,66 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "KKBKN260801405172",
-        "net": "23171.36",
-        "members": 5,
-        "narration": "IMPS/KKBKN260801405172/RAZORPAYSOFT/SETTLEMENT"
+        "utr": "KKBKN260804906235",
+        "net": "20096.29",
+        "members": 4,
+        "narration": "imps/kkbkn260804906235/razorpaysoft/settlement"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400034",
+      "left": "setl_82400033",
       "right": [
-        "bank:0045"
+        "bank:0044"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "KKBKN260802436897",
-        "net": "23470.35",
-        "members": 3,
-        "narration": "ACH/C/KKBKN260802436897/RAZORPAY SOFTWARE"
+        "utr": "AXISN260805597259",
+        "net": "15618.63",
+        "members": 4,
+        "narration": "NEFT-AXISN260805597259-RAZORPAY SOFTWARE PVT LTD-AXIS0009187"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400035",
+      "right": [
+        "bank:0047"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "ICICN260807333918",
+        "net": "10781.19",
+        "members": 1,
+        "narration": "mb:neft cr-icicn260807333918-razorpay-settlement"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400036",
+      "right": [
+        "bank:0048"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "SBIN0260808945715",
+        "net": "8134.78",
+        "members": 1,
+        "narration": "neft cr sbin0260808945715 razorpay software  pvt  ltd"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400037",
       "right": [
         "bank:0049"
       ],
@@ -2516,35 +2518,32 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "SBIN0260803301301",
-        "net": "15829.56",
-        "members": 5,
-        "narration": "RTGS SBIN0260803301301 RAZORPAY SOFTWARE PRIVATE LIMITED"
+        "utr": "KKBKN260809944541",
+        "net": "5758.43",
+        "members": 4,
+        "narration": "MB:NEFT CR-KKBKN260809944541-RAZORPAY-SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400036",
+      "left": "setl_82400038",
       "right": [
-        "bank:0047",
         "bank:0050"
       ],
-      "tier": "T3_AGGREGATE",
-      "confidence": 0.97,
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
-        "on": "utr+aggregate",
-        "utr": "KKBKN260804644399",
-        "parts": 2,
-        "part_amounts": [
-          "7560.26",
-          "11340.39"
-        ]
+        "on": "utr",
+        "utr": "HDFCN260810304429",
+        "net": "9726.08",
+        "members": 2,
+        "narration": "IMPS/HDFCN260810304429/RAZORPAYSOFT/SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400037",
+      "left": "setl_82400040",
       "right": [
         "bank:0052"
       ],
@@ -2553,49 +2552,15 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "SBIN0260805992150",
-        "net": "12086.50",
-        "members": 5,
-        "narration": "ACH/C/SBIN0260805992150/RAZORPAY SOFTWARE"
+        "utr": "ICICN260812251568",
+        "net": "7435.28",
+        "members": 2,
+        "narration": "ACH/C/ICICN260812251568/RAZORPAY SOFTWARE"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400038",
-      "right": [
-        "bank:0053"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "ICICN260806948382",
-        "net": "14270.59",
-        "members": 3,
-        "narration": "IMPS/ICICN260806948382/RAZORPAYSOFT/SETTLEMENT"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400039",
-      "right": [
-        "bank:0057"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "AXISN260807445297",
-        "net": "10781.19",
-        "members": 1,
-        "narration": "RTGS AXISN260807445297 RAZORPAY SOFTWARE PRIVATE LIMITED"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400040",
+      "left": "setl_82400041",
       "right": [
         "bank:0056"
       ],
@@ -2604,31 +2569,48 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "ICICN260808122306",
-        "net": "8134.78",
-        "members": 1,
-        "narration": "IMPS/ICICN260808122306/RAZORPAYSOFT/SETTLEMENT"
+        "utr": "SBIN0260813364269",
+        "net": "23733.74",
+        "members": 6,
+        "narration": "RTGS SBIN0260813364269 RAZORPAY SOFTWARE PRIVATE LIMITED"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400041",
+      "left": "setl_82400042",
       "right": [
-        "bank:0058"
+        "bank:0054"
       ],
       "tier": "T1_NORMALIZED_ID",
       "confidence": 0.8,
       "delta": "-11.80",
       "evidence": {
         "on": "utr_amount_differs",
-        "utr": "AXISN260809179591",
-        "bank_total": "5116.32",
-        "batch_net": "5128.12"
+        "utr": "SBIN0260814301778",
+        "bank_total": "31246.93",
+        "batch_net": "31258.73"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400042",
+      "left": "setl_82400043",
+      "right": [
+        "bank:0059"
+      ],
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr",
+        "utr": "KKBKN260816405172",
+        "net": "4447.78",
+        "members": 4,
+        "narration": "ACH/C/KKBKN260816405172/RAZORPAY SOFTWARE"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400045",
       "right": [
         "bank:0060"
       ],
@@ -2637,129 +2619,10 @@
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "SBIN0260810231988",
-        "net": "9726.08",
+        "utr": "SBIN0260819301301",
+        "net": "416.55",
         "members": 2,
-        "narration": "imps/sbin0260810231988/razorpaysoft/settlement"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400043",
-      "right": [
-        "bank:0062"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "SBIN0260812185218",
-        "net": "7435.28",
-        "members": 2,
-        "narration": "NEFT-SBIN0260812185218-RAZORPAY SOFTWARE PVT LTD-AXIS0006599"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400044",
-      "right": [
-        "bank:0064"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "AXISN260813674139",
-        "net": "11305.06",
-        "members": 6,
-        "narration": "IMPS/AXISN260813674139/RAZORPAYSOFT/SETTLEMENT"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400045",
-      "right": [
-        "bank:0061"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260813740695",
-        "net": "105.66",
-        "members": 1,
-        "narration": "IMPS/KKBKN260813740695/RAZORPAYSOFT/SETTLEMENT"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400046",
-      "right": [
-        "bank:0063"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260814195479",
-        "net": "28145.19",
-        "members": 3,
-        "narration": "ACH/C/KKBKN260814195479/RAZORPAY SOFTWARE"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400047",
-      "right": [
-        "bank:0065"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260814569094",
-        "net": "10.64",
-        "members": 1,
-        "narration": "NEFT CR KKBKN260814569094 RAZORPAY SOFTWARE  PVT  LTD"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400048",
-      "right": [
-        "bank:0068"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "KKBKN260816900053",
-        "net": "13528.89",
-        "members": 3,
-        "narration": "RTGS KKBKN260816900053 RAZORPAY SOFTWARE PRIVATE LIMITED"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400050",
-      "right": [
-        "bank:0069"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "SBIN0260818687300",
-        "net": "930.10",
-        "members": 1,
-        "narration": "mb:neft cr-sbin0260818687300-razorpay-settlement"
+        "narration": "IMPS/SBIN0260819301301/RAZORPAYSOFT/SETTLEMENT"
       }
     },
     {
@@ -2780,15 +2643,15 @@
         ],
         "batch_nets": [
           "14605.69",
-          "21453.94"
+          "22641.85"
         ],
-        "credit": "36059.63",
+        "credit": "37247.54",
         "narration": "NEFT CR RAZORPAY SOFTWARE PVT LTD CONSOLIDATED PAYOUT"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "bank:0002",
+      "left": "bank:0003",
       "right": [
         "setl_82400002",
         "setl_82400003"
@@ -2803,10 +2666,10 @@
           "setl_82400003"
         ],
         "batch_nets": [
-          "12.58",
-          "14834.67"
+          "14834.67",
+          "25565.80"
         ],
-        "credit": "14847.25",
+        "credit": "40400.47",
         "narration": "NEFT CR RAZORPAY SOFTWARE PVT LTD CONSOLIDATED PAYOUT"
       }
     },
@@ -2814,7 +2677,7 @@
       "leg": "invoice_to_bank",
       "left": "INV-2627-1035",
       "right": [
-        "bank:0011"
+        "bank:0007"
       ],
       "tier": "T2_AMOUNT_DATE",
       "confidence": 0.96,
@@ -2823,7 +2686,7 @@
         "on": "narration+amount",
         "relation": "gross",
         "customer": "Anand Traders",
-        "narration": "NEFT-KKBKN260711107987-ANAND TRADERS-DIRECT",
+        "narration": "NEFT-KKBKN260711991192-ANAND TRADERS-DIRECT",
         "name_overlap": 0.4,
         "invoice_gross": "2047.16",
         "bank_credit": "2047.16",
@@ -2834,7 +2697,7 @@
       "leg": "invoice_to_bank",
       "left": "INV-2627-1010",
       "right": [
-        "bank:0055"
+        "bank:0046"
       ],
       "tier": "T2_AMOUNT_DATE",
       "confidence": 0.96,
@@ -2843,7 +2706,7 @@
         "on": "narration+amount",
         "relation": "gross",
         "customer": "Prabhat Printers",
-        "narration": "NEFT-ICICN260807326144-PRABHAT PRINTERS-DIRECT",
+        "narration": "NEFT-KKBKN260807496896-PRABHAT PRINTERS-DIRECT",
         "name_overlap": 0.4,
         "invoice_gross": "5003.96",
         "bank_credit": "5003.96",
@@ -2854,7 +2717,7 @@
       "leg": "invoice_to_bank",
       "left": "INV-2627-1121",
       "right": [
-        "bank:0067"
+        "bank:0061"
       ],
       "tier": "T2_AMOUNT_DATE",
       "confidence": 0.96,
@@ -2863,7 +2726,7 @@
         "on": "narration+amount",
         "relation": "gross",
         "customer": "Indus Motors",
-        "narration": "NEFT-KKBKN260815749794-INDUS MOTORS-DIRECT",
+        "narration": "NEFT-HDFCN260821936398-INDUS MOTORS-DIRECT",
         "name_overlap": 0.4,
         "invoice_gross": "8004.91",
         "bank_credit": "8004.91",
@@ -2872,29 +2735,9 @@
     },
     {
       "leg": "invoice_to_bank",
-      "left": "INV-2627-1033",
-      "right": [
-        "bank:0009"
-      ],
-      "tier": "T4_ADJUDICATED",
-      "confidence": 0.62,
-      "delta": "-68.38",
-      "evidence": {
-        "on": "narration+amount",
-        "relation": "net_of_tds_2pct",
-        "customer": "Prabhat Printers",
-        "narration": "RTGS-AXISN260709210774-PRABHAT PRNTRS-PMT AGST BILL",
-        "name_overlap": 0.125,
-        "invoice_gross": "3419.18",
-        "bank_credit": "3350.80",
-        "note": "model read the counterparty name; amount relationship verified"
-      }
-    },
-    {
-      "leg": "invoice_to_bank",
       "left": "INV-2627-1095",
       "right": [
-        "bank:0020"
+        "bank:0009"
       ],
       "tier": "T4_ADJUDICATED",
       "confidence": 0.62,
@@ -2903,7 +2746,7 @@
         "on": "narration+amount",
         "relation": "net_of_tds_2pct",
         "customer": "Meridian Labs",
-        "narration": "RTGS-AXISN260715950845-MERIDIAN LBS-PMT AGST BILL",
+        "narration": "RTGS-AXISN260711688748-MERIDIAN LBS-PMT AGST BILL",
         "name_overlap": 0.125,
         "invoice_gross": "7947.72",
         "bank_credit": "7788.77",
@@ -2912,9 +2755,29 @@
     },
     {
       "leg": "invoice_to_bank",
+      "left": "INV-2627-1033",
+      "right": [
+        "bank:0011"
+      ],
+      "tier": "T4_ADJUDICATED",
+      "confidence": 0.62,
+      "delta": "-68.38",
+      "evidence": {
+        "on": "narration+amount",
+        "relation": "net_of_tds_2pct",
+        "customer": "Prabhat Printers",
+        "narration": "RTGS-SBIN0260712759373-PRABHAT PRNTRS-PMT AGST BILL",
+        "name_overlap": 0.125,
+        "invoice_gross": "3419.18",
+        "bank_credit": "3350.80",
+        "note": "model read the counterparty name; amount relationship verified"
+      }
+    },
+    {
+      "leg": "invoice_to_bank",
       "left": "INV-2627-1020",
       "right": [
-        "bank:0046"
+        "bank:0038"
       ],
       "tier": "T4_ADJUDICATED",
       "confidence": 0.62,
@@ -2923,7 +2786,7 @@
         "on": "narration+amount",
         "relation": "net_of_tds_2pct",
         "customer": "Everest Logistics",
-        "narration": "RTGS-KKBKN260803968413-EVEREST LGSTCS-PMT AGST BILL",
+        "narration": "RTGS-ICICN260803863670-EVEREST LGSTCS-PMT AGST BILL",
         "name_overlap": 0.125,
         "invoice_gross": "6566.17",
         "bank_credit": "6434.85",
@@ -2941,8 +2804,8 @@
       "evidence": {
         "order_id": "order:order_8240082",
         "first_capture": "pay_82400075",
-        "first_at": "2026-07-02T07:10:00",
-        "duplicate_at": "2026-07-02T18:05:00",
+        "first_at": "2026-07-02T06:45:00",
+        "duplicate_at": "2026-07-02T13:10:00",
         "amount": "1852.74"
       },
       "proposed_action": "Refund pay_82400076 and credit-note the order, or confirm two genuine shipments against order:order_8240082.",
@@ -2973,8 +2836,8 @@
       "evidence": {
         "order_id": "order:order_8240092",
         "first_capture": "pay_82400086",
-        "first_at": "2026-07-13T16:24:00",
-        "duplicate_at": "2026-07-14T14:56:00",
+        "first_at": "2026-07-13T20:26:00",
+        "duplicate_at": "2026-07-14T05:59:00",
         "amount": "4504.64"
       },
       "proposed_action": "Refund pay_82400087 and credit-note the order, or confirm two genuine shipments against order:order_8240092.",
@@ -3033,8 +2896,8 @@
       "evidence": {
         "order_id": "order:order_8240102",
         "first_capture": "pay_82400096",
-        "first_at": "2026-07-22T07:52:00",
-        "duplicate_at": "2026-07-22T13:25:00",
+        "first_at": "2026-07-22T10:25:00",
+        "duplicate_at": "2026-07-23T10:11:00",
         "amount": "9122.17"
       },
       "proposed_action": "Refund pay_82400097 and credit-note the order, or confirm two genuine shipments against order:order_8240102.",
@@ -3054,7 +2917,7 @@
         ],
         "dates": [
           "2026-08-10",
-          "2026-08-16"
+          "2026-08-17"
         ],
         "sums_to": "2104.14",
         "customer": "Rashmi Jewellers"
@@ -3067,16 +2930,16 @@
       "source": "erp",
       "code": "SHORT_PAYMENT",
       "disposition": "needs_review",
-      "value_at_risk": "-266.72",
+      "value_at_risk": "-143.62",
       "evidence": {
         "payment": "pay_82400027",
         "matched_on": "identifier",
         "invoice_gross": "2051.68",
-        "paid": "1784.96",
-        "gap": "-266.72",
+        "paid": "1908.06",
+        "gap": "-143.62",
         "customer": "Kaveri Seeds"
       },
-      "proposed_action": "Kaveri Seeds paid 266.72 less than INV-2627-1030. Chase the balance, or raise a credit note if it was agreed.",
+      "proposed_action": "Kaveri Seeds paid 143.62 less than INV-2627-1030. Chase the balance, or raise a credit note if it was agreed.",
       "narrative": ""
     },
     {
@@ -3084,16 +2947,16 @@
       "source": "erp",
       "code": "SHORT_PAYMENT",
       "disposition": "needs_review",
-      "value_at_risk": "-1098.90",
+      "value_at_risk": "-422.65",
       "evidence": {
         "payment": "pay_82400093",
         "matched_on": "identifier",
         "invoice_gross": "8453.05",
-        "paid": "7354.15",
-        "gap": "-1098.90",
+        "paid": "8030.40",
+        "gap": "-422.65",
         "customer": "Sagar Marine"
       },
-      "proposed_action": "Sagar Marine paid 1098.90 less than INV-2627-1100. Chase the balance, or raise a credit note if it was agreed.",
+      "proposed_action": "Sagar Marine paid 422.65 less than INV-2627-1100. Chase the balance, or raise a credit note if it was agreed.",
       "narrative": ""
     },
     {
@@ -3101,16 +2964,16 @@
       "source": "erp",
       "code": "SHORT_PAYMENT",
       "disposition": "needs_review",
-      "value_at_risk": "-485.88",
+      "value_at_risk": "-1263.28",
       "evidence": {
         "payment": "pay_82400058",
         "matched_on": "identifier",
         "invoice_gross": "9717.55",
-        "paid": "9231.67",
-        "gap": "-485.88",
+        "paid": "8454.27",
+        "gap": "-1263.28",
         "customer": "Kaveri Seeds"
       },
-      "proposed_action": "Kaveri Seeds paid 485.88 less than INV-2627-1066. Chase the balance, or raise a credit note if it was agreed.",
+      "proposed_action": "Kaveri Seeds paid 1263.28 less than INV-2627-1066. Chase the balance, or raise a credit note if it was agreed.",
       "narrative": ""
     },
     {
@@ -3118,16 +2981,16 @@
       "source": "erp",
       "code": "OVERPAYMENT",
       "disposition": "needs_review",
-      "value_at_risk": "62.67",
+      "value_at_risk": "141.02",
       "evidence": {
         "payment": "pay_82400094",
         "matched_on": "identifier",
         "invoice_gross": "1566.85",
-        "paid": "1629.52",
-        "gap": "62.67",
+        "paid": "1707.87",
+        "gap": "141.02",
         "customer": "Udupi Kitchens"
       },
-      "proposed_action": "Udupi Kitchens paid 62.67 more than INV-2627-1101. Refund it or hold it as an advance against the next invoice.",
+      "proposed_action": "Udupi Kitchens paid 141.02 more than INV-2627-1101. Refund it or hold it as an advance against the next invoice.",
       "narrative": ""
     },
     {
@@ -3252,7 +3115,7 @@
       "evidence": {
         "order_id": "order_8240116",
         "receipt": "INV-2627-1117",
-        "captured_at": "2026-07-09T16:23:00",
+        "captured_at": "2026-07-09T13:46:00",
         "method": "upi",
         "amount": "2143.95"
       },
@@ -3268,7 +3131,7 @@
       "evidence": {
         "order_id": "order_8240059",
         "receipt": "INV-2627-1060",
-        "captured_at": "2026-07-14T21:48:00",
+        "captured_at": "2026-07-14T14:27:00",
         "method": "upi",
         "amount": "10286.51"
       },
@@ -3284,7 +3147,7 @@
       "evidence": {
         "order_id": "order_8240128",
         "receipt": "INV-2627-1129",
-        "captured_at": "2026-07-18T17:13:00",
+        "captured_at": "2026-07-18T11:16:00",
         "method": "upi",
         "amount": "3271.88"
       },
@@ -3300,7 +3163,7 @@
       "evidence": {
         "order_id": "order_8240042",
         "receipt": "INV-2627-1043",
-        "captured_at": "2026-07-31T12:55:00",
+        "captured_at": "2026-07-31T15:26:00",
         "method": "upi",
         "amount": "8576.37"
       },
@@ -3316,7 +3179,7 @@
       "evidence": {
         "order_id": "order_8240078",
         "receipt": "INV-2627-1079",
-        "captured_at": "2026-08-03T07:51:00",
+        "captured_at": "2026-08-03T14:19:00",
         "method": "netbanking",
         "amount": "10818.10"
       },
@@ -3348,7 +3211,7 @@
       "disposition": "needs_review",
       "value_at_risk": "8033.51",
       "evidence": {
-        "captured_at": "2026-07-10T22:22:00",
+        "captured_at": "2026-07-10T13:35:00",
         "method": "upi",
         "amount": "8033.51",
         "order_id": "order_8240122"
@@ -3363,7 +3226,7 @@
       "disposition": "needs_review",
       "value_at_risk": "3054.81",
       "evidence": {
-        "captured_at": "2026-07-11T19:09:00",
+        "captured_at": "2026-07-11T15:57:00",
         "method": "wallet",
         "amount": "3121.10",
         "order_id": "order_8240085"
@@ -3378,7 +3241,7 @@
       "disposition": "needs_review",
       "value_at_risk": "1546.78",
       "evidence": {
-        "captured_at": "2026-07-18T17:10:00",
+        "captured_at": "2026-07-18T12:19:00",
         "method": "upi",
         "amount": "1546.78",
         "order_id": "order_8240057"
@@ -3391,17 +3254,17 @@
       "source": "pg",
       "code": "FEE_VARIANCE",
       "disposition": "auto_resolved",
-      "value_at_risk": "2.71",
+      "value_at_risk": "4.84",
       "evidence": {
         "method": "card",
         "contracted_bps": 200,
         "expected_fee": "160.27",
-        "charged_fee": "162.57",
+        "charged_fee": "164.37",
         "expected_gst": "28.85",
-        "charged_gst": "29.26",
-        "drift": "2.71"
+        "charged_gst": "29.59",
+        "drift": "4.84"
       },
-      "proposed_action": "Recover 2.71 of MDR against pay_82400132.",
+      "proposed_action": "Recover 4.84 of MDR against pay_82400132.",
       "narrative": ""
     },
     {
@@ -3427,13 +3290,27 @@
       "source": "pg",
       "code": "ORPHAN_REFUND",
       "disposition": "needs_review",
-      "value_at_risk": "3238.47",
+      "value_at_risk": "2645.35",
       "evidence": {
         "parent_payment_id": "pay_82490000",
-        "amount": "3238.47",
+        "amount": "2645.35",
         "created_at": "2026-08-01T11:00:00"
       },
       "proposed_action": "Locate pay_82490000 \u2014 it is outside this report's period or was captured on another account.",
+      "narrative": ""
+    },
+    {
+      "key": "rfnd_82490001",
+      "source": "pg",
+      "code": "ORPHAN_REFUND",
+      "disposition": "needs_review",
+      "value_at_risk": "909.92",
+      "evidence": {
+        "parent_payment_id": "pay_82490001",
+        "amount": "909.92",
+        "created_at": "2026-08-02T11:00:00"
+      },
+      "proposed_action": "Locate pay_82490001 \u2014 it is outside this report's period or was captured on another account.",
       "narrative": ""
     },
     {
@@ -3443,7 +3320,7 @@
       "disposition": "needs_review",
       "value_at_risk": "6962.93",
       "evidence": {
-        "captured_at": "2026-08-02T06:41:00",
+        "captured_at": "2026-08-02T12:55:00",
         "method": "emi",
         "amount": "7218.46",
         "order_id": "order_8240044"
@@ -3452,30 +3329,16 @@
       "narrative": ""
     },
     {
-      "key": "rfnd_82490001",
-      "source": "pg",
-      "code": "ORPHAN_REFUND",
-      "disposition": "needs_review",
-      "value_at_risk": "1351.54",
-      "evidence": {
-        "parent_payment_id": "pay_82490001",
-        "amount": "1351.54",
-        "created_at": "2026-08-02T11:00:00"
-      },
-      "proposed_action": "Locate pay_82490001 \u2014 it is outside this report's period or was captured on another account.",
-      "narrative": ""
-    },
-    {
       "key": "adjs_82400000",
       "source": "pg",
       "code": "CHARGEBACK_ADJUSTMENT",
       "disposition": "needs_review",
-      "value_at_risk": "1494.51",
+      "value_at_risk": "2410.43",
       "evidence": {
         "dispute_id": "disp_8240000",
-        "amount": "1494.51",
+        "amount": "2410.43",
         "created_at": "2026-08-03T09:30:00",
-        "settlement_id": "setl_82400037"
+        "settlement_id": "setl_82400033"
       },
       "proposed_action": "Book the dispute debit to a chargeback expense account and decide whether to contest before the representment window closes.",
       "narrative": ""
@@ -3485,10 +3348,10 @@
       "source": "pg",
       "code": "ORPHAN_REFUND",
       "disposition": "needs_review",
-      "value_at_risk": "2895.63",
+      "value_at_risk": "3078.28",
       "evidence": {
         "parent_payment_id": "pay_82490002",
-        "amount": "2895.63",
+        "amount": "3078.28",
         "created_at": "2026-08-03T11:00:00"
       },
       "proposed_action": "Locate pay_82490002 \u2014 it is outside this report's period or was captured on another account.",
@@ -3499,12 +3362,12 @@
       "source": "pg",
       "code": "CHARGEBACK_ADJUSTMENT",
       "disposition": "needs_review",
-      "value_at_risk": "2715.41",
+      "value_at_risk": "2085.10",
       "evidence": {
         "dispute_id": "disp_8240001",
-        "amount": "2715.41",
+        "amount": "2085.10",
         "created_at": "2026-08-07T09:30:00",
-        "settlement_id": "setl_82400041"
+        "settlement_id": "setl_82400037"
       },
       "proposed_action": "Book the dispute debit to a chargeback expense account and decide whether to contest before the representment window closes.",
       "narrative": ""
@@ -3532,12 +3395,12 @@
       "source": "pg",
       "code": "CHARGEBACK_ADJUSTMENT",
       "disposition": "needs_review",
-      "value_at_risk": "1189.24",
+      "value_at_risk": "2979.08",
       "evidence": {
         "dispute_id": "disp_8240002",
-        "amount": "1189.24",
+        "amount": "2979.08",
         "created_at": "2026-08-11T09:30:00",
-        "settlement_id": "setl_82400044"
+        "settlement_id": "setl_82400041"
       },
       "proposed_action": "Book the dispute debit to a chargeback expense account and decide whether to contest before the representment window closes.",
       "narrative": ""
@@ -3547,17 +3410,17 @@
       "source": "pg",
       "code": "FEE_VARIANCE",
       "disposition": "auto_resolved",
-      "value_at_risk": "-1.77",
+      "value_at_risk": "8.85",
       "evidence": {
         "method": "netbanking",
         "contracted_bps": 150,
         "expected_fee": "157.30",
-        "charged_fee": "155.80",
+        "charged_fee": "164.80",
         "expected_gst": "28.31",
-        "charged_gst": "28.04",
-        "drift": "-1.77"
+        "charged_gst": "29.66",
+        "drift": "8.85"
       },
-      "proposed_action": "Credit back 1.77 of MDR against pay_82400044.",
+      "proposed_action": "Recover 8.85 of MDR against pay_82400044.",
       "narrative": ""
     },
     {
@@ -3613,108 +3476,108 @@
       "source": "erp",
       "code": "TAX_LINE_MISMATCH",
       "disposition": "needs_review",
-      "value_at_risk": "1197.63",
+      "value_at_risk": "-921.25",
       "evidence": {
         "taxable": "9212.53",
-        "gst_charged": "460.63",
+        "gst_charged": "2579.51",
         "gst_expected_18pct": "1658.26",
-        "shortfall": "1197.63",
+        "shortfall": "-921.25",
         "customer": "Bharat Textiles"
       },
-      "proposed_action": "Reconfirm the HSN rate on INV-2627-1128; if 18% applies, a revised invoice for 1197.63 of GST is due.",
+      "proposed_action": "Reconfirm the HSN rate on INV-2627-1128; if 18% applies, 921.25 of GST was over-collected and needs a credit note.",
       "narrative": ""
     },
     {
-      "key": "setl_82400007",
-      "source": "settlement",
-      "code": "SETTLEMENT_AMOUNT_MISMATCH",
-      "disposition": "needs_review",
-      "value_at_risk": "-11.80",
-      "evidence": {
-        "utr": "SBIN0260708365068",
-        "batch_net": "44994.34",
-        "bank_credited": "44982.54",
-        "delta": "-11.80",
-        "plausible_charge_up_to": "112.49",
-        "narration": "MB:NEFT CR-SBIN0260708365068-RAZORPAY-SETTLEMENT"
-      },
-      "proposed_action": "Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank.",
-      "narrative": ""
-    },
-    {
-      "key": "setl_82400019",
+      "key": "setl_82400012",
       "source": "settlement",
       "code": "SPLIT_SETTLEMENT",
       "disposition": "auto_resolved",
       "value_at_risk": "0.00",
       "evidence": {
-        "utr": "KKBKN260720891036",
+        "utr": "KKBKN260715519995",
         "parts": 2,
         "lines": [
-          "bank:0027",
-          "bank:0028"
+          "bank:0019",
+          "bank:0021"
         ],
         "dates": [
-          "2026-07-20",
-          "2026-07-21"
+          "2026-07-16",
+          "2026-07-17"
         ],
-        "sums_to": "8.26"
+        "sums_to": "10418.40"
       },
       "proposed_action": "No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line.",
       "narrative": ""
     },
     {
-      "key": "setl_82400023",
+      "key": "setl_82400014",
       "source": "settlement",
       "code": "SETTLEMENT_AMOUNT_MISMATCH",
       "disposition": "needs_review",
       "value_at_risk": "-5.90",
       "evidence": {
-        "utr": "AXISN260722597259",
-        "batch_net": "1318.08",
-        "bank_credited": "1312.18",
+        "utr": "KKBKN260717982508",
+        "batch_net": "11743.41",
+        "bank_credited": "11737.51",
         "delta": "-5.90",
         "plausible_charge_up_to": "100.00",
-        "narration": "NEFT-AXISN260722597259-RAZORPAY SOFTWARE PVT LTD-KKBK0001412"
+        "narration": "IMPS/KKBKN260717982508/RAZORPAYSOFT/SETTLEMENT"
       },
       "proposed_action": "Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank.",
       "narrative": ""
     },
     {
-      "key": "setl_82400036",
+      "key": "setl_82400016",
       "source": "settlement",
       "code": "SPLIT_SETTLEMENT",
       "disposition": "auto_resolved",
       "value_at_risk": "0.00",
       "evidence": {
-        "utr": "KKBKN260804644399",
+        "utr": "KKBKN260719311944",
         "parts": 2,
         "lines": [
-          "bank:0047",
-          "bank:0050"
+          "bank:0023",
+          "bank:0025"
         ],
         "dates": [
-          "2026-08-04",
-          "2026-08-05"
+          "2026-07-19",
+          "2026-07-20"
         ],
-        "sums_to": "18900.65"
+        "sums_to": "15753.74"
       },
       "proposed_action": "No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line.",
       "narrative": ""
     },
     {
-      "key": "setl_82400041",
+      "key": "setl_82400017",
+      "source": "settlement",
+      "code": "SETTLEMENT_AMOUNT_MISMATCH",
+      "disposition": "needs_review",
+      "value_at_risk": "-23.60",
+      "evidence": {
+        "utr": "SBIN0260720365068",
+        "batch_net": "19766.88",
+        "bank_credited": "19743.28",
+        "delta": "-23.60",
+        "plausible_charge_up_to": "100.00",
+        "narration": "NEFT CR SBIN0260720365068 RAZORPAY SOFTWARE  PVT  LTD"
+      },
+      "proposed_action": "Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank.",
+      "narrative": ""
+    },
+    {
+      "key": "setl_82400042",
       "source": "settlement",
       "code": "SETTLEMENT_AMOUNT_MISMATCH",
       "disposition": "needs_review",
       "value_at_risk": "-11.80",
       "evidence": {
-        "utr": "AXISN260809179591",
-        "batch_net": "5128.12",
-        "bank_credited": "5116.32",
+        "utr": "SBIN0260814301778",
+        "batch_net": "31258.73",
+        "bank_credited": "31246.93",
         "delta": "-11.80",
         "plausible_charge_up_to": "100.00",
-        "narration": "IMPS/AXISN260809179591/RAZORPAYSOFT/SETTLEMENT"
+        "narration": "ACH/C/SBIN0260814301778/RAZORPAY SOFTWARE"
       },
       "proposed_action": "Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank.",
       "narrative": ""
@@ -3728,7 +3591,7 @@
       "evidence": {
         "bank_line": "bank:0001",
         "narration": "NEFT CR RAZORPAY SOFTWARE PVT LTD CONSOLIDATED PAYOUT",
-        "credit_total": "36059.63",
+        "credit_total": "37247.54",
         "this_batch": "14605.69",
         "paid_with": [
           "setl_82400001"
@@ -3747,8 +3610,8 @@
       "evidence": {
         "bank_line": "bank:0001",
         "narration": "NEFT CR RAZORPAY SOFTWARE PVT LTD CONSOLIDATED PAYOUT",
-        "credit_total": "36059.63",
-        "this_batch": "21453.94",
+        "credit_total": "37247.54",
+        "this_batch": "22641.85",
         "paid_with": [
           "setl_82400000"
         ],
@@ -3764,10 +3627,10 @@
       "disposition": "auto_resolved",
       "value_at_risk": "0.00",
       "evidence": {
-        "bank_line": "bank:0002",
+        "bank_line": "bank:0003",
         "narration": "NEFT CR RAZORPAY SOFTWARE PVT LTD CONSOLIDATED PAYOUT",
-        "credit_total": "14847.25",
-        "this_batch": "12.58",
+        "credit_total": "40400.47",
+        "this_batch": "14834.67",
         "paid_with": [
           "setl_82400003"
         ],
@@ -3783,10 +3646,10 @@
       "disposition": "auto_resolved",
       "value_at_risk": "0.00",
       "evidence": {
-        "bank_line": "bank:0002",
+        "bank_line": "bank:0003",
         "narration": "NEFT CR RAZORPAY SOFTWARE PVT LTD CONSOLIDATED PAYOUT",
-        "credit_total": "14847.25",
-        "this_batch": "14834.67",
+        "credit_total": "40400.47",
+        "this_batch": "25565.80",
         "paid_with": [
           "setl_82400002"
         ],
@@ -3796,83 +3659,83 @@
       "narrative": ""
     },
     {
-      "key": "setl_82400008",
+      "key": "setl_82400020",
       "source": "settlement",
       "code": "MISSING_IN_BANK",
       "disposition": "needs_review",
-      "value_at_risk": "10371.48",
+      "value_at_risk": "1645.52",
       "evidence": {
-        "utr": "ICICN260709431605",
-        "settled_at": "2026-07-09T11:00:00",
-        "net": "10371.48",
-        "members": 5,
-        "gross": "10482.85",
-        "fee_and_gst": "111.37"
+        "utr": "ICICN260723723502",
+        "settled_at": "2026-07-23T11:00:00",
+        "net": "1645.52",
+        "members": 2,
+        "gross": "1698.15",
+        "fee_and_gst": "52.63"
       },
-      "proposed_action": "Trace UTR ICICN260709431605 with the bank. Until it lands, 10371.48 sits in gateway receivable, not in cash.",
+      "proposed_action": "Trace UTR ICICN260723723502 with the bank. Until it lands, 1645.52 sits in gateway receivable, not in cash.",
       "narrative": ""
     },
     {
-      "key": "setl_82400015",
+      "key": "setl_82400025",
       "source": "settlement",
       "code": "MISSING_IN_BANK",
       "disposition": "needs_review",
-      "value_at_risk": "43233.74",
+      "value_at_risk": "20402.61",
       "evidence": {
-        "utr": "SBIN0260716871951",
-        "settled_at": "2026-07-16T11:00:00",
-        "net": "43233.74",
-        "members": 6,
-        "gross": "43629.74",
-        "fee_and_gst": "396.00"
+        "utr": "SBIN0260728871951",
+        "settled_at": "2026-07-28T11:00:00",
+        "net": "20402.61",
+        "members": 4,
+        "gross": "21042.99",
+        "fee_and_gst": "640.38"
       },
-      "proposed_action": "Trace UTR SBIN0260716871951 with the bank. Until it lands, 43233.74 sits in gateway receivable, not in cash.",
+      "proposed_action": "Trace UTR SBIN0260728871951 with the bank. Until it lands, 20402.61 sits in gateway receivable, not in cash.",
       "narrative": ""
     },
     {
-      "key": "setl_82400030",
+      "key": "setl_82400034",
       "source": "settlement",
       "code": "MISSING_IN_BANK",
       "disposition": "needs_review",
-      "value_at_risk": "11627.79",
+      "value_at_risk": "14270.59",
       "evidence": {
-        "utr": "ICICN260729251568",
-        "settled_at": "2026-07-29T11:00:00",
-        "net": "11627.79",
+        "utr": "HDFCN260806358365",
+        "settled_at": "2026-08-06T11:00:00",
+        "net": "14270.59",
         "members": 3,
-        "gross": "11883.73",
-        "fee_and_gst": "255.94"
+        "gross": "14348.22",
+        "fee_and_gst": "77.63"
       },
-      "proposed_action": "Trace UTR ICICN260729251568 with the bank. Until it lands, 11627.79 sits in gateway receivable, not in cash.",
+      "proposed_action": "Trace UTR HDFCN260806358365 with the bank. Until it lands, 14270.59 sits in gateway receivable, not in cash.",
       "narrative": ""
     },
     {
-      "key": "bank:0017",
+      "key": "bank:0004",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "21561.47",
+      "value_at_risk": "8936.54",
       "evidence": {
-        "value_date": "2026-07-14",
-        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
-        "ref_no": "33543500",
-        "amount": "21561.47",
+        "value_date": "2026-07-07",
+        "narration": "TERM LOAN DISBURSAL TL-99321",
+        "ref_no": "40751440",
+        "amount": "8936.54",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
       "narrative": ""
     },
     {
-      "key": "bank:0022",
+      "key": "bank:0030",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "19507.56",
+      "value_at_risk": "16188.64",
       "evidence": {
-        "value_date": "2026-07-17",
-        "narration": "INT.PD:12345678:01-08-2026 TO 31-08-2026",
-        "ref_no": "79227966",
-        "amount": "19507.56",
+        "value_date": "2026-07-25",
+        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
+        "ref_no": "60154839",
+        "amount": "16188.64",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
@@ -3883,28 +3746,44 @@
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "13124.04",
+      "value_at_risk": "15333.98",
       "evidence": {
-        "value_date": "2026-07-29",
-        "narration": "TERM LOAN DISBURSAL TL-99321",
-        "ref_no": "76387789",
-        "amount": "13124.04",
+        "value_date": "2026-08-04",
+        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
+        "ref_no": "24407929",
+        "amount": "15333.98",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
       "narrative": ""
     },
     {
-      "key": "bank:0048",
+      "key": "bank:0041",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "8808.35",
+      "value_at_risk": "11075.35",
       "evidence": {
         "value_date": "2026-08-04",
-        "narration": "CHQ PAID-004512",
-        "ref_no": "60177567",
-        "amount": "8808.35",
+        "narration": "TERM LOAN DISBURSAL TL-99321",
+        "ref_no": "33186094",
+        "amount": "11075.35",
+        "claims_settlement": false
+      },
+      "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
+      "narrative": ""
+    },
+    {
+      "key": "bank:0045",
+      "source": "bank",
+      "code": "UNEXPECTED_BANK_CREDIT",
+      "disposition": "needs_review",
+      "value_at_risk": "5540.58",
+      "evidence": {
+        "value_date": "2026-08-06",
+        "narration": "INT.PD:12345678:01-08-2026 TO 31-08-2026",
+        "ref_no": "87715422",
+        "amount": "5540.58",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
@@ -3915,65 +3794,31 @@
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "9151.73",
+      "value_at_risk": "10517.70",
       "evidence": {
-        "value_date": "2026-08-05",
-        "narration": "TERM LOAN DISBURSAL TL-99321",
-        "ref_no": "79215773",
-        "amount": "9151.73",
+        "value_date": "2026-08-11",
+        "narration": "CHQ PAID-004512",
+        "ref_no": "49519355",
+        "amount": "10517.70",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
       "narrative": ""
     },
     {
-      "key": "bank:0059",
+      "key": "bank:0055",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "11056.29",
+      "value_at_risk": "9205.22",
       "evidence": {
-        "value_date": "2026-08-10",
+        "value_date": "2026-08-14",
         "narration": "INT.PD:12345678:01-08-2026 TO 31-08-2026",
-        "ref_no": "53408889",
-        "amount": "11056.29",
+        "ref_no": "57943619",
+        "amount": "9205.22",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
-      "narrative": ""
-    },
-    {
-      "key": "bank:0066",
-      "source": "bank",
-      "code": "UNEXPECTED_BANK_CREDIT",
-      "disposition": "needs_review",
-      "value_at_risk": "1802.28",
-      "evidence": {
-        "value_date": "2026-08-15",
-        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
-        "ref_no": "34896367",
-        "amount": "1802.28",
-        "claims_settlement": false
-      },
-      "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
-      "narrative": ""
-    },
-    {
-      "key": "INV-2627-1033",
-      "source": "erp",
-      "code": "TDS_WITHHELD",
-      "disposition": "auto_resolved",
-      "value_at_risk": "68.38",
-      "evidence": {
-        "relation": "net_of_tds_2pct",
-        "bank_line": "bank:0009",
-        "invoice_gross": "3419.18",
-        "received": "3350.80",
-        "withheld": "68.38",
-        "customer": "Prabhat Printers",
-        "matched_by": "T4_ADJUDICATED"
-      },
-      "proposed_action": "Book 68.38 as TDS receivable against Prabhat Printers and collect Form 16A for the quarter.",
       "narrative": ""
     },
     {
@@ -3984,7 +3829,7 @@
       "value_at_risk": "158.95",
       "evidence": {
         "relation": "net_of_tds_2pct",
-        "bank_line": "bank:0020",
+        "bank_line": "bank:0009",
         "invoice_gross": "7947.72",
         "received": "7788.77",
         "withheld": "158.95",
@@ -3995,6 +3840,24 @@
       "narrative": ""
     },
     {
+      "key": "INV-2627-1033",
+      "source": "erp",
+      "code": "TDS_WITHHELD",
+      "disposition": "auto_resolved",
+      "value_at_risk": "68.38",
+      "evidence": {
+        "relation": "net_of_tds_2pct",
+        "bank_line": "bank:0011",
+        "invoice_gross": "3419.18",
+        "received": "3350.80",
+        "withheld": "68.38",
+        "customer": "Prabhat Printers",
+        "matched_by": "T4_ADJUDICATED"
+      },
+      "proposed_action": "Book 68.38 as TDS receivable against Prabhat Printers and collect Form 16A for the quarter.",
+      "narrative": ""
+    },
+    {
       "key": "INV-2627-1020",
       "source": "erp",
       "code": "TDS_WITHHELD",
@@ -4002,7 +3865,7 @@
       "value_at_risk": "131.32",
       "evidence": {
         "relation": "net_of_tds_2pct",
-        "bank_line": "bank:0046",
+        "bank_line": "bank:0038",
         "invoice_gross": "6566.17",
         "received": "6434.85",
         "withheld": "131.32",
@@ -4011,122 +3874,57 @@
       },
       "proposed_action": "Book 131.32 as TDS receivable against Everest Logistics and collect Form 16A for the quarter.",
       "narrative": ""
-    },
-    {
-      "key": "INV-2627-1029",
-      "source": "erp",
-      "code": "FX_REVALUATION",
-      "disposition": "auto_resolved",
-      "value_at_risk": "-2.53",
-      "evidence": {
-        "currency": "USD",
-        "invoiced": "12.58 USD",
-        "booked_at_invoice_date": "1,055.76 INR",
-        "booked_rate": "1 USD = 83.9235 INR (2026-07-01, RBI reference)",
-        "value_when_received": "1,053.23 INR",
-        "received_rate": "1 USD = 83.7229 INR (2026-07-04, RBI reference)",
-        "difference": "-2.53 INR",
-        "customer": "Rashmi Jewellers"
-      },
-      "proposed_action": "Exchange loss of 2.53 INR on INV-2627-1029. Post it to foreign exchange loss; the customer paid what they owed.",
-      "narrative": ""
-    },
-    {
-      "key": "INV-2627-1092",
-      "source": "erp",
-      "code": "FX_REVALUATION",
-      "disposition": "auto_resolved",
-      "value_at_risk": "7.44",
-      "evidence": {
-        "currency": "EUR",
-        "invoiced": "8.26 EUR",
-        "booked_at_invoice_date": "741.96 INR",
-        "booked_rate": "1 EUR = 89.8255 INR (2026-07-16, RBI reference)",
-        "value_when_received": "749.40 INR",
-        "received_rate": "1 EUR = 90.7264 INR (2026-07-19, RBI reference)",
-        "difference": "+7.44 INR",
-        "customer": "Orion Sportswear"
-      },
-      "proposed_action": "Exchange gain of 7.44 INR on INV-2627-1092. Post it to foreign exchange gain; the customer paid what they owed.",
-      "narrative": ""
-    },
-    {
-      "key": "INV-2627-1016",
-      "source": "erp",
-      "code": "FX_REVALUATION",
-      "disposition": "auto_resolved",
-      "value_at_risk": "71.85",
-      "evidence": {
-        "currency": "EUR",
-        "invoiced": "99.86 EUR",
-        "booked_at_invoice_date": "9,059.94 INR",
-        "booked_rate": "1 EUR = 90.7264 INR (2026-07-19, RBI reference)",
-        "value_when_received": "9,131.79 INR",
-        "received_rate": "1 EUR = 91.4459 INR (2026-07-22, RBI reference)",
-        "difference": "+71.85 INR",
-        "customer": "Prabhat Printers"
-      },
-      "proposed_action": "Exchange gain of 71.85 INR on INV-2627-1016. Post it to foreign exchange gain; the customer paid what they owed.",
-      "narrative": ""
-    },
-    {
-      "key": "INV-2627-1094",
-      "source": "erp",
-      "code": "FX_REVALUATION",
-      "disposition": "auto_resolved",
-      "value_at_risk": "19.36",
-      "evidence": {
-        "currency": "USD",
-        "invoiced": "105.66 USD",
-        "booked_at_invoice_date": "8,563.87 INR",
-        "booked_rate": "1 USD = 81.0512 INR (2026-08-09, RBI reference)",
-        "value_when_received": "8,583.23 INR",
-        "received_rate": "1 USD = 81.2344 INR (2026-08-12, RBI reference)",
-        "difference": "+19.36 INR",
-        "customer": "Jyoti Electricals"
-      },
-      "proposed_action": "Exchange gain of 19.36 INR on INV-2627-1094. Post it to foreign exchange gain; the customer paid what they owed.",
-      "narrative": ""
     }
   ],
   "adjudications": [
     {
-      "batch": "setl_82400008",
+      "batch": "setl_82400020",
       "candidates": [
-        "bank:0059",
-        "bank:0051",
-        "bank:0048"
+        "bank:0007",
+        "bank:0011",
+        "bank:0046"
       ],
-      "chose": "bank:0051",
-      "reason": "The amounts (10371.48 vs 11056.29) and dates (2026-07-09 vs 2026-08-05/04) do not match any other transactions listed, suggesting it's an independent entry unrelated to the others.",
+      "chose": "bank:0046",
+      "reason": "The amounts (1645.52) match between the settlement batch and the NEFT transactions listed, indicating they represent the same underlying financial transaction.",
       "verdict": "rejected_by_arithmetic"
     },
     {
-      "batch": "setl_82400015",
+      "batch": "setl_82400025",
       "candidates": [
-        "bank:0017",
-        "bank:0022",
-        "bank:0040"
-      ],
-      "chose": "bank:0017",
-      "reason": "The settlement batch amount (INR 43233.74) matches the given amount in option A (21561.47), and both have the same date (2026-07-16).",
-      "verdict": "rejected_by_arithmetic"
-    },
-    {
-      "batch": "setl_82400030",
-      "candidates": [
-        "bank:0059",
+        "bank:0030",
         "bank:0040",
-        "bank:0051"
+        "bank:0041"
       ],
-      "chose": "bank:0040",
-      "reason": "The amounts (11627.79 vs 11056.29) and dates (2026-07-29 vs 2026-08-10) match between the given settlement batch and option B.",
+      "chose": "bank:0041",
+      "reason": "The amounts (16188.64 vs 20402.61) and dates (2026-07-25 vs 2026-07-28) do not match any other transactions listed, making it the closest to the given settlement batch.",
+      "verdict": "rejected_by_arithmetic"
+    },
+    {
+      "batch": "setl_82400034",
+      "candidates": [
+        "bank:0040",
+        "bank:0030",
+        "bank:0041"
+      ],
+      "chose": "bank:0041",
+      "reason": "The amounts (14270.59 vs 11075.35) and dates (2026-08-06 vs 2026-08-04) match between the given settlement batch and option C.",
       "verdict": "rejected_by_arithmetic"
     },
     {
       "leg": "invoice_to_bank",
       "bank_line": "bank:0009",
-      "narration": "RTGS-AXISN260709210774-PRABHAT PRNTRS-PMT AGST BILL",
+      "narration": "RTGS-AXISN260711688748-MERIDIAN LBS-PMT AGST BILL",
+      "candidates": [
+        "INV-2627-1095"
+      ],
+      "chose": "INV-2627-1095",
+      "reason": "The narration mentions \"MERIDIAN LBS-PMT AGST BILL\", which corresponds to Meridian Labs as the customer with an invoice date close to the payment date (July 11). The amount matches approximately 7947.",
+      "verdict": "accepted"
+    },
+    {
+      "leg": "invoice_to_bank",
+      "bank_line": "bank:0011",
+      "narration": "RTGS-SBIN0260712759373-PRABHAT PRNTRS-PMT AGST BILL",
       "candidates": [
         "INV-2627-1033"
       ],
@@ -4136,19 +3934,8 @@
     },
     {
       "leg": "invoice_to_bank",
-      "bank_line": "bank:0020",
-      "narration": "RTGS-AXISN260715950845-MERIDIAN LBS-PMT AGST BILL",
-      "candidates": [
-        "INV-2627-1095"
-      ],
-      "chose": "INV-2627-1095",
-      "reason": "The narration mentions \"MERIDIAN LBS-PMT AGST BILL\", which corresponds to Meridian Labs as the customer with an invoice date of 2026-07-08. This matches the gross amount of 7947.72 mentioned in option",
-      "verdict": "accepted"
-    },
-    {
-      "leg": "invoice_to_bank",
-      "bank_line": "bank:0046",
-      "narration": "RTGS-KKBKN260803968413-EVEREST LGSTCS-PMT AGST BILL",
+      "bank_line": "bank:0038",
+      "narration": "RTGS-ICICN260803863670-EVEREST LGSTCS-PMT AGST BILL",
       "candidates": [
         "INV-2627-1020"
       ],
@@ -4158,12 +3945,12 @@
     }
   ],
   "metrics": {
-    "records": 355,
-    "wall_seconds": 24.9709,
-    "records_per_second": 14,
-    "engine_seconds": 24.9511,
-    "auto_clear_rate": 0.8535,
-    "auto_cleared_records": 303,
+    "records": 347,
+    "wall_seconds": 23.4323,
+    "records_per_second": 15,
+    "engine_seconds": 23.423,
+    "auto_clear_rate": 0.8415,
+    "auto_cleared_records": 292,
     "links": {
       "invoice_to_payment": {
         "tp": 126,
@@ -4175,13 +3962,13 @@
         "support": 126
       },
       "settlement_to_bank": {
-        "tp": 49,
+        "tp": 41,
         "fp": 0,
         "fn": 0,
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
-        "support": 49
+        "support": 41
       },
       "invoice_to_bank": {
         "tp": 6,
@@ -4197,13 +3984,13 @@
     "legs_scored": 3,
     "exceptions": {
       "overall": {
-        "tp": 68,
+        "tp": 64,
         "fp": 0,
         "fn": 0,
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
-        "support": 68
+        "support": 64
       },
       "macro_f1": 1.0,
       "per_code": {
@@ -4235,15 +4022,6 @@
           "support": 5
         },
         "FUNDS_ON_HOLD": {
-          "tp": 4,
-          "fp": 0,
-          "fn": 0,
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1": 1.0,
-          "support": 4
-        },
-        "FX_REVALUATION": {
           "tp": 4,
           "fp": 0,
           "fn": 0,
@@ -4384,9 +4162,6 @@
       "FUNDS_ON_HOLD": {
         "FUNDS_ON_HOLD": 4
       },
-      "FX_REVALUATION": {
-        "FX_REVALUATION": 4
-      },
       "MERGED_PAYOUT": {
         "MERGED_PAYOUT": 4
       },
@@ -4429,7 +4204,7 @@
     },
     "unresolved": {
       "count": 47,
-      "value_at_risk": "274343.39",
+      "value_at_risk": "238230.57",
       "by_code": {
         "UNEXPECTED_BANK_CREDIT": 7,
         "UNPAID_INVOICE": 6,
@@ -4446,10 +4221,10 @@
       }
     },
     "auto_resolved": {
-      "count": 21
+      "count": 17
     },
     "tiers": {
-      "T0_EXACT_ID": 153,
+      "T0_EXACT_ID": 145,
       "T1_NORMALIZED_ID": 3,
       "T2_AMOUNT_DATE": 8,
       "T3_AGGREGATE": 7,

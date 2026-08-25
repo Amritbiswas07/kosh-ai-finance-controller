@@ -34,12 +34,7 @@ def test_every_exception_code_is_exercised():
     present = set(gt.exceptions.values())
     ads, _cases = build_adversarial()
     present |= {f.code.value for f in _reconcile(ads, _batches(ads)).findings}
-    expected = ({c.value for c in ExceptionCode}
-                - {ExceptionCode.UNCLASSIFIED.value}
-                # Exercised by the multi-currency corpus; see test_fx.py.
-                - {ExceptionCode.FX_REVALUATION.value,
-                   ExceptionCode.FX_RATE_MISSING.value,
-                   ExceptionCode.MIXED_CURRENCY_BATCH.value})
+    expected = {c.value for c in ExceptionCode} - {ExceptionCode.UNCLASSIFIED.value}
     assert expected - present == set(), f"never exercised: {expected - present}"
 
 
