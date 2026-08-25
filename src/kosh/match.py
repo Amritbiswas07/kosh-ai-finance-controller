@@ -20,6 +20,7 @@ candidates or 'no match'. It cannot invent a counterparty or an amount.
 
 from __future__ import annotations
 
+import bisect
 import time
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -53,6 +54,7 @@ CHARGE_TOL_FRAC = 0.0025    # or 0.25% of the batch, whichever is larger
 
 
 class Tier(str, Enum):
+    CONFIRMED = "T0_HUMAN_CONFIRMED"     # a person decided; nothing outranks that
     EXACT_ID = "T0_EXACT_ID"
     NORMALIZED_ID = "T1_NORMALIZED_ID"
     AMOUNT_DATE = "T2_AMOUNT_DATE"
@@ -119,6 +121,7 @@ class Finding:
 class ReconResult:
     matches: list[Match] = field(default_factory=list)
     findings: list[Finding] = field(default_factory=list)
+    confirmed_keys: set = field(default_factory=set)
     timings: dict[str, float] = field(default_factory=dict)
     counts: dict[str, int] = field(default_factory=dict)
     adjudications: list[dict] = field(default_factory=list)
@@ -146,8 +149,29 @@ def expected_fee(amount_paise: int, method: str) -> tuple[int, int]:
 #  Leg A — ERP invoice ↔ gateway payment
 # --------------------------------------------------------------------------- #
 
-def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None) -> None:
-    payments = [t for t in ds.pg if t.type == "payment"]
+def _apply_confirmed(ds: Dataset, batches, confirmed, res: ReconResult) -> None:
+    """Replay a person's decisions before any tier runs.
+
+    Once a controller has said *this credit is that payout*, asking again every
+    morning is not diligence, it is the tool forgetting. A confirmed link is
+    recorded at the top tier and its records are withheld from the cascade, so
+    the same question is never put twice.
+    """
+    known = ({i.invoice_no for i in ds.invoices} | {t.entity_id for t in ds.pg}
+             | {b.settlement_id for b in batches} | {b.key for b in ds.bank})
+    for leg, left, right in sorted(confirmed):
+        if left not in known or right not in known:
+            continue                      # the records are not in this period
+        res.matches.append(Match(
+            Leg(leg), left, (right,), Tier.CONFIRMED, 1.0, 0,
+            {"on": "confirmed_by_a_person", "note": "carried from an earlier run"}))
+        res.confirmed_keys.update((left, right))
+
+
+def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None,
+                             skip: "set[str] | None" = None) -> None:
+    skip = skip or set()
+    payments = [t for t in ds.pg if t.type == "payment" and t.entity_id not in skip]
     handled: set[str] = set()   # captures already accounted for as instalments
 
     # Duplicates first: a second capture on an order is not a candidate for the
@@ -221,8 +245,10 @@ def reconcile_erp_to_gateway(ds: Dataset, res: ReconResult, adjudicator=None) ->
                 proposed_action=f"Refund {extra.entity_id} and credit-note the order, "
                                 f"or confirm two genuine shipments against {order}."))
 
-    open_inv = {i.invoice_no: i for i in ds.invoices if i.invoice_no not in
-                {m.left for m in res.matches if m.leg is Leg.ERP_PG}}
+    open_inv = {i.invoice_no: i for i in ds.invoices
+                if i.invoice_no not in skip
+                and i.invoice_no not in {m.left for m in res.matches
+                                         if m.leg is Leg.ERP_PG}}
     open_pay = {p.entity_id: p for p in primary if p.entity_id not in handled}
 
     # T0 — the order_id is on both sides.
@@ -339,34 +365,98 @@ def _assign_one_to_one(*, left, right, left_amount, right_amount, left_date, rig
     """
     if not left or not right:
         return
-    BIG = 10**9
-    cost = np.full((len(left), len(right)), float(BIG))
+
+    # Feasible pairs only. Building the full |left| x |right| matrix in a Python
+    # double loop cost 1.4M comparisons at n=1200 and 20 GB of matrix at n=50k —
+    # it did not degrade, it died. Since a pair is only feasible inside a narrow
+    # amount tolerance, sorting the right side by amount and walking a window
+    # over it finds every candidate in O(n log n + k), where k is the number of
+    # pairs that could ever match.
+    order = sorted(range(len(right)), key=lambda c: right_amount(right[c]))
+    sorted_amounts = [right_amount(right[c]) for c in order]
+    pairs: list[tuple[int, int, float]] = []
     for r, a in enumerate(left):
-        for c, b in enumerate(right):
-            damt = abs(left_amount(a) - right_amount(b))
-            dday = _days(left_date(a), right_date(b))
-            if damt <= AMOUNT_TOL and dday <= window:
-                cost[r, c] = damt + dday * 10        # amount dominates; date breaks ties
+        amt = left_amount(a)
+        lo = bisect.bisect_left(sorted_amounts, amt - AMOUNT_TOL)
+        hi = bisect.bisect_right(sorted_amounts, amt + AMOUNT_TOL)
+        for pos in range(lo, hi):
+            c = order[pos]
+            dday = _days(left_date(a), right_date(right[c]))
+            if dday <= window:
+                pairs.append((r, c, abs(amt - sorted_amounts[pos]) + dday * 10))
+    if not pairs:
+        return
+
+    # The feasibility graph is almost always a scatter of tiny components — a
+    # handful of rows that could plausibly be each other. Solving each one
+    # exactly is the same answer as one big assignment, at a fraction of the
+    # size, and keeps the result independent of how the file was ordered.
+    for block_left, block_right in _components(pairs):
+        li = {r: i for i, r in enumerate(block_left)}
+        ci = {c: j for j, c in enumerate(block_right)}
+        BIG = 10**9
+        cost = np.full((len(block_left), len(block_right)), float(BIG))
+        for r, c, w in pairs:
+            if r in li and c in ci:
+                cost[li[r], ci[c]] = w
+        rows, cols = linear_sum_assignment(cost)
+        for rr, cc in zip(rows, cols):
+            if cost[rr, cc] >= BIG:
+                continue
+            if (int((cost[rr] == cost[rr, cc]).sum()) > 1
+                    or int((cost[:, cc] == cost[rr, cc]).sum()) > 1):
+                continue
+            _emit_assignment(block_left[rr], block_right[cc], left, right,
+                             left_amount, right_amount, left_date, right_date,
+                             leg, res, left_key, right_key, on_match, extra)
+    return
+
+
+def _components(pairs):
+    """Split the feasibility graph into independent left/right groups."""
+    parent: dict[tuple[str, int], tuple[str, int]] = {}
+
+    def find(x):
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    for r, c, _w in pairs:
+        union(("L", r), ("R", c))
+    groups: dict[tuple[str, int], tuple[list[int], list[int]]] = {}
+    for node in list(parent):
+        side, idx = node
+        lefts, rights = groups.setdefault(find(node), ([], []))
+        (lefts if side == "L" else rights).append(idx)
+    return [(sorted(l), sorted(r)) for l, r in groups.values() if l and r]
+
+
+def _emit_assignment(r, c, left, right, left_amount, right_amount, left_date,
+                     right_date, leg, res, left_key, right_key, on_match, extra):
+    a, b = left[r], right[c]
+    damt = left_amount(a) - right_amount(b)
+    dday = _days(left_date(a), right_date(b))
+    res.matches.append(Match(
+        leg, left_key(a), (right_key(b),), Tier.AMOUNT_DATE,
+        round(max(0.70, 0.92 - 0.03 * dday), 3), -damt,
+        {"on": "amount+date", "amount": str(to_rupees(right_amount(b))),
+         "date_gap_days": dday, **extra(a, b)}))
+    on_match(a, b)
+
+
+def _unused_dense_path(left, right, cost, res):     # pragma: no cover
     rows, cols = linear_sum_assignment(cost)
     for r, c in zip(rows, cols):
-        if cost[r, c] >= BIG:
+        if cost[r, c] >= 10**9:
             continue
-        # An optimal assignment is not the same as an unambiguous one. Where a
-        # row has several candidates of identical cost — three payouts of the
-        # same amount on the same day is routine for subscription billing — the
-        # pairing is decided by input order, not by evidence. Subset-sum already
-        # refuses ties; so does this.
-        if int((cost[r] == cost[r, c]).sum()) > 1 or int((cost[:, c] == cost[r, c]).sum()) > 1:
-            continue
-        a, b = left[r], right[c]
-        damt = left_amount(a) - right_amount(b)
-        dday = _days(left_date(a), right_date(b))
-        res.matches.append(Match(
-            leg, left_key(a), (right_key(b),), Tier.AMOUNT_DATE,
-            round(max(0.70, 0.92 - 0.03 * dday), 3), -damt,
-            {"on": "amount+date", "amount": str(to_rupees(right_amount(b))),
-             "date_gap_days": dday, **extra(a, b)}))
-        on_match(a, b)
+        pass
 
 
 def _adjudicate_erp(open_inv: dict, open_pay: dict, res: ReconResult, adjudicator) -> None:
@@ -485,15 +575,41 @@ def check_integrity(ds: Dataset, res: ReconResult) -> None:
 
 def reconcile_settlement_to_bank(batches: list[SettlementBatch], ds: Dataset,
                                  res: ReconResult, adjudicator=None) -> None:
-    credits = [b for b in ds.bank if b.is_credit]
+    credits = [b for b in ds.bank if b.is_credit and b.key not in res.confirmed_keys]
     open_lines = {c.key: c for c in credits}
-    open_batches = {b.settlement_id: b for b in batches}
+    open_batches = {b.settlement_id: b for b in batches
+                    if b.settlement_id not in res.confirmed_keys}
 
     # Index every UTR-shaped token found in every narration, once.
     utr_index: dict[str, list[BankLine]] = {}
     for line in credits:
         for utr in extract_utrs(line.narration):
             utr_index.setdefault(utr, []).append(line)
+
+    # A reference that identifies two different payouts identifies neither. The
+    # bank occasionally reuses one, and matching the single credit to whichever
+    # batch came first in the file is a coin toss dressed as an identifier.
+    batches_by_utr: dict[str, list[SettlementBatch]] = {}
+    for b in batches:
+        if b.utr:
+            batches_by_utr.setdefault(b.utr, []).append(b)
+    ambiguous_utrs = {u for u, bs in batches_by_utr.items() if len(bs) > 1}
+    for utr in sorted(ambiguous_utrs):
+        shared = batches_by_utr[utr]
+        for b in shared:
+            res.findings.append(Finding(
+                key=b.settlement_id, source="settlement",
+                code=ExceptionCode.AMBIGUOUS_REFERENCE,
+                disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=b.net_paise,
+                evidence={"utr": utr, "shared_with": [x.settlement_id for x in shared
+                                                     if x is not b],
+                          "net": str(to_rupees(b.net_paise)),
+                          "settled_at": b.settled_at.isoformat(),
+                          "bank_lines_quoting_it": [l.key for l in utr_index.get(utr, [])]},
+                proposed_action=f"Reference {utr} is on {len(shared)} payouts. Ask the "
+                                "gateway which credit belongs to which batch; matching "
+                                "on it would be a guess."))
+            open_batches.pop(b.settlement_id, None)
 
     # T0/T1 — the UTR is quoted in the narration.
     for batch in list(open_batches.values()):
@@ -949,15 +1065,21 @@ def _suggest_causes(res: ReconResult, adjudicator) -> None:
 
 
 def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
-              adjudicate_legs: frozenset | None = None) -> ReconResult:
+              adjudicate_legs: frozenset | None = None,
+              confirmed: "set[tuple[str, str, str]] | None" = None) -> ReconResult:
     """`adjudicate_legs` selects which legs may consult the model. Defaults to
     the one leg where a model answer can be verified against arithmetic; see
     docs/architecture.md for the measurement behind that default."""
     legs = DEFAULT_ADJUDICATED_LEGS if adjudicate_legs is None else adjudicate_legs
+    # Links a controller has already confirmed by hand. They are passed in
+    # rather than read from anywhere, so the engine stays free of hidden state
+    # and the confirmations are visible in the call that used them.
+    confirmed = confirmed or set()
     pick = lambda leg: adjudicator if (adjudicator is not None and leg in legs) else None  # noqa: E731
     res = ReconResult()
     t0 = time.perf_counter()
-    reconcile_erp_to_gateway(ds, res, pick(Leg.ERP_PG))
+    _apply_confirmed(ds, batches, confirmed, res)
+    reconcile_erp_to_gateway(ds, res, pick(Leg.ERP_PG), res.confirmed_keys)
     t1 = time.perf_counter()
     check_integrity(ds, res)
     t2 = time.perf_counter()

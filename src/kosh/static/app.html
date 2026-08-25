@@ -328,6 +328,10 @@ footer{max-width:1200px;margin:0 auto;padding:0 var(--s5) var(--s6);
     <button data-tab="ask">
       <span class="lbl">Ask<em>Question this run</em></span>
     </button>
+    <button data-tab="ledger">
+      <span class="lbl">Ledger<em>What is open, and how old</em></span>
+      <span class="n" id="tabLedger"></span>
+    </button>
   </nav>
 </aside>
 
@@ -370,6 +374,22 @@ footer{max-width:1200px;margin:0 auto;padding:0 var(--s5) var(--s6);
       and whether the arithmetic accepted it. A pick whose amount cannot be reconciled is
       discarded however confident the model was.</p>
     <div id="adjudications"></div>
+  </section>
+
+  <section id="tab-ledger" hidden>
+    <p class="hint">The accumulated picture across every run, not just this one.
+      A break stays here until the data answers it or a person closes it — and
+      absence from an export is not an answer.</p>
+    <div class="cards" id="ledgerTiles"></div>
+    <h2>Open work</h2>
+    <div id="ledgerOpen"></div>
+    <h2>Closed by a person</h2>
+    <div id="ledgerClosed"></div>
+    <h2>Links confirmed by hand</h2>
+    <p class="hint">Replayed into every later run, so the engine stops asking.</p>
+    <div class="scroll" id="ledgerLinks"></div>
+    <h2>Audit trail</h2>
+    <div class="scroll" id="ledgerAudit"></div>
   </section>
 
   <section id="tab-ask" hidden>
@@ -439,7 +459,7 @@ async function runRecon() {
       if (!line.startsWith("data:")) continue;
       let msg; try { msg = JSON.parse(line.slice(5)); } catch { continue; }
       if (msg.stage === "done") {
-        STATE = msg.result; render();
+        STATE = msg.result; render(); loadLedger();
         $("progress").hidden = true; btn.disabled = false;
         return;
       }
@@ -624,6 +644,80 @@ function renderAdjudications() {
     }).join("") + `</table></div>`;
 }
 
+/* ------------------------------------------------------------------- ledger */
+let LEDGER = null;
+
+async function loadLedger() {
+  try { LEDGER = await (await fetch("/api/ledger")).json(); }
+  catch (e) { LEDGER = { enabled: false, why: e.message }; }
+  renderLedger();
+}
+
+function renderLedger() {
+  if (!LEDGER) return;
+  if (!LEDGER.enabled) {
+    $("ledgerTiles").innerHTML = "";
+    $("ledgerOpen").innerHTML =
+      `<div class="empty">No ledger attached — ${esc(LEDGER.why || "")}</div>`;
+    ["ledgerClosed", "ledgerLinks", "ledgerAudit"].forEach(id => $(id).innerHTML = "");
+    $("tabLedger").hidden = true;
+    return;
+  }
+  const c = LEDGER.counts;
+  const open = LEDGER.exceptions.filter(e => e.status === "open" || e.status === "investigating");
+  const closed = LEDGER.exceptions.filter(e => e.status === "resolved" || e.status === "written_off");
+  const exposure = open.reduce((a, e) => a + Math.abs(parseFloat(e.value)), 0);
+  const oldest = open.reduce((a, e) => Math.max(a, e.age_runs), 0);
+
+  $("tabLedger").hidden = false;
+  $("tabLedger").textContent = open.length;
+  $("ledgerTiles").innerHTML = [
+    ["Runs", String(c.runs), "reconciliations folded in", false],
+    ["Open", String(open.length), inr(exposure) + " of exposure", true],
+    ["Oldest", oldest + (oldest === 1 ? " run" : " runs"), "since it was raised", false],
+    ["Assigned", String(c.assigned), "have an owner", false],
+    ["Closed by a person", String(closed.length), "resolved or written off", false],
+    ["Confirmed links", String(c.confirmed_links), "replayed each run", false],
+  ].map(([k, v, n, flag]) =>
+    `<div class="card${flag ? " flag" : ""}"><div class="k">${esc(k)}</div>
+     <div class="v">${esc(v)}</div><div class="n">${esc(n)}</div></div>`).join("");
+
+  const rows = (list, closedView) => !list.length
+    ? `<div class="empty">Nothing here.</div>`
+    : `<div class=scroll><table><tr><th>Record</th><th>Reason</th>
+        <th class=n>Value</th>${closedView
+          ? "<th>Outcome</th><th>How</th>"
+          : "<th>Status</th><th>Owner</th><th class=n>Age</th>"}</tr>` +
+      list.map(e => `<tr><td><code>${esc(e.key)}</code></td>
+        <td class="code">${esc(e.code)}</td>
+        <td class=n>${esc(inr(e.value))}</td>` + (closedView
+          ? `<td><span class="tag ${e.status === "written_off" ? "review" : "auto"}">
+               ${esc(e.status.replace("_", " "))}</span></td>
+             <td class=ev>${esc(e.resolution || "")}</td>`
+          : `<td>${esc(e.status)}</td>
+             <td>${e.assignee ? esc(e.assignee) : "<span class=ev>unassigned</span>"}</td>
+             <td class=n>${e.age_runs}</td>`) + `</tr>`).join("") + `</table></div>`;
+
+  $("ledgerOpen").innerHTML = rows(open, false);
+  $("ledgerClosed").innerHTML = rows(closed, true);
+
+  $("ledgerLinks").innerHTML = !LEDGER.confirmed_links.length
+    ? `<div class="empty">None yet. <code>kosh exception link</code> records one.</div>`
+    : `<table><tr><th>Leg</th><th>Left</th><th>Right</th><th>By</th><th>Note</th></tr>` +
+      LEDGER.confirmed_links.map(l => `<tr><td class="code">${esc(l.leg)}</td>
+        <td><code>${esc(l.left)}</code></td><td><code>${esc(l.right)}</code></td>
+        <td>${esc(l.by)}</td><td class=ev>${esc(l.note || "")}</td></tr>`).join("") +
+      `</table>`;
+
+  $("ledgerAudit").innerHTML = !LEDGER.history.length
+    ? `<div class="empty">No actions recorded.</div>`
+    : `<table><tr><th>When</th><th>Who</th><th>Did</th><th>To</th><th>Detail</th></tr>` +
+      LEDGER.history.map(h => `<tr><td class=ev>${esc(h.at)}</td>
+        <td>${esc(h.actor)}</td><td class="code">${esc(h.action)}</td>
+        <td><code>${esc(h.subject)}</code></td>
+        <td class=ev>${esc(h.detail || "")}</td></tr>`).join("") + `</table>`;
+}
+
 /* ---------------------------------------------------------------------- ask */
 const SAMPLES = [
   "which settlements have not reached the bank?",
@@ -655,7 +749,8 @@ $("run").addEventListener("click", runRecon);
 
 /* ---- navigation drawer ---- */
 const TITLES = { overview: "Overview", exceptions: "Exceptions",
-                 model: "Model adjudications", ask: "Settlement Q&A" };
+                 model: "Model adjudications", ask: "Settlement Q&A",
+                 ledger: "Ledger" };
 let lastFocus = null;
 
 //: Above this width the sidebar is permanent and the menu button is gone.
@@ -752,6 +847,7 @@ $("samples").addEventListener("click", e => {
 fetch("/api/state").then(r => r.json()).then(s => {
   if (s.ready) { STATE = s; $("seed").value = s.meta.seed; render(); }
   else $("status").textContent = "No run yet — press Reconcile.";
+  loadLedger();
 }).catch(e => $("status").textContent = "Could not reach the server: " + e.message);
 </script>
 </body>

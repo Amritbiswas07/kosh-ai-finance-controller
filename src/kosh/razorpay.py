@@ -58,14 +58,30 @@ def _redact(text: str, *secrets: str) -> str:
     return text
 
 
+def _urllib_transport(url: str, headers: dict, timeout: int) -> tuple[int, bytes]:
+    req = urllib.request.Request(url, method="GET", headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.status, r.read()
+    except urllib.error.HTTPError as e:
+        return e.code, e.read()
+
+
 @dataclass
 class RazorpayClient:
-    """Reads settlement recon rows. Issues GET and nothing else."""
+    """Reads settlement recon rows. Issues GET and nothing else.
+
+    `transport` exists so the request path — the Authorization header, paging,
+    and every error branch — can be exercised without a live account. Only the
+    default one touches a socket; everything above it is the same code either
+    way, which is the part worth testing.
+    """
 
     key_id: str
     key_secret: str
     base: str = BASE
     timeout: int = 30
+    transport: object = None
 
     @classmethod
     def from_env(cls) -> "RazorpayClient":
@@ -83,24 +99,33 @@ class RazorpayClient:
         url = f"{self.base}{path}?" + urllib.parse.urlencode(params)
         token = base64.b64encode(
             f"{self.key_id}:{self.key_secret}".encode()).decode()
-        req = urllib.request.Request(url, method="GET", headers={
-            "Authorization": f"Basic {token}",
-            "Accept": "application/json",
-            "User-Agent": "kosh-reconciler/1.0 (read-only)"})
+        headers = {"Authorization": f"Basic {token}",
+                   "Accept": "application/json",
+                   "User-Agent": "kosh-reconciler/1.0 (read-only)"}
+        send = self.transport or _urllib_transport
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as r:
-                return json.loads(r.read().decode())
-        except urllib.error.HTTPError as e:
-            body = _redact(e.read().decode(errors="replace")[:400],
-                           self.key_secret, self.key_id)
-            if e.code in (401, 403):
-                raise RazorpayError(
-                    f"Razorpay refused the credentials ({e.code}). Check "
-                    "RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.") from None
-            raise RazorpayError(f"Razorpay returned {e.code}: {body}") from None
+            status, body = send(url, headers, self.timeout)
         except urllib.error.URLError as e:
             raise RazorpayError(
                 f"Could not reach Razorpay: {_redact(str(e.reason), self.key_secret)}"
+            ) from None
+        if status in (401, 403):
+            raise RazorpayError(
+                f"Razorpay refused the credentials ({status}). Check "
+                "RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.") from None
+        if status == 429:
+            raise RazorpayError(
+                "Razorpay is rate-limiting this key (429). Retry with a smaller "
+                "period, or wait before pulling again.") from None
+        if status >= 400:
+            text = _redact(body.decode(errors="replace")[:400],
+                           self.key_secret, self.key_id)
+            raise RazorpayError(f"Razorpay returned {status}: {text}") from None
+        try:
+            return json.loads(body.decode())
+        except json.JSONDecodeError as e:
+            raise RazorpayError(
+                f"Razorpay returned {status} with a body that is not JSON: {e}"
             ) from None
 
     def fetch_recon(self, year: int, month: int, day: int | None = None,

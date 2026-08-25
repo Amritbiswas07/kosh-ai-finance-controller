@@ -46,6 +46,7 @@ forever):
 | `kosh serve` | Browse and work the run in a local web UI |
 | `kosh sync` | Reconcile and fold the result into the running ledger |
 | `kosh pull --year --month [--day]` | Fetch a real settlement recon period from Razorpay |
+| `kosh exception list \| assign \| resolve \| link` | Work a break: own it, close it, or confirm a link |
 | `pytest -q` | 117 tests, no model loaded, ~1.2 s |
 | `python scripts/benchmark.py --seeds 30 [--llm]` | Accuracy across 30 regenerated worlds |
 | `python scripts/ablation.py` | Does the model earn its place, and on which leg? |
@@ -293,6 +294,48 @@ residual is records with no counterparty *in the data at all* — an invoice
 nobody paid, a batch the bank has not sent — so there is nothing to find and
 every answer is a false positive. Of its 15 calls there, 13 were declines and 2
 were wrong picks the arithmetic gate caught.
+
+---
+
+## It is a control, not a report
+
+Exceptions have an owner and a lifecycle, closing a large one needs a second
+name that cannot be the first, and every action is attributable:
+
+```bash
+./.venv/bin/kosh exception assign --key setl_82400025 --code MISSING_IN_BANK \
+    --to priya --by amrit
+./.venv/bin/kosh exception write-off --key pay_82400052 --code UNBILLED_PAYMENT \
+    --by priya --note "unrecoverable after 90 days" --approved-by amrit
+```
+
+**And it learns from the person.** When a controller links two records the
+engine could not, every later run replays that decision at a tier above all
+others — asking again each morning is not diligence, it is the tool forgetting:
+
+```
+$ kosh exception link --key setl_82400020 --to bank:0004 --by amrit
+$ kosh sync
+  replaying 1 link(s) a person already confirmed
+    - bank:0004      UNEXPECTED_BANK_CREDIT   8,936.54   matched once the data arrived
+    - setl_82400020  MISSING_IN_BANK          1,645.52   matched once the data arrived
+```
+
+The confirmations are *passed into* `reconcile()` rather than read by it, so the
+engine keeps no hidden state. The web UI has a **Ledger** view showing the same
+picture — what is open, who owns it, how old it is, and the audit trail.
+
+---
+
+## It reads what banks actually send
+
+`kosh.feeds` reads **MT940**, the SWIFT statement format Indian banks export
+from corporate net-banking — comma decimals, two-digit years, dates split across
+two fields, narrations continued across lines, and a debit/credit marker that is
+a letter inside a field rather than a column. Drop a `bank_statement.sta` beside
+the other files and it is used instead of the CSV. The parser also checks the
+statement against its own opening and closing balances, because one that does
+not add up has been truncated.
 
 ---
 

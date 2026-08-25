@@ -95,6 +95,21 @@ def load(root: Path) -> tuple[Dataset, list[str]]:
             except (IngestError, ValueError, KeyError) as exc:
                 errors.append(f"pg_settlement_report.csv:{n}: {exc}")
 
+    # A real MT940 download takes precedence over the CSV when both are present,
+    # so pointing the engine at a bank's own export needs no other change.
+    mt940 = next((p for p in (root / "bank_statement.sta", root / "bank_statement.mt940")
+                  if p.exists()), None)
+    if mt940 is not None:
+        from .feeds import parse_mt940
+        stmt = parse_mt940(mt940.read_text())
+        ds.bank.extend(stmt.lines)
+        errors.extend(f"{mt940.name}: {e}" for e in stmt.errors)
+        if not stmt.balances_reconcile():
+            errors.append(
+                f"{mt940.name}: the statement does not agree with its own opening "
+                "and closing balances — it may be truncated")
+        return ds, errors
+
     with (root / "bank_statement.csv").open(newline="") as fh:
         for n, row in enumerate(csv.DictReader(fh), start=2):
             try:

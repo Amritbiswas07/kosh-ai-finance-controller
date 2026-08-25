@@ -156,3 +156,97 @@ def test_a_foreign_currency_row_is_refused_not_silently_treated_as_rupees():
 def test_a_missing_currency_is_assumed_to_be_the_base_one(items):
     stripped = {k: v for k, v in items[0].items() if k != "currency"}
     assert to_pg_txn(stripped).amount_paise == 979200
+
+
+# ------------------------------------------------------------- the request path
+
+def _recording_transport(pages, calls):
+    """Stands in for the network, recording what the client actually sent."""
+    def send(url, headers, timeout):
+        calls.append({"url": url, "headers": headers, "timeout": timeout})
+        page = pages[min(len(calls) - 1, len(pages) - 1)]
+        if isinstance(page, int):
+            return page, b'{"error":{"description":"nope"}}'
+        return 200, json.dumps(page).encode()
+    return send
+
+
+def test_the_request_carries_basic_auth_and_never_the_secret_in_the_url():
+    """The header is the only place a credential belongs."""
+    import base64
+    calls = []
+    c = RazorpayClient(key_id="rzp_test_abc", key_secret="supersecret",
+                       transport=_recording_transport([{"items": []}], calls))
+    c.fetch_recon(2026, 7, 3)
+    sent = calls[0]
+    assert sent["url"].startswith("https://api.razorpay.com/v1/settlements/recon/combined?")
+    assert "supersecret" not in sent["url"] and "rzp_test_abc" not in sent["url"]
+    scheme, token = sent["headers"]["Authorization"].split(" ", 1)
+    assert scheme == "Basic"
+    assert base64.b64decode(token).decode() == "rzp_test_abc:supersecret"
+    assert "year=2026" in sent["url"] and "month=07" in sent["url"]
+    assert "day=03" in sent["url"]
+
+
+def test_the_day_is_omitted_when_not_asked_for():
+    calls = []
+    c = RazorpayClient(key_id="k", key_secret="s",
+                       transport=_recording_transport([{"items": []}], calls))
+    c.fetch_recon(2026, 7)
+    assert "day=" not in calls[0]["url"]
+
+
+def test_paging_walks_every_page_over_the_real_request_path():
+    calls = []
+    full = {"items": [{"entity_id": f"pay_{i}"} for i in range(100)]}
+    last = {"items": [{"entity_id": "pay_final"}]}
+    c = RazorpayClient(key_id="k", key_secret="s",
+                       transport=_recording_transport([full, last], calls))
+    out = c.fetch_recon(2026, 7)
+    assert len(out) == 101
+    assert "skip=0" in calls[0]["url"] and "skip=100" in calls[1]["url"]
+    assert all("count=100" in c_["url"] for c_ in calls)
+
+
+@pytest.mark.parametrize("status,expected", [
+    (401, "refused the credentials"),
+    (403, "refused the credentials"),
+    (429, "rate-limiting"),
+    (500, "returned 500"),
+])
+def test_every_error_branch_says_something_useful(status, expected):
+    c = RazorpayClient(key_id="rzp_test_abc", key_secret="supersecret",
+                       transport=_recording_transport([status], []))
+    with pytest.raises(RazorpayError) as e:
+        c.fetch_recon(2026, 7)
+    assert expected in str(e.value)
+    assert "supersecret" not in str(e.value)
+
+
+def test_a_non_json_body_is_reported_as_such():
+    def send(url, headers, timeout):
+        return 200, b"<html>maintenance</html>"
+    c = RazorpayClient(key_id="k", key_secret="s", transport=send)
+    with pytest.raises(RazorpayError, match="not JSON"):
+        c.fetch_recon(2026, 7)
+
+
+def test_an_unreachable_host_is_reported_without_the_secret():
+    import urllib.error
+    def send(url, headers, timeout):
+        raise urllib.error.URLError("nodename nor servname provided")
+    c = RazorpayClient(key_id="k", key_secret="supersecret", transport=send)
+    with pytest.raises(RazorpayError) as e:
+        c.fetch_recon(2026, 7)
+    assert "Could not reach Razorpay" in str(e.value)
+    assert "supersecret" not in str(e.value)
+
+
+def test_a_whole_period_maps_end_to_end_over_the_request_path(items):
+    """Client, paging, mapping and the engine's own parser, in one pass."""
+    calls = []
+    c = RazorpayClient(key_id="k", key_secret="s",
+                       transport=_recording_transport([{"items": items}], calls))
+    rows, errors = to_pg_txns(c.fetch_recon(2026, 7, 3))
+    assert len(rows) == 4 and len(errors) == 1
+    assert sum(t.amount_paise for t in rows if t.type == "payment") == 979200 + 500000

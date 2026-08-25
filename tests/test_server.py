@@ -304,3 +304,51 @@ def test_the_top_bar_is_pinned_and_lifts_off_the_content(live):
     assert 'addEventListener("scroll", onScroll, { passive: true })' in page
     # The bar names the section once the page heading has scrolled away.
     assert 'id="crumb"' in page and '$("crumb").hidden = !moved' in page
+
+
+def test_the_pages_javascript_actually_parses():
+    """A guard that should have existed sooner.
+
+    An edit once inserted a statement between an `if` block and its `else`. The
+    whole script failed to parse, so every handler on the page was dead — and
+    the suite stayed green, because nothing here had ever looked at the
+    JavaScript. Skips where no JS engine is available rather than pretending to
+    check.
+    """
+    import re
+    import shutil
+    import subprocess
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("no node available to parse with")
+    page = (Path(__file__).resolve().parents[1]
+            / "src/kosh/static/app.html").read_text()
+    scripts = re.findall(r"<script>([\s\S]*?)</script>", page)
+    assert scripts, "the page has no script to check"
+    for i, src in enumerate(scripts):
+        proc = subprocess.run([node, "--input-type=module", "--check"],
+                              input=src, capture_output=True, text=True)
+        assert proc.returncode == 0, f"script {i} does not parse:\n{proc.stderr}"
+
+
+def test_the_ledger_view_is_wired_to_the_ledger_endpoint(live):
+    base, _ = live
+    _, body, _ = get(base, "/")
+    page = body.decode()
+    assert 'data-tab="ledger"' in page and 'id="tab-ledger"' in page
+    assert "/api/ledger" in page
+    # Every tab in the drawer must have a section and a title behind it.
+    import re
+    tabs = set(re.findall(r'data-tab="(\w+)"', page))
+    for t in tabs:
+        assert f'id="tab-{t}"' in page, t
+        assert f'{t}: "' in page, f"{t} has no page title"
+
+
+def test_the_ledger_endpoint_says_so_when_no_ledger_is_attached(live):
+    base, session = live
+    assert session.db is None
+    _, body, _ = get(base, "/api/ledger")
+    payload = json.loads(body)
+    assert payload["enabled"] is False and payload["why"]

@@ -1,6 +1,6 @@
-# Reconciliation pack — synthetic
+# Reconciliation pack — synthetic period
 
-Generated 2026-08-25 19:26. 347 source records across three systems, reconciled in 19.9 ms of engine time plus 22.7 s of model adjudication.
+Generated 2026-08-25 19:50. 347 source records across three systems, reconciled in 41.7 ms of engine time plus 23.3 s of model adjudication.
 
 ## Where the money is
 
