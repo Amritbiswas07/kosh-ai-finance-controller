@@ -1,0 +1,170 @@
+{
+  "configuration": "Qwen/Qwen2.5-1.5B-Instruct",
+  "records": 33,
+  "seconds": 30.78,
+  "links_recovered": 4,
+  "links_total": 4,
+  "false_links": 1,
+  "no_link_cases": 8,
+  "unknowns_admitted": 1,
+  "unknowns_total": 3,
+  "invented_cause_rate": 0.0,
+  "invented_causes": [],
+  "partial_true_but_unlinked": [
+    [
+      "reversal_pair",
+      [
+        "MISSING_IN_BANK"
+      ]
+    ],
+    [
+      "netted_payout",
+      [
+        "MISSING_IN_BANK",
+        "UNEXPECTED_BANK_CREDIT"
+      ]
+    ]
+  ],
+  "missed_links": [],
+  "tiers": {
+    "T0_EXACT_ID": 2,
+    "T1_NORMALIZED_ID": 1,
+    "T4_ADJUDICATED": 4
+  },
+  "cases": [
+    {
+      "case": "unseen_narration_2",
+      "kind": "link",
+      "verdict": "recovered",
+      "codes": [],
+      "why": "three payouts of the same amount on the same day; the reference is the only signal and no pattern reads it"
+    },
+    {
+      "case": "unseen_narration_1",
+      "kind": "link",
+      "verdict": "recovered",
+      "codes": [],
+      "why": "three payouts of the same amount on the same day; the reference is the only signal and no pattern reads it"
+    },
+    {
+      "case": "unseen_narration_0",
+      "kind": "link",
+      "verdict": "recovered",
+      "codes": [],
+      "why": "three payouts of the same amount on the same day; the reference is the only signal and no pattern reads it"
+    },
+    {
+      "case": "fx_conversion",
+      "kind": "unknown",
+      "verdict": "admitted unknown",
+      "codes": [
+        "UNCLASSIFIED"
+      ],
+      "why": "credit is short by an FX spread; no code exists for this"
+    },
+    {
+      "case": "reversal_pair",
+      "kind": "unknown",
+      "verdict": "partial (true, unlinked)",
+      "codes": [
+        "MISSING_IN_BANK"
+      ],
+      "why": "capture and exact reversal net to a fee-only settlement"
+    },
+    {
+      "case": "netted_payout",
+      "kind": "unknown",
+      "verdict": "partial (true, unlinked)",
+      "codes": [
+        "MISSING_IN_BANK",
+        "UNEXPECTED_BANK_CREDIT"
+      ],
+      "why": "one credit pays two batches less a chargeback; subset-sum cannot reach it because of the deduction"
+    },
+    {
+      "case": "amount_collision_0",
+      "kind": "no_link",
+      "verdict": "correctly declined",
+      "codes": [
+        "UNBILLED_PAYMENT",
+        "UNPAID_INVOICE"
+      ],
+      "why": "six invoices and six payments share an amount and a day with nothing to tell them apart"
+    },
+    {
+      "case": "amount_collision_1",
+      "kind": "no_link",
+      "verdict": "correctly declined",
+      "codes": [
+        "UNBILLED_PAYMENT",
+        "UNPAID_INVOICE"
+      ],
+      "why": "six invoices and six payments share an amount and a day with nothing to tell them apart"
+    },
+    {
+      "case": "amount_collision_2",
+      "kind": "no_link",
+      "verdict": "correctly declined",
+      "codes": [
+        "UNBILLED_PAYMENT",
+        "UNPAID_INVOICE"
+      ],
+      "why": "six invoices and six payments share an amount and a day with nothing to tell them apart"
+    },
+    {
+      "case": "amount_collision_3",
+      "kind": "no_link",
+      "verdict": "correctly declined",
+      "codes": [
+        "UNBILLED_PAYMENT",
+        "UNPAID_INVOICE"
+      ],
+      "why": "six invoices and six payments share an amount and a day with nothing to tell them apart"
+    },
+    {
+      "case": "amount_collision_4",
+      "kind": "no_link",
+      "verdict": "correctly declined",
+      "codes": [
+        "UNBILLED_PAYMENT",
+        "UNPAID_INVOICE"
+      ],
+      "why": "six invoices and six payments share an amount and a day with nothing to tell them apart"
+    },
+    {
+      "case": "amount_collision_5",
+      "kind": "no_link",
+      "verdict": "correctly declined",
+      "codes": [
+        "UNBILLED_PAYMENT",
+        "UNPAID_INVOICE"
+      ],
+      "why": "six invoices and six payments share an amount and a day with nothing to tell them apart"
+    },
+    {
+      "case": "duplicate_bank_line",
+      "kind": "no_link",
+      "verdict": "correctly declined",
+      "codes": [
+        "DUPLICATE_BANK_LINE"
+      ],
+      "why": "one payout appears twice in the export; matching both double-counts the cash"
+    },
+    {
+      "case": "utr_reuse",
+      "kind": "no_link",
+      "verdict": "false link",
+      "codes": [
+        "MISSING_IN_BANK"
+      ],
+      "why": "one reference on two batches; only one credit exists"
+    },
+    {
+      "case": "one_paise_drift",
+      "kind": "link",
+      "verdict": "recovered",
+      "codes": [],
+      "why": "off by a single paise; must still reconcile"
+    }
+  ]
+}

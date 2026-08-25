@@ -71,7 +71,7 @@ class Leg(str, Enum):
 #: evidence, not on principle: their residuals are records with no counterparty
 #: in the data at all, so there is nothing for a model to find and every answer
 #: it gives is a false positive. See `scripts/ablation.py`.
-DEFAULT_ADJUDICATED_LEGS = frozenset({Leg.INVOICE_BANK})
+DEFAULT_ADJUDICATED_LEGS = frozenset({Leg.INVOICE_BANK, Leg.BATCH_BANK})
 ALL_ADJUDICATED_LEGS = frozenset(Leg)
 
 
@@ -351,6 +351,13 @@ def _assign_one_to_one(*, left, right, left_amount, right_amount, left_date, rig
     for r, c in zip(rows, cols):
         if cost[r, c] >= BIG:
             continue
+        # An optimal assignment is not the same as an unambiguous one. Where a
+        # row has several candidates of identical cost — three payouts of the
+        # same amount on the same day is routine for subscription billing — the
+        # pairing is decided by input order, not by evidence. Subset-sum already
+        # refuses ties; so does this.
+        if int((cost[r] == cost[r, c]).sum()) > 1 or int((cost[:, c] == cost[r, c]).sum()) > 1:
+            continue
         a, b = left[r], right[c]
         damt = left_amount(a) - right_amount(b)
         dday = _days(left_date(a), right_date(b))
@@ -517,6 +524,29 @@ def reconcile_settlement_to_bank(batches: list[SettlementBatch], ds: Dataset,
                           "sums_to": str(to_rupees(total))},
                 proposed_action="No action: the parts reconcile exactly. Post as one receipt "
                                 "so the sub-ledger keeps a single settlement line."))
+        elif (len(hits) > 1
+              and all(l.amount_paise == hits[0].amount_paise for l in hits)
+              and abs(hits[0].amount_paise - batch.net_paise) <= AMOUNT_TOL):
+            # The same payout printed more than once — a re-exported statement,
+            # not extra money. Matching every copy silently doubled the cash the
+            # bridge reported as landed.
+            keep, copies = hits[0], hits[1:]
+            res.matches.append(Match(
+                Leg.BATCH_BANK, batch.settlement_id, (keep.key,), Tier.EXACT_ID, 0.95,
+                keep.amount_paise - batch.net_paise,
+                {"on": "utr", "utr": batch.utr, "duplicate_lines_ignored": len(copies),
+                 "narration": keep.narration}))
+            for c in copies:
+                res.findings.append(Finding(
+                    key=c.key, source="bank", code=ExceptionCode.DUPLICATE_BANK_LINE,
+                    disposition=Disposition.NEEDS_REVIEW, value_at_risk_paise=c.amount_paise,
+                    evidence={"utr": batch.utr, "same_as": keep.key,
+                              "value_date": c.value_date.isoformat(),
+                              "amount": str(to_rupees(c.amount_paise)),
+                              "narration": c.narration},
+                    proposed_action="This credit is identical to " + keep.key +
+                                    " and carries the same reference. Confirm the "
+                                    "statement was not exported twice before posting."))
         else:
             res.matches.append(Match(
                 Leg.BATCH_BANK, batch.settlement_id, tuple(l.key for l in hits),
@@ -531,6 +561,14 @@ def reconcile_settlement_to_bank(batches: list[SettlementBatch], ds: Dataset,
 
     # T3 — consolidated payouts: one credit paying several batches, no UTR quoted.
     _match_merged_payouts(open_batches, open_lines, res)
+
+    # Reading the reference out of an unfamiliar statement format comes *before*
+    # matching on amount and date. Evidence has an order — an identifier beats a
+    # reference in free text, which beats an amount that happens to agree — and
+    # running the blind pass first let it consume lines whose reference was
+    # sitting there in plain sight.
+    if adjudicator is not None:
+        _recover_unreadable_narrations(open_batches, open_lines, res, adjudicator)
 
     # T2 — last deterministic pass: single batch, single credit, amount + date.
     _assign_one_to_one(
@@ -665,6 +703,60 @@ def _match_merged_payouts(open_batches: dict, open_lines: dict, res: ReconResult
                 proposed_action="No action: the consolidated credit reconciles exactly. Ask "
                                 "the gateway to quote per-batch UTRs to avoid the search."))
             open_batches.pop(b.settlement_id, None)
+        open_lines.pop(line.key, None)
+
+
+def _recover_unreadable_narrations(open_batches: dict, open_lines: dict,
+                                   res: ReconResult, adjudicator) -> None:
+    """Ask the model to read a statement format nobody has written a pattern for.
+
+    An earlier ablation found model adjudication on this leg worthless, and it
+    was — on a corpus whose narrations all came from six templates the extractor
+    already knew. Every residual there genuinely had no counterparty, so every
+    answer was a false positive. Against statement formats the extractor cannot
+    parse the residual *does* have a counterparty, and the same call earns its
+    place. The rule was never about the leg; it was about whether anything was
+    there to find.
+
+    So it runs only where that is plausibly true: the line reads as gateway
+    money, no reference could be extracted from it, and the amount is checked
+    against the chosen batch before anything is posted.
+    """
+    for line in sorted(open_lines.values(), key=lambda l: l.line_no):
+        if not looks_like_settlement(line.narration) or extract_utrs(line.narration):
+            continue                       # a pattern already read it, or it is not ours
+        cands = sorted(open_batches.values(),
+                       key=lambda b: (abs(b.net_paise - line.amount_paise),
+                                      _days(b.settled_at.date(), line.value_date)))[:3]
+        if not cands:
+            continue
+        choice = adjudicator.read_narration(
+            {"amount": str(to_rupees(line.amount_paise)),
+             "value_date": line.value_date.isoformat(), "narration": line.narration},
+            [{"key": b.settlement_id, "net": str(to_rupees(b.net_paise)),
+              "settled_on": b.settled_at.date().isoformat(),
+              "utr": b.utr} for b in cands])
+        picked = next((b for b in cands if b.settlement_id == choice.get("choice")), None)
+        verdict = "declined" if picked is None else "accepted"
+        if picked is not None and (
+                abs(picked.net_paise - line.amount_paise) > ADJUDICATION_TOL
+                or _days(picked.settled_at.date(), line.value_date) > DATE_WINDOW_BANK):
+            verdict = "rejected_by_arithmetic"
+        res.adjudications.append({
+            "leg": "unreadable_narration", "bank_line": line.key,
+            "narration": line.narration,
+            "candidates": [b.settlement_id for b in cands],
+            "chose": choice.get("choice"), "reason": choice.get("reason", ""),
+            "verdict": verdict})
+        if verdict != "accepted":
+            continue
+        res.matches.append(Match(
+            Leg.BATCH_BANK, picked.settlement_id, (line.key,), Tier.ADJUDICATED,
+            float(choice.get("confidence", 0.6)), line.amount_paise - picked.net_paise,
+            {"on": "model_read_the_narration", "narration": line.narration,
+             "utr_not_extractable": True, "reason": choice.get("reason", ""),
+             "candidates": [b.settlement_id for b in cands]}))
+        open_batches.pop(picked.settlement_id, None)
         open_lines.pop(line.key, None)
 
 
@@ -840,6 +932,22 @@ def reconcile_direct_receipts(ds: Dataset, res: ReconResult, adjudicator=None) -
 
 # --------------------------------------------------------------------------- #
 
+def _suggest_causes(res: ReconResult, adjudicator) -> None:
+    """Attach a hypothesis to breaks the taxonomy has no code for.
+
+    It is written into `hypothesis`, not into `code`. A guess promoted to a
+    category is precisely what UNCLASSIFIED exists to prevent, so the finding
+    stays unclassified and the sentence sits beside it, marked as a maybe.
+    """
+    for f in res.findings:
+        if f.code is not ExceptionCode.UNCLASSIFIED:
+            continue
+        guess = adjudicator.propose_cause({**f.evidence, "gap": str(to_rupees(
+            f.value_at_risk_paise))})
+        if guess:
+            f.evidence["hypothesis"] = guess
+
+
 def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
               adjudicate_legs: frozenset | None = None) -> ReconResult:
     """`adjudicate_legs` selects which legs may consult the model. Defaults to
@@ -857,6 +965,8 @@ def reconcile(ds: Dataset, batches: list[SettlementBatch], adjudicator=None,
     t3 = time.perf_counter()
     # Runs last: it consumes the exceptions the first three legs produced.
     reconcile_direct_receipts(ds, res, pick(Leg.INVOICE_BANK))
+    if adjudicator is not None:
+        _suggest_causes(res, adjudicator)
     t4 = time.perf_counter()
 
     res.timings = {"erp_to_gateway_s": round(t1 - t0, 4),

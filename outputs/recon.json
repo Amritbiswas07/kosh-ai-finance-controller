@@ -1,9 +1,9 @@
 {
   "meta": {
     "seed": 20260824,
-    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 17.1s)",
+    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 5.2s)",
     "period": "synthetic",
-    "llm_seconds": 16.367
+    "llm_seconds": 22.204
   },
   "counts": {
     "erp_invoices": 135,
@@ -16,11 +16,11 @@
     "unresolved": 47
   },
   "timings": {
-    "erp_to_gateway_s": 0.0374,
-    "integrity_s": 0.0002,
-    "settlement_to_bank_s": 0.0003,
-    "direct_receipts_s": 16.4786,
-    "total_s": 16.5165
+    "erp_to_gateway_s": 0.001,
+    "integrity_s": 0.0001,
+    "settlement_to_bank_s": 12.1464,
+    "direct_receipts_s": 10.0755,
+    "total_s": 22.223
   },
   "position": {
     "captured": "724300.88",
@@ -3878,6 +3878,39 @@
   ],
   "adjudications": [
     {
+      "batch": "setl_82400020",
+      "candidates": [
+        "bank:0007",
+        "bank:0011",
+        "bank:0046"
+      ],
+      "chose": "bank:0046",
+      "reason": "The amounts (1645.52) match between the settlement batch and the NEFT transactions listed, indicating they represent the same underlying financial transaction.",
+      "verdict": "rejected_by_arithmetic"
+    },
+    {
+      "batch": "setl_82400025",
+      "candidates": [
+        "bank:0030",
+        "bank:0040",
+        "bank:0041"
+      ],
+      "chose": "bank:0041",
+      "reason": "The amounts (16188.64 vs 20402.61) and dates (2026-07-25 vs 2026-07-28) do not match any other transactions listed, making it the closest to the given settlement batch.",
+      "verdict": "rejected_by_arithmetic"
+    },
+    {
+      "batch": "setl_82400034",
+      "candidates": [
+        "bank:0040",
+        "bank:0030",
+        "bank:0041"
+      ],
+      "chose": "bank:0041",
+      "reason": "The amounts (14270.59 vs 11075.35) and dates (2026-08-06 vs 2026-08-04) match between the given settlement batch and option C.",
+      "verdict": "rejected_by_arithmetic"
+    },
+    {
       "leg": "invoice_to_bank",
       "bank_line": "bank:0009",
       "narration": "RTGS-AXISN260711688748-MERIDIAN LBS-PMT AGST BILL",
@@ -3913,9 +3946,9 @@
   ],
   "metrics": {
     "records": 347,
-    "wall_seconds": 16.5614,
-    "records_per_second": 21,
-    "engine_seconds": 16.5165,
+    "wall_seconds": 22.2304,
+    "records_per_second": 16,
+    "engine_seconds": 22.223,
     "auto_clear_rate": 0.8415,
     "auto_cleared_records": 292,
     "links": {

@@ -1,6 +1,6 @@
 # Reconciliation pack — synthetic
 
-Generated 2026-08-25 16:30. 347 source records across three systems, reconciled in 149.5 ms of engine time plus 16.4 s of model adjudication.
+Generated 2026-08-25 16:41. 347 source records across three systems, reconciled in 19.0 ms of engine time plus 22.2 s of model adjudication.
 
 ## Where the money is
 
@@ -45,7 +45,7 @@ The engine never reads `ground_truth.json`; only the evaluator does.
 
 Exception classification, scored strictly over (record, code) pairs: **precision 1.0000, recall 1.0000, F1 1.0000** on 64 true exceptions (64 correct, 0 false positives, 0 missed).
 
-Throughput: **21 records/second** end to end including CSV parsing. Auto-clear rate **84.2%** (292 of 347 records correctly linked and carrying nothing that needs a human).
+Throughput: **16 records/second** end to end including CSV parsing. Auto-clear rate **84.2%** (292 of 347 records correctly linked and carrying nothing that needs a human).
 
 ## Exceptions
 
@@ -240,6 +240,9 @@ Every residual the deterministic tiers could not settle, what the model proposed
 
 | Item | Candidates | Chose | Verdict | Model's reason |
 |---|---|---|---|---|
+| `setl_82400020` | 3 | `bank:0046` | rejected_by_arithmetic | The amounts (1645.52) match between the settlement batch and the NEFT transactions listed, indicating they represent the |
+| `setl_82400025` | 3 | `bank:0041` | rejected_by_arithmetic | The amounts (16188.64 vs 20402.61) and dates (2026-07-25 vs 2026-07-28) do not match any other transactions listed, maki |
+| `setl_82400034` | 3 | `bank:0041` | rejected_by_arithmetic | The amounts (14270.59 vs 11075.35) and dates (2026-08-06 vs 2026-08-04) match between the given settlement batch and opt |
 | `bank:0009` | 1 | `INV-2627-1095` | accepted | The narration mentions "MERIDIAN LBS-PMT AGST BILL", which corresponds to Meridian Labs as the customer with an invoice  |
 | `bank:0011` | 1 | `INV-2627-1033` | accepted | The narration mentions "BILL" which indicates it settles an unpaid invoice. |
 | `bank:0038` | 1 | `INV-2627-1020` | accepted | The narration mentions "EVEREST LGSTCS-PMT AGST BILL", which corresponds to an invoice for Everest Logistics with a gros |

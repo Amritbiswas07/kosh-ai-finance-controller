@@ -74,6 +74,12 @@ class StubAdjudicator:
     def narrate(self, finding, context: str = "") -> str:
         return ""
 
+    def read_narration(self, line, candidates) -> dict:
+        return self.choose("", []).as_dict()
+
+    def propose_cause(self, finding: dict) -> str:
+        return ""
+
 
 @dataclass
 class LocalAdjudicator:
@@ -165,6 +171,20 @@ class LocalAdjudicator:
              "Which gateway payment covers it?")
         return self.choose(q, candidates).as_dict()
 
+    def read_narration(self, line: dict, candidates: list[dict]) -> dict:
+        """A bank line that claims to be gateway money but whose reference the
+        extractor could not parse.
+
+        This is the one thing regular expressions genuinely cannot do: absorb a
+        statement format nobody has written a pattern for. The model is still
+        choosing from a fixed list of open batches, and the amount is checked
+        afterwards, so a wrong read cannot post a wrong number.
+        """
+        q = (f"Bank credit of INR {line['amount']} on {line['value_date']}. The "
+             f"statement line reads: \"{line['narration']}\".\n"
+             "Which settlement batch is this credit paying?")
+        return self.choose(q, candidates).as_dict()
+
     def choose_bank_line(self, batch, candidates: list[dict]) -> dict:
         q = (f"Settlement batch {batch['settlement_id']} netting INR {batch['net']} on "
              f"{batch['settled_at']}.\nWhich bank credit is this batch?")
@@ -182,3 +202,21 @@ class LocalAdjudicator:
         facts = "\n".join(f"{k}: {v}" for k, v in finding.items())
         out = self._generate(self._NARRATE, f"{context}\n{facts}".strip())
         return " ".join(out.split())[:400]
+
+    _CAUSE = (
+        "You are a finance controller looking at a reconciliation break the software "
+        "could not categorise. From the figures given, suggest in one short sentence "
+        "what most likely caused it — for example a currency conversion, a bank "
+        "recall, a netting, or a correspondent charge. Begin with 'Possibly'. Do not "
+        "state it as fact, do not invent any number, and do not repeat the figures.")
+
+    def propose_cause(self, finding: dict) -> str:
+        """A hypothesis for a break the taxonomy has no code for.
+
+        Deliberately advisory. It is attached alongside UNCLASSIFIED and never
+        replaces it, because a guess dressed as a category is exactly what the
+        UNCLASSIFIED code exists to prevent.
+        """
+        facts = "\n".join(f"{k}: {v}" for k, v in finding.items())
+        out = " ".join(self._generate(self._CAUSE, facts).split())[:220]
+        return out if out.lower().startswith("possibly") else ""
