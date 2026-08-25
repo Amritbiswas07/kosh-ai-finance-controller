@@ -1,9 +1,9 @@
 {
   "meta": {
     "seed": 20260824,
-    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 5.1s)",
+    "model": "Qwen/Qwen2.5-1.5B-Instruct on mps (loaded in 6.5s)",
     "period": "synthetic",
-    "llm_seconds": 22.407
+    "llm_seconds": 26.014
   },
   "counts": {
     "erp_invoices": 135,
@@ -12,31 +12,31 @@
     "total_records": 347,
     "settlement_batches": 42,
     "matches": 166,
-    "findings": 64,
-    "unresolved": 47
+    "findings": 69,
+    "unresolved": 52
   },
   "timings": {
-    "erp_to_gateway_s": 0.0011,
-    "integrity_s": 0.0001,
-    "settlement_to_bank_s": 12.2821,
-    "direct_receipts_s": 10.1438,
-    "total_s": 22.4272
+    "erp_to_gateway_s": 0.0013,
+    "integrity_s": 0.0002,
+    "settlement_to_bank_s": 13.8976,
+    "direct_receipts_s": 12.1358,
+    "total_s": 26.0348
   },
   "position": {
     "captured": "724300.88",
     "on_hold_gross": "19919.85",
     "unbatched_gross": "9822.75",
     "gross_entering_settlement": "694558.28",
-    "refunds_settled": "27025.17",
+    "refunds_settled": "26511.62",
     "gateway_fees": "8923.02",
     "fee_gst": "1606.15",
     "dispute_adjustments": "7474.61",
-    "settled_net": "649529.33",
-    "batch_net": "649529.33",
+    "settled_net": "650042.88",
+    "batch_net": "650042.88",
     "residual": "0.00",
-    "landed_in_bank": "613210.61",
-    "in_transit": "36318.72",
-    "unexplained_credits": "76798.01",
+    "landed_in_bank": "625607.82",
+    "in_transit": "24435.06",
+    "unexplained_credits": "55273.81",
     "open_receivables": "28781.50",
     "unbilled_revenue": "35096.81",
     "tds_receivable": "358.65"
@@ -2031,7 +2031,7 @@
       "leg": "settlement_to_bank",
       "left": "setl_82400004",
       "right": [
-        "bank:0002"
+        "bank:0004"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2041,14 +2041,14 @@
         "utr": "AXISN260707292243",
         "net": "15942.21",
         "members": 2,
-        "narration": "ACH/C/AXISN260707292243/RAZORPAY SOFTWARE"
+        "narration": "neft-axisn260707292243-razorpay software pvt ltd-sbin0001310"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400005",
       "right": [
-        "bank:0005"
+        "bank:0006"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2058,14 +2058,14 @@
         "utr": "AXISN260708114011",
         "net": "40041.88",
         "members": 8,
-        "narration": "MB:NEFT CR-AXISN260708114011-RAZORPAY-SETTLEMENT"
+        "narration": "NEFT CR AXISN260708114011 RAZORPAY SOFTWARE  PVT  LTD"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400006",
       "right": [
-        "bank:0006"
+        "bank:0005"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2075,31 +2075,14 @@
         "utr": "AXISN260709707695",
         "net": "12359.62",
         "members": 4,
-        "narration": "MB:NEFT CR-AXISN260709707695-RAZORPAY-SETTLEMENT"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400007",
-      "right": [
-        "bank:0008"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "ICICN260710639127",
-        "net": "4406.63",
-        "members": 3,
-        "narration": "RTGS ICICN260710639127 RAZORPAY SOFTWARE PRIVATE LIMITED"
+        "narration": "ACH/C/AXISN260709707695/RAZORPAY SOFTWARE"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400008",
       "right": [
-        "bank:0010"
+        "bank:0008"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2109,48 +2092,14 @@
         "utr": "AXISN260711986167",
         "net": "18180.01",
         "members": 5,
-        "narration": "ACH/C/AXISN260711986167/RAZORPAY SOFTWARE"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400009",
-      "right": [
-        "bank:0013"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "SBIN0260712168948",
-        "net": "4710.38",
-        "members": 2,
-        "narration": "RTGS SBIN0260712168948 RAZORPAY SOFTWARE PRIVATE LIMITED"
-      }
-    },
-    {
-      "leg": "settlement_to_bank",
-      "left": "setl_82400010",
-      "right": [
-        "bank:0012"
-      ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
-      "evidence": {
-        "on": "utr",
-        "utr": "ICICN260713699100",
-        "net": "15318.05",
-        "members": 3,
-        "narration": "MB:NEFT CR-ICICN260713699100-RAZORPAY-SETTLEMENT"
+        "narration": "MB:NEFT CR-AXISN260711986167-RAZORPAY-SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400011",
       "right": [
-        "bank:0014"
+        "bank:0011"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2167,27 +2116,24 @@
       "leg": "settlement_to_bank",
       "left": "setl_82400012",
       "right": [
-        "bank:0019",
-        "bank:0021"
+        "bank:0012"
       ],
-      "tier": "T3_AGGREGATE",
-      "confidence": 0.97,
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
-        "on": "utr+aggregate",
+        "on": "utr",
         "utr": "KKBKN260715519995",
-        "parts": 2,
-        "part_amounts": [
-          "5730.12",
-          "4688.28"
-        ]
+        "net": "10418.40",
+        "members": 2,
+        "narration": "RTGS KKBKN260715519995 RAZORPAY SOFTWARE PRIVATE LIMITED"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400013",
       "right": [
-        "bank:0018"
+        "bank:0014"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2197,30 +2143,31 @@
         "utr": "ICICN260716844352",
         "net": "43233.74",
         "members": 6,
-        "narration": "NEFT CR ICICN260716844352 RAZORPAY SOFTWARE  PVT  LTD"
+        "narration": "ACH/C/ICICN260716844352/RAZORPAY SOFTWARE"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400014",
       "right": [
-        "bank:0020"
+        "bank:0016"
       ],
-      "tier": "T1_NORMALIZED_ID",
-      "confidence": 0.8,
-      "delta": "-5.90",
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
       "evidence": {
-        "on": "utr_amount_differs",
+        "on": "utr",
         "utr": "KKBKN260717982508",
-        "bank_total": "11737.51",
-        "batch_net": "11743.41"
+        "net": "11743.41",
+        "members": 2,
+        "narration": "RTGS KKBKN260717982508 RAZORPAY SOFTWARE PRIVATE LIMITED"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400015",
       "right": [
-        "bank:0022"
+        "bank:0015"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2230,50 +2177,48 @@
         "utr": "AXISN260718601680",
         "net": "13755.92",
         "members": 3,
-        "narration": "ACH/C/AXISN260718601680/RAZORPAY SOFTWARE"
+        "narration": "MB:NEFT CR-AXISN260718601680-RAZORPAY-SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400016",
       "right": [
-        "bank:0023",
-        "bank:0025"
+        "bank:0017"
       ],
-      "tier": "T3_AGGREGATE",
-      "confidence": 0.97,
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
-        "on": "utr+aggregate",
+        "on": "utr",
         "utr": "KKBKN260719311944",
-        "parts": 2,
-        "part_amounts": [
-          "8664.56",
-          "7089.18"
-        ]
+        "net": "15753.74",
+        "members": 3,
+        "narration": "MB:NEFT CR-KKBKN260719311944-RAZORPAY-SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400017",
       "right": [
-        "bank:0024"
+        "bank:0018"
       ],
-      "tier": "T1_NORMALIZED_ID",
-      "confidence": 0.8,
-      "delta": "-23.60",
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
       "evidence": {
-        "on": "utr_amount_differs",
+        "on": "utr",
         "utr": "SBIN0260720365068",
-        "bank_total": "19743.28",
-        "batch_net": "19766.88"
+        "net": "19766.88",
+        "members": 6,
+        "narration": "ach/c/sbin0260720365068/razorpay software"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400019",
       "right": [
-        "bank:0026"
+        "bank:0020"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2283,14 +2228,30 @@
         "utr": "SBIN0260722478478",
         "net": "10577.74",
         "members": 2,
-        "narration": "neft cr sbin0260722478478 razorpay software  pvt  ltd"
+        "narration": "NEFT CR SBIN0260722478478 RAZORPAY SOFTWARE  PVT  LTD"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400020",
+      "right": [
+        "bank:0019"
+      ],
+      "tier": "T1_NORMALIZED_ID",
+      "confidence": 0.8,
+      "delta": "-5.90",
+      "evidence": {
+        "on": "utr_amount_differs",
+        "utr": "ICICN260723723502",
+        "bank_total": "1639.62",
+        "batch_net": "1645.52"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400021",
       "right": [
-        "bank:0028"
+        "bank:0021"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2300,31 +2261,30 @@
         "utr": "KKBKN260724840714",
         "net": "22447.70",
         "members": 3,
-        "narration": "MB:NEFT CR-KKBKN260724840714-RAZORPAY-SETTLEMENT"
+        "narration": "NEFT CR KKBKN260724840714 RAZORPAY SOFTWARE  PVT  LTD"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400022",
       "right": [
-        "bank:0029"
+        "bank:0022"
       ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
-      "delta": "0.00",
+      "tier": "T1_NORMALIZED_ID",
+      "confidence": 0.8,
+      "delta": "-23.60",
       "evidence": {
-        "on": "utr",
+        "on": "utr_amount_differs",
         "utr": "AXISN260725327302",
-        "net": "16747.91",
-        "members": 2,
-        "narration": "IMPS/AXISN260725327302/RAZORPAYSOFT/SETTLEMENT"
+        "bank_total": "16724.31",
+        "batch_net": "16747.91"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400024",
       "right": [
-        "bank:0031"
+        "bank:0024"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2334,14 +2294,34 @@
         "utr": "ICICN260727729956",
         "net": "17665.41",
         "members": 2,
-        "narration": "imps/icicn260727729956/razorpaysoft/settlement"
+        "narration": "RTGS ICICN260727729956 RAZORPAY SOFTWARE PRIVATE LIMITED"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400025",
+      "right": [
+        "bank:0025",
+        "bank:0027"
+      ],
+      "tier": "T3_AGGREGATE",
+      "confidence": 0.97,
+      "delta": "0.00",
+      "evidence": {
+        "on": "utr+aggregate",
+        "utr": "SBIN0260728871951",
+        "parts": 2,
+        "part_amounts": [
+          "14281.83",
+          "6120.78"
+        ]
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400026",
       "right": [
-        "bank:0032"
+        "bank:0028"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2351,14 +2331,14 @@
         "utr": "AXISN260729282728",
         "net": "11627.79",
         "members": 3,
-        "narration": "RTGS AXISN260729282728 RAZORPAY SOFTWARE PRIVATE LIMITED"
+        "narration": "neft cr axisn260729282728 razorpay software  pvt  ltd"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400027",
       "right": [
-        "bank:0033"
+        "bank:0030"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2368,14 +2348,14 @@
         "utr": "KKBKN260730211485",
         "net": "19645.23",
         "members": 4,
-        "narration": "NEFT CR KKBKN260730211485 RAZORPAY SOFTWARE  PVT  LTD"
+        "narration": "IMPS/KKBKN260730211485/RAZORPAYSOFT/SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400028",
       "right": [
-        "bank:0034"
+        "bank:0031"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2385,14 +2365,14 @@
         "utr": "SBIN0260731143610",
         "net": "7310.81",
         "members": 1,
-        "narration": "NEFT-SBIN0260731143610-RAZORPAY SOFTWARE PVT LTD-KKBK0001412"
+        "narration": "RTGS SBIN0260731143610 RAZORPAY SOFTWARE PRIVATE LIMITED"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400029",
       "right": [
-        "bank:0036"
+        "bank:0032"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2402,14 +2382,14 @@
         "utr": "KKBKN260801891036",
         "net": "22412.29",
         "members": 5,
-        "narration": "IMPS/KKBKN260801891036/RAZORPAYSOFT/SETTLEMENT"
+        "narration": "imps/kkbkn260801891036/razorpaysoft/settlement"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400030",
       "right": [
-        "bank:0037"
+        "bank:0033"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2426,7 +2406,7 @@
       "leg": "settlement_to_bank",
       "left": "setl_82400031",
       "right": [
-        "bank:0039"
+        "bank:0035"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2443,7 +2423,7 @@
       "leg": "settlement_to_bank",
       "left": "setl_82400032",
       "right": [
-        "bank:0043"
+        "bank:0037"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2453,14 +2433,14 @@
         "utr": "KKBKN260804906235",
         "net": "20096.29",
         "members": 4,
-        "narration": "imps/kkbkn260804906235/razorpaysoft/settlement"
+        "narration": "NEFT-KKBKN260804906235-RAZORPAY SOFTWARE PVT LTD-KKBK0001412"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400033",
       "right": [
-        "bank:0044"
+        "bank:0039"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2470,14 +2450,30 @@
         "utr": "AXISN260805597259",
         "net": "15618.63",
         "members": 4,
-        "narration": "NEFT-AXISN260805597259-RAZORPAY SOFTWARE PVT LTD-AXIS0009187"
+        "narration": "IMPS/AXISN260805597259/RAZORPAYSOFT/SETTLEMENT"
+      }
+    },
+    {
+      "leg": "settlement_to_bank",
+      "left": "setl_82400034",
+      "right": [
+        "bank:0042"
+      ],
+      "tier": "T1_NORMALIZED_ID",
+      "confidence": 0.8,
+      "delta": "25.00",
+      "evidence": {
+        "on": "utr_amount_differs",
+        "utr": "HDFCN260806358365",
+        "bank_total": "14295.59",
+        "batch_net": "14270.59"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400035",
       "right": [
-        "bank:0047"
+        "bank:0044"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2487,14 +2483,14 @@
         "utr": "ICICN260807333918",
         "net": "10781.19",
         "members": 1,
-        "narration": "mb:neft cr-icicn260807333918-razorpay-settlement"
+        "narration": "NEFT CR ICICN260807333918 RAZORPAY SOFTWARE  PVT  LTD"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400036",
       "right": [
-        "bank:0048"
+        "bank:0045"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2504,14 +2500,14 @@
         "utr": "SBIN0260808945715",
         "net": "8134.78",
         "members": 1,
-        "narration": "neft cr sbin0260808945715 razorpay software  pvt  ltd"
+        "narration": "IMPS/SBIN0260808945715/RAZORPAYSOFT/SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400037",
       "right": [
-        "bank:0049"
+        "bank:0047"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2521,14 +2517,14 @@
         "utr": "KKBKN260809944541",
         "net": "5758.43",
         "members": 4,
-        "narration": "MB:NEFT CR-KKBKN260809944541-RAZORPAY-SETTLEMENT"
+        "narration": "NEFT-KKBKN260809944541-RAZORPAY SOFTWARE PVT LTD-AXIS0009187"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400038",
       "right": [
-        "bank:0050"
+        "bank:0049"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2538,14 +2534,14 @@
         "utr": "HDFCN260810304429",
         "net": "9726.08",
         "members": 2,
-        "narration": "IMPS/HDFCN260810304429/RAZORPAYSOFT/SETTLEMENT"
+        "narration": "mb:neft cr-hdfcn260810304429-razorpay-settlement"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400040",
       "right": [
-        "bank:0052"
+        "bank:0050"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2555,47 +2551,51 @@
         "utr": "ICICN260812251568",
         "net": "7435.28",
         "members": 2,
-        "narration": "ACH/C/ICICN260812251568/RAZORPAY SOFTWARE"
+        "narration": "neft cr icicn260812251568 razorpay software  pvt  ltd"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400041",
       "right": [
-        "bank:0056"
+        "bank:0051",
+        "bank:0054"
       ],
-      "tier": "T0_EXACT_ID",
-      "confidence": 1.0,
+      "tier": "T3_AGGREGATE",
+      "confidence": 0.97,
       "delta": "0.00",
       "evidence": {
-        "on": "utr",
+        "on": "utr+aggregate",
         "utr": "SBIN0260813364269",
-        "net": "23733.74",
-        "members": 6,
-        "narration": "RTGS SBIN0260813364269 RAZORPAY SOFTWARE PRIVATE LIMITED"
+        "parts": 2,
+        "part_amounts": [
+          "16613.62",
+          "7120.12"
+        ]
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400042",
       "right": [
-        "bank:0054"
+        "bank:0055"
       ],
-      "tier": "T1_NORMALIZED_ID",
-      "confidence": 0.8,
-      "delta": "-11.80",
+      "tier": "T0_EXACT_ID",
+      "confidence": 1.0,
+      "delta": "0.00",
       "evidence": {
-        "on": "utr_amount_differs",
+        "on": "utr",
         "utr": "SBIN0260814301778",
-        "bank_total": "31246.93",
-        "batch_net": "31258.73"
+        "net": "31258.73",
+        "members": 4,
+        "narration": "ach/c/sbin0260814301778/razorpay software"
       }
     },
     {
       "leg": "settlement_to_bank",
       "left": "setl_82400043",
       "right": [
-        "bank:0059"
+        "bank:0057"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
@@ -2605,24 +2605,24 @@
         "utr": "KKBKN260816405172",
         "net": "4447.78",
         "members": 4,
-        "narration": "ACH/C/KKBKN260816405172/RAZORPAY SOFTWARE"
+        "narration": "IMPS/KKBKN260816405172/RAZORPAYSOFT/SETTLEMENT"
       }
     },
     {
       "leg": "settlement_to_bank",
-      "left": "setl_82400045",
+      "left": "setl_82400044",
       "right": [
-        "bank:0060"
+        "bank:0061"
       ],
       "tier": "T0_EXACT_ID",
       "confidence": 1.0,
       "delta": "0.00",
       "evidence": {
         "on": "utr",
-        "utr": "SBIN0260819301301",
-        "net": "416.55",
-        "members": 2,
-        "narration": "IMPS/SBIN0260819301301/RAZORPAYSOFT/SETTLEMENT"
+        "utr": "KKBKN260819436897",
+        "net": "930.10",
+        "members": 1,
+        "narration": "ACH/C/KKBKN260819436897/RAZORPAY SOFTWARE"
       }
     },
     {
@@ -2686,7 +2686,7 @@
         "on": "narration+amount",
         "relation": "gross",
         "customer": "Anand Traders",
-        "narration": "NEFT-KKBKN260711991192-ANAND TRADERS-DIRECT",
+        "narration": "NEFT-SBIN0260710844405-ANAND TRADERS-DIRECT",
         "name_overlap": 0.4,
         "invoice_gross": "2047.16",
         "bank_credit": "2047.16",
@@ -2697,7 +2697,7 @@
       "leg": "invoice_to_bank",
       "left": "INV-2627-1010",
       "right": [
-        "bank:0046"
+        "bank:0036"
       ],
       "tier": "T2_AMOUNT_DATE",
       "confidence": 0.96,
@@ -2706,7 +2706,7 @@
         "on": "narration+amount",
         "relation": "gross",
         "customer": "Prabhat Printers",
-        "narration": "NEFT-KKBKN260807496896-PRABHAT PRINTERS-DIRECT",
+        "narration": "NEFT-AXISN260804747550-PRABHAT PRINTERS-DIRECT",
         "name_overlap": 0.4,
         "invoice_gross": "5003.96",
         "bank_credit": "5003.96",
@@ -2717,7 +2717,7 @@
       "leg": "invoice_to_bank",
       "left": "INV-2627-1121",
       "right": [
-        "bank:0061"
+        "bank:0059"
       ],
       "tier": "T2_AMOUNT_DATE",
       "confidence": 0.96,
@@ -2726,7 +2726,7 @@
         "on": "narration+amount",
         "relation": "gross",
         "customer": "Indus Motors",
-        "narration": "NEFT-HDFCN260821936398-INDUS MOTORS-DIRECT",
+        "narration": "NEFT-AXISN260816316697-INDUS MOTORS-DIRECT",
         "name_overlap": 0.4,
         "invoice_gross": "8004.91",
         "bank_credit": "8004.91",
@@ -2735,29 +2735,9 @@
     },
     {
       "leg": "invoice_to_bank",
-      "left": "INV-2627-1095",
-      "right": [
-        "bank:0009"
-      ],
-      "tier": "T4_ADJUDICATED",
-      "confidence": 0.62,
-      "delta": "-158.95",
-      "evidence": {
-        "on": "narration+amount",
-        "relation": "net_of_tds_2pct",
-        "customer": "Meridian Labs",
-        "narration": "RTGS-AXISN260711688748-MERIDIAN LBS-PMT AGST BILL",
-        "name_overlap": 0.125,
-        "invoice_gross": "7947.72",
-        "bank_credit": "7788.77",
-        "note": "model read the counterparty name; amount relationship verified"
-      }
-    },
-    {
-      "leg": "invoice_to_bank",
       "left": "INV-2627-1033",
       "right": [
-        "bank:0011"
+        "bank:0009"
       ],
       "tier": "T4_ADJUDICATED",
       "confidence": 0.62,
@@ -2766,7 +2746,7 @@
         "on": "narration+amount",
         "relation": "net_of_tds_2pct",
         "customer": "Prabhat Printers",
-        "narration": "RTGS-SBIN0260712759373-PRABHAT PRNTRS-PMT AGST BILL",
+        "narration": "RTGS-ICICN260711244237-PRABHAT PRNTRS-PMT AGST BILL",
         "name_overlap": 0.125,
         "invoice_gross": "3419.18",
         "bank_credit": "3350.80",
@@ -2775,9 +2755,29 @@
     },
     {
       "leg": "invoice_to_bank",
+      "left": "INV-2627-1095",
+      "right": [
+        "bank:0010"
+      ],
+      "tier": "T4_ADJUDICATED",
+      "confidence": 0.62,
+      "delta": "-158.95",
+      "evidence": {
+        "on": "narration+amount",
+        "relation": "net_of_tds_2pct",
+        "customer": "Meridian Labs",
+        "narration": "RTGS-AXISN260712726536-MERIDIAN LBS-PMT AGST BILL",
+        "name_overlap": 0.125,
+        "invoice_gross": "7947.72",
+        "bank_credit": "7788.77",
+        "note": "model read the counterparty name; amount relationship verified"
+      }
+    },
+    {
+      "leg": "invoice_to_bank",
       "left": "INV-2627-1020",
       "right": [
-        "bank:0038"
+        "bank:0040"
       ],
       "tier": "T4_ADJUDICATED",
       "confidence": 0.62,
@@ -2786,7 +2786,7 @@
         "on": "narration+amount",
         "relation": "net_of_tds_2pct",
         "customer": "Everest Logistics",
-        "narration": "RTGS-ICICN260803863670-EVEREST LGSTCS-PMT AGST BILL",
+        "narration": "RTGS-KKBKN260805533437-EVEREST LGSTCS-PMT AGST BILL",
         "name_overlap": 0.125,
         "invoice_gross": "6566.17",
         "bank_credit": "6434.85",
@@ -3250,6 +3250,21 @@
       "narrative": ""
     },
     {
+      "key": "rfnd_82400008",
+      "source": "pg",
+      "code": "AWAITING_SETTLEMENT",
+      "disposition": "needs_review",
+      "value_at_risk": "-2694.70",
+      "evidence": {
+        "type": "refund",
+        "amount": "2694.70",
+        "created_at": "2026-07-19T07:52:00",
+        "parent_payment_id": "pay_82400102"
+      },
+      "proposed_action": "Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does.",
+      "narrative": ""
+    },
+    {
       "key": "pay_82400132",
       "source": "pg",
       "code": "FEE_VARIANCE",
@@ -3265,6 +3280,21 @@
         "drift": "4.84"
       },
       "proposed_action": "Recover 4.84 of MDR against pay_82400132.",
+      "narrative": ""
+    },
+    {
+      "key": "rfnd_82400000",
+      "source": "pg",
+      "code": "AWAITING_SETTLEMENT",
+      "disposition": "needs_review",
+      "value_at_risk": "-9426.51",
+      "evidence": {
+        "type": "refund",
+        "amount": "9426.51",
+        "created_at": "2026-07-24T17:22:00",
+        "parent_payment_id": "pay_82400014"
+      },
+      "proposed_action": "Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does.",
       "narrative": ""
     },
     {
@@ -3391,6 +3421,21 @@
       "narrative": ""
     },
     {
+      "key": "rfnd_82400003",
+      "source": "pg",
+      "code": "AWAITING_SETTLEMENT",
+      "disposition": "needs_review",
+      "value_at_risk": "-8331.40",
+      "evidence": {
+        "type": "refund",
+        "amount": "8331.40",
+        "created_at": "2026-08-09T15:35:00",
+        "parent_payment_id": "pay_82400050"
+      },
+      "proposed_action": "Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does.",
+      "narrative": ""
+    },
+    {
       "key": "adjs_82400002",
       "source": "pg",
       "code": "CHARGEBACK_ADJUSTMENT",
@@ -3421,6 +3466,36 @@
         "drift": "8.85"
       },
       "proposed_action": "Recover 8.85 of MDR against pay_82400044.",
+      "narrative": ""
+    },
+    {
+      "key": "rfnd_82400007",
+      "source": "pg",
+      "code": "AWAITING_SETTLEMENT",
+      "disposition": "needs_review",
+      "value_at_risk": "-4987.24",
+      "evidence": {
+        "type": "refund",
+        "amount": "4987.24",
+        "created_at": "2026-08-16T22:07:00",
+        "parent_payment_id": "pay_82400088"
+      },
+      "proposed_action": "Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does.",
+      "narrative": ""
+    },
+    {
+      "key": "rfnd_82400002",
+      "source": "pg",
+      "code": "AWAITING_SETTLEMENT",
+      "disposition": "needs_review",
+      "value_at_risk": "-513.55",
+      "evidence": {
+        "type": "refund",
+        "amount": "513.55",
+        "created_at": "2026-08-17T15:13:00",
+        "parent_payment_id": "pay_82400028"
+      },
+      "proposed_action": "Not yet netted into a payout. Expect it to reduce a forthcoming settlement; hold it out of the cash position until it does.",
       "narrative": ""
     },
     {
@@ -3488,98 +3563,98 @@
       "narrative": ""
     },
     {
-      "key": "setl_82400012",
-      "source": "settlement",
-      "code": "SPLIT_SETTLEMENT",
-      "disposition": "auto_resolved",
-      "value_at_risk": "0.00",
-      "evidence": {
-        "utr": "KKBKN260715519995",
-        "parts": 2,
-        "lines": [
-          "bank:0019",
-          "bank:0021"
-        ],
-        "dates": [
-          "2026-07-16",
-          "2026-07-17"
-        ],
-        "sums_to": "10418.40"
-      },
-      "proposed_action": "No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line.",
-      "narrative": ""
-    },
-    {
-      "key": "setl_82400014",
+      "key": "setl_82400020",
       "source": "settlement",
       "code": "SETTLEMENT_AMOUNT_MISMATCH",
       "disposition": "needs_review",
       "value_at_risk": "-5.90",
       "evidence": {
-        "utr": "KKBKN260717982508",
-        "batch_net": "11743.41",
-        "bank_credited": "11737.51",
+        "utr": "ICICN260723723502",
+        "batch_net": "1645.52",
+        "bank_credited": "1639.62",
         "delta": "-5.90",
         "plausible_charge_up_to": "100.00",
-        "narration": "IMPS/KKBKN260717982508/RAZORPAYSOFT/SETTLEMENT"
+        "narration": "IMPS/ICICN260723723502/RAZORPAYSOFT/SETTLEMENT"
       },
       "proposed_action": "Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank.",
       "narrative": ""
     },
     {
-      "key": "setl_82400016",
-      "source": "settlement",
-      "code": "SPLIT_SETTLEMENT",
-      "disposition": "auto_resolved",
-      "value_at_risk": "0.00",
-      "evidence": {
-        "utr": "KKBKN260719311944",
-        "parts": 2,
-        "lines": [
-          "bank:0023",
-          "bank:0025"
-        ],
-        "dates": [
-          "2026-07-19",
-          "2026-07-20"
-        ],
-        "sums_to": "15753.74"
-      },
-      "proposed_action": "No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line.",
-      "narrative": ""
-    },
-    {
-      "key": "setl_82400017",
+      "key": "setl_82400022",
       "source": "settlement",
       "code": "SETTLEMENT_AMOUNT_MISMATCH",
       "disposition": "needs_review",
       "value_at_risk": "-23.60",
       "evidence": {
-        "utr": "SBIN0260720365068",
-        "batch_net": "19766.88",
-        "bank_credited": "19743.28",
+        "utr": "AXISN260725327302",
+        "batch_net": "16747.91",
+        "bank_credited": "16724.31",
         "delta": "-23.60",
         "plausible_charge_up_to": "100.00",
-        "narration": "NEFT CR SBIN0260720365068 RAZORPAY SOFTWARE  PVT  LTD"
+        "narration": "ACH/C/AXISN260725327302/RAZORPAY SOFTWARE"
       },
       "proposed_action": "Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank.",
       "narrative": ""
     },
     {
-      "key": "setl_82400042",
+      "key": "setl_82400025",
+      "source": "settlement",
+      "code": "SPLIT_SETTLEMENT",
+      "disposition": "auto_resolved",
+      "value_at_risk": "0.00",
+      "evidence": {
+        "utr": "SBIN0260728871951",
+        "parts": 2,
+        "lines": [
+          "bank:0025",
+          "bank:0027"
+        ],
+        "dates": [
+          "2026-07-28",
+          "2026-07-29"
+        ],
+        "sums_to": "20402.61"
+      },
+      "proposed_action": "No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line.",
+      "narrative": ""
+    },
+    {
+      "key": "setl_82400034",
       "source": "settlement",
       "code": "SETTLEMENT_AMOUNT_MISMATCH",
       "disposition": "needs_review",
-      "value_at_risk": "-11.80",
+      "value_at_risk": "25.00",
       "evidence": {
-        "utr": "SBIN0260814301778",
-        "batch_net": "31258.73",
-        "bank_credited": "31246.93",
-        "delta": "-11.80",
+        "utr": "HDFCN260806358365",
+        "batch_net": "14270.59",
+        "bank_credited": "14295.59",
+        "delta": "25.00",
         "plausible_charge_up_to": "100.00",
-        "narration": "ACH/C/SBIN0260814301778/RAZORPAY SOFTWARE"
+        "narration": "RTGS HDFCN260806358365 RAZORPAY SOFTWARE PRIVATE LIMITED"
       },
-      "proposed_action": "Bank credited less than the batch netted to, by an amount consistent with a correspondent charge; confirm with the bank.",
+      "proposed_action": "Bank credited more than the batch netted to; check for a prior shortfall being made good.",
+      "narrative": ""
+    },
+    {
+      "key": "setl_82400041",
+      "source": "settlement",
+      "code": "SPLIT_SETTLEMENT",
+      "disposition": "auto_resolved",
+      "value_at_risk": "0.00",
+      "evidence": {
+        "utr": "SBIN0260813364269",
+        "parts": 2,
+        "lines": [
+          "bank:0051",
+          "bank:0054"
+        ],
+        "dates": [
+          "2026-08-13",
+          "2026-08-14"
+        ],
+        "sums_to": "23733.74"
+      },
+      "proposed_action": "No action: the parts reconcile exactly. Post as one receipt so the sub-ledger keeps a single settlement line.",
       "narrative": ""
     },
     {
@@ -3659,99 +3734,83 @@
       "narrative": ""
     },
     {
-      "key": "setl_82400020",
+      "key": "setl_82400007",
       "source": "settlement",
       "code": "MISSING_IN_BANK",
       "disposition": "needs_review",
-      "value_at_risk": "1645.52",
+      "value_at_risk": "4406.63",
       "evidence": {
-        "utr": "ICICN260723723502",
-        "settled_at": "2026-07-23T11:00:00",
-        "net": "1645.52",
-        "members": 2,
-        "gross": "1698.15",
-        "fee_and_gst": "52.63"
-      },
-      "proposed_action": "Trace UTR ICICN260723723502 with the bank. Until it lands, 1645.52 sits in gateway receivable, not in cash.",
-      "narrative": ""
-    },
-    {
-      "key": "setl_82400025",
-      "source": "settlement",
-      "code": "MISSING_IN_BANK",
-      "disposition": "needs_review",
-      "value_at_risk": "20402.61",
-      "evidence": {
-        "utr": "SBIN0260728871951",
-        "settled_at": "2026-07-28T11:00:00",
-        "net": "20402.61",
-        "members": 4,
-        "gross": "21042.99",
-        "fee_and_gst": "640.38"
-      },
-      "proposed_action": "Trace UTR SBIN0260728871951 with the bank. Until it lands, 20402.61 sits in gateway receivable, not in cash.",
-      "narrative": ""
-    },
-    {
-      "key": "setl_82400034",
-      "source": "settlement",
-      "code": "MISSING_IN_BANK",
-      "disposition": "needs_review",
-      "value_at_risk": "14270.59",
-      "evidence": {
-        "utr": "HDFCN260806358365",
-        "settled_at": "2026-08-06T11:00:00",
-        "net": "14270.59",
+        "utr": "ICICN260710639127",
+        "settled_at": "2026-07-10T11:00:00",
+        "net": "4406.63",
         "members": 3,
-        "gross": "14348.22",
-        "fee_and_gst": "77.63"
+        "gross": "4490.56",
+        "fee_and_gst": "83.93"
       },
-      "proposed_action": "Trace UTR HDFCN260806358365 with the bank. Until it lands, 14270.59 sits in gateway receivable, not in cash.",
+      "proposed_action": "Trace UTR ICICN260710639127 with the bank. Until it lands, 4406.63 sits in gateway receivable, not in cash.",
       "narrative": ""
     },
     {
-      "key": "bank:0004",
+      "key": "setl_82400009",
+      "source": "settlement",
+      "code": "MISSING_IN_BANK",
+      "disposition": "needs_review",
+      "value_at_risk": "4710.38",
+      "evidence": {
+        "utr": "SBIN0260712168948",
+        "settled_at": "2026-07-12T11:00:00",
+        "net": "4710.38",
+        "members": 2,
+        "gross": "4819.32",
+        "fee_and_gst": "108.94"
+      },
+      "proposed_action": "Trace UTR SBIN0260712168948 with the bank. Until it lands, 4710.38 sits in gateway receivable, not in cash.",
+      "narrative": ""
+    },
+    {
+      "key": "setl_82400010",
+      "source": "settlement",
+      "code": "MISSING_IN_BANK",
+      "disposition": "needs_review",
+      "value_at_risk": "15318.05",
+      "evidence": {
+        "utr": "ICICN260713699100",
+        "settled_at": "2026-07-13T11:00:00",
+        "net": "15318.05",
+        "members": 3,
+        "gross": "15318.05",
+        "fee_and_gst": "0.00"
+      },
+      "proposed_action": "Trace UTR ICICN260713699100 with the bank. Until it lands, 15318.05 sits in gateway receivable, not in cash.",
+      "narrative": ""
+    },
+    {
+      "key": "bank:0026",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "8936.54",
+      "value_at_risk": "5929.95",
       "evidence": {
-        "value_date": "2026-07-07",
-        "narration": "TERM LOAN DISBURSAL TL-99321",
-        "ref_no": "40751440",
-        "amount": "8936.54",
+        "value_date": "2026-07-29",
+        "narration": "INT.PD:12345678:01-08-2026 TO 31-08-2026",
+        "ref_no": "86892032",
+        "amount": "5929.95",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
       "narrative": ""
     },
     {
-      "key": "bank:0030",
+      "key": "bank:0038",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "16188.64",
-      "evidence": {
-        "value_date": "2026-07-25",
-        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
-        "ref_no": "60154839",
-        "amount": "16188.64",
-        "claims_settlement": false
-      },
-      "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
-      "narrative": ""
-    },
-    {
-      "key": "bank:0040",
-      "source": "bank",
-      "code": "UNEXPECTED_BANK_CREDIT",
-      "disposition": "needs_review",
-      "value_at_risk": "15333.98",
+      "value_at_risk": "16182.86",
       "evidence": {
         "value_date": "2026-08-04",
-        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
-        "ref_no": "24407929",
-        "amount": "15333.98",
+        "narration": "TERM LOAN DISBURSAL TL-99321",
+        "ref_no": "89448703",
+        "amount": "16182.86",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
@@ -3762,26 +3821,10 @@
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "11075.35",
-      "evidence": {
-        "value_date": "2026-08-04",
-        "narration": "TERM LOAN DISBURSAL TL-99321",
-        "ref_no": "33186094",
-        "amount": "11075.35",
-        "claims_settlement": false
-      },
-      "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
-      "narrative": ""
-    },
-    {
-      "key": "bank:0045",
-      "source": "bank",
-      "code": "UNEXPECTED_BANK_CREDIT",
-      "disposition": "needs_review",
       "value_at_risk": "5540.58",
       "evidence": {
         "value_date": "2026-08-06",
-        "narration": "INT.PD:12345678:01-08-2026 TO 31-08-2026",
+        "narration": "CHQ PAID-004512",
         "ref_no": "87715422",
         "amount": "5540.58",
         "claims_settlement": false
@@ -3790,53 +3833,67 @@
       "narrative": ""
     },
     {
-      "key": "bank:0051",
+      "key": "bank:0046",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "10517.70",
+      "value_at_risk": "6876.63",
       "evidence": {
-        "value_date": "2026-08-11",
-        "narration": "CHQ PAID-004512",
-        "ref_no": "49519355",
-        "amount": "10517.70",
+        "value_date": "2026-08-09",
+        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
+        "ref_no": "66728391",
+        "amount": "6876.63",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
       "narrative": ""
     },
     {
-      "key": "bank:0055",
+      "key": "bank:0048",
       "source": "bank",
       "code": "UNEXPECTED_BANK_CREDIT",
       "disposition": "needs_review",
-      "value_at_risk": "9205.22",
+      "value_at_risk": "5239.36",
       "evidence": {
-        "value_date": "2026-08-14",
+        "value_date": "2026-08-10",
+        "narration": "TERM LOAN DISBURSAL TL-99321",
+        "ref_no": "70647722",
+        "amount": "5239.36",
+        "claims_settlement": false
+      },
+      "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
+      "narrative": ""
+    },
+    {
+      "key": "bank:0056",
+      "source": "bank",
+      "code": "UNEXPECTED_BANK_CREDIT",
+      "disposition": "needs_review",
+      "value_at_risk": "5819.78",
+      "evidence": {
+        "value_date": "2026-08-15",
+        "narration": "NEFT-CITIN25081200099-ANAND TRADERS-DIRECT",
+        "ref_no": "65404711",
+        "amount": "5819.78",
+        "claims_settlement": false
+      },
+      "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
+      "narrative": ""
+    },
+    {
+      "key": "bank:0058",
+      "source": "bank",
+      "code": "UNEXPECTED_BANK_CREDIT",
+      "disposition": "needs_review",
+      "value_at_risk": "9684.65",
+      "evidence": {
+        "value_date": "2026-08-16",
         "narration": "INT.PD:12345678:01-08-2026 TO 31-08-2026",
-        "ref_no": "57943619",
-        "amount": "9205.22",
+        "ref_no": "74133746",
+        "amount": "9684.65",
         "claims_settlement": false
       },
       "proposed_action": "Identify the payer before this is swept into the settlement control account; it is not gateway money on the evidence here.",
-      "narrative": ""
-    },
-    {
-      "key": "INV-2627-1095",
-      "source": "erp",
-      "code": "TDS_WITHHELD",
-      "disposition": "auto_resolved",
-      "value_at_risk": "158.95",
-      "evidence": {
-        "relation": "net_of_tds_2pct",
-        "bank_line": "bank:0009",
-        "invoice_gross": "7947.72",
-        "received": "7788.77",
-        "withheld": "158.95",
-        "customer": "Meridian Labs",
-        "matched_by": "T4_ADJUDICATED"
-      },
-      "proposed_action": "Book 158.95 as TDS receivable against Meridian Labs and collect Form 16A for the quarter.",
       "narrative": ""
     },
     {
@@ -3847,7 +3904,7 @@
       "value_at_risk": "68.38",
       "evidence": {
         "relation": "net_of_tds_2pct",
-        "bank_line": "bank:0011",
+        "bank_line": "bank:0009",
         "invoice_gross": "3419.18",
         "received": "3350.80",
         "withheld": "68.38",
@@ -3858,6 +3915,24 @@
       "narrative": ""
     },
     {
+      "key": "INV-2627-1095",
+      "source": "erp",
+      "code": "TDS_WITHHELD",
+      "disposition": "auto_resolved",
+      "value_at_risk": "158.95",
+      "evidence": {
+        "relation": "net_of_tds_2pct",
+        "bank_line": "bank:0010",
+        "invoice_gross": "7947.72",
+        "received": "7788.77",
+        "withheld": "158.95",
+        "customer": "Meridian Labs",
+        "matched_by": "T4_ADJUDICATED"
+      },
+      "proposed_action": "Book 158.95 as TDS receivable against Meridian Labs and collect Form 16A for the quarter.",
+      "narrative": ""
+    },
+    {
       "key": "INV-2627-1020",
       "source": "erp",
       "code": "TDS_WITHHELD",
@@ -3865,7 +3940,7 @@
       "value_at_risk": "131.32",
       "evidence": {
         "relation": "net_of_tds_2pct",
-        "bank_line": "bank:0038",
+        "bank_line": "bank:0040",
         "invoice_gross": "6566.17",
         "received": "6434.85",
         "withheld": "131.32",
@@ -3878,79 +3953,78 @@
   ],
   "adjudications": [
     {
-      "batch": "setl_82400020",
+      "batch": "setl_82400007",
       "candidates": [
-        "bank:0007",
-        "bank:0011",
-        "bank:0046"
+        "bank:0036",
+        "bank:0048",
+        "bank:0009"
       ],
-      "chose": "bank:0046",
-      "reason": "The amounts (1645.52) match between the settlement batch and the NEFT transactions listed, indicating they represent the same underlying financial transaction.",
+      "chose": "bank:0009",
+      "reason": "The settlement batch amount (INR 4406.63) matches with option C's amount (3350.80), and both have the same date (2026-07-10). The other options do not match either in amount or date.",
       "verdict": "rejected_by_arithmetic"
     },
     {
-      "batch": "setl_82400025",
+      "batch": "setl_82400009",
       "candidates": [
-        "bank:0030",
-        "bank:0040",
+        "bank:0036",
+        "bank:0048",
         "bank:0041"
       ],
-      "chose": "bank:0041",
-      "reason": "The amounts (16188.64 vs 20402.61) and dates (2026-07-25 vs 2026-07-28) do not match any other transactions listed, making it the closest to the given settlement batch.",
-      "verdict": "rejected_by_arithmetic"
+      "chose": null,
+      "reason": "The amounts (5003.96, 5239.36, and 5540.58) do not match the given net settlement amount of INR 4710.38. Additionally, there is no clear connection between these transactions and the specific date men"
     },
     {
-      "batch": "setl_82400034",
+      "batch": "setl_82400010",
       "candidates": [
-        "bank:0040",
-        "bank:0030",
-        "bank:0041"
+        "bank:0038",
+        "bank:0058",
+        "bank:0059"
       ],
-      "chose": "bank:0041",
-      "reason": "The amounts (14270.59 vs 11075.35) and dates (2026-08-06 vs 2026-08-04) match between the given settlement batch and option C.",
+      "chose": "bank:0059",
+      "reason": "The amounts (15318.05) match between the settlement batch and the NEFT transaction, and both have the same date (2026-07-13).",
       "verdict": "rejected_by_arithmetic"
     },
     {
       "leg": "invoice_to_bank",
       "bank_line": "bank:0009",
-      "narration": "RTGS-AXISN260711688748-MERIDIAN LBS-PMT AGST BILL",
-      "candidates": [
-        "INV-2627-1095"
-      ],
-      "chose": "INV-2627-1095",
-      "reason": "The narration mentions \"MERIDIAN LBS-PMT AGST BILL\", which corresponds to Meridian Labs as the customer with an invoice date close to the payment date (July 11). The amount matches approximately 7947.",
-      "verdict": "accepted"
-    },
-    {
-      "leg": "invoice_to_bank",
-      "bank_line": "bank:0011",
-      "narration": "RTGS-SBIN0260712759373-PRABHAT PRNTRS-PMT AGST BILL",
+      "narration": "RTGS-ICICN260711244237-PRABHAT PRNTRS-PMT AGST BILL",
       "candidates": [
         "INV-2627-1033"
       ],
       "chose": "INV-2627-1033",
-      "reason": "The narration mentions \"BILL\" which indicates it settles an unpaid invoice.",
+      "reason": "The narration mentions \"PMT AGST BILL\", which indicates an invoice payment settlement. The amount (INR 3350.80) matches the given unexplained credit amount.",
       "verdict": "accepted"
     },
     {
       "leg": "invoice_to_bank",
-      "bank_line": "bank:0038",
-      "narration": "RTGS-ICICN260803863670-EVEREST LGSTCS-PMT AGST BILL",
+      "bank_line": "bank:0010",
+      "narration": "RTGS-AXISN260712726536-MERIDIAN LBS-PMT AGST BILL",
+      "candidates": [
+        "INV-2627-1095"
+      ],
+      "chose": "INV-2627-1095",
+      "reason": "The narration mentions \"MERIDIAN LBS-PMT AGST BILL\", which corresponds to Meridian Labs as the customer with an invoice date close to the payment date (July 12). The amount matches approximately 7947.",
+      "verdict": "accepted"
+    },
+    {
+      "leg": "invoice_to_bank",
+      "bank_line": "bank:0040",
+      "narration": "RTGS-KKBKN260805533437-EVEREST LGSTCS-PMT AGST BILL",
       "candidates": [
         "INV-2627-1020"
       ],
       "chose": "INV-2627-1020",
-      "reason": "The narration mentions \"EVEREST LGSTCS-PMT AGST BILL\", which corresponds to an invoice for Everest Logistics with a gross amount of 6566.17, settling the outstanding balance of INR 6434.85.",
+      "reason": "The narration mentions \"EVEREST LGSTCS-PMT AGST BILL\", which indicates an invoice settlement with Everest Logistics. The amount matches closely (INR 6434.85), though there's a slight discrepancy due t",
       "verdict": "accepted"
     }
   ],
   "metrics": {
     "records": 347,
-    "wall_seconds": 22.4365,
-    "records_per_second": 15,
-    "engine_seconds": 22.4272,
-    "auto_clear_rate": 0.8415,
-    "auto_cleared_records": 292,
+    "wall_seconds": 26.0461,
+    "records_per_second": 13,
+    "engine_seconds": 26.0348,
+    "auto_clear_rate": 0.8386,
+    "auto_cleared_records": 291,
     "links": {
       "invoice_to_payment": {
         "tp": 126,
@@ -3984,16 +4058,25 @@
     "legs_scored": 3,
     "exceptions": {
       "overall": {
-        "tp": 64,
+        "tp": 69,
         "fp": 0,
         "fn": 0,
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
-        "support": 64
+        "support": 69
       },
       "macro_f1": 1.0,
       "per_code": {
+        "AWAITING_SETTLEMENT": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 5
+        },
         "CHARGEBACK_ADJUSTMENT": {
           "tp": 3,
           "fp": 0,
@@ -4150,6 +4233,9 @@
       }
     },
     "confusion": {
+      "AWAITING_SETTLEMENT": {
+        "AWAITING_SETTLEMENT": 5
+      },
       "CHARGEBACK_ADJUSTMENT": {
         "CHARGEBACK_ADJUSTMENT": 3
       },
@@ -4203,12 +4289,13 @@
       }
     },
     "unresolved": {
-      "count": 47,
-      "value_at_risk": "238230.57",
+      "count": 52,
+      "value_at_risk": "230789.31",
       "by_code": {
         "UNEXPECTED_BANK_CREDIT": 7,
         "UNPAID_INVOICE": 6,
         "UNBILLED_PAYMENT": 5,
+        "AWAITING_SETTLEMENT": 5,
         "DUPLICATE_PAYMENT": 4,
         "FUNDS_ON_HOLD": 4,
         "TAX_LINE_MISMATCH": 4,

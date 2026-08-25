@@ -80,6 +80,7 @@ class Injections:
     short_payment: int = 3        # customer underpaid the invoice
     overpayment: int = 2          # customer overpaid it
     part_payment: int = 3         # invoice settled by instalments that add up
+    unsettled_refund: int = 2     # refunded too late in the period to be netted
 
     def total(self) -> int:
         return sum(getattr(self, f) for f in self.__dataclass_fields__)
@@ -363,7 +364,13 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
                 "Dispute adjustment debited by the gateway; no matching ERP entry.")
 
     # --- settle everything that is settleable into daily batches -------------
-    to_settle = [t for t in payments + refunds + adjustments if not t.on_hold]
+    # A refund raised in the last days of the period has not been netted into a
+    # payout yet. It is money about to leave, and it belongs to no batch.
+    late = set()
+    for r in sorted(refunds, key=lambda x: x.created_at, reverse=True)[:inj.unsettled_refund]:
+        late.add(r.entity_id)
+    to_settle = [t for t in payments + refunds + adjustments
+                 if not t.on_hold and t.entity_id not in late]
     by_day: dict[date, list[PGTxn]] = {}
     for t in to_settle:
         settle_day = (t.created_at + timedelta(days=2)).date()
@@ -387,7 +394,22 @@ def build(seed: int = 20260824, n_orders: int = 140, inj: Injections | None = No
         batches.append({"id": sid, "utr": utr, "day": day, "net": net,
                         "members": [m.entity_id for m in members]})
 
-    ds.pg = settled_rows + [p for p in payments if p.on_hold]
+    # Held payments and late refunds are still on the report; they simply
+    # carry no settlement. Dropping them would have removed the very rows
+    # the AWAITING_SETTLEMENT case exists to describe.
+    ds.pg = (settled_rows + [p for p in payments if p.on_hold]
+             + [r for r in refunds if r.entity_id in late])
+
+    # Whatever the reason — raised too late, or sitting in a batch that netted
+    # to nothing and so never left — a refund or adjustment carrying no
+    # settlement is money about to leave that no payout has taken yet. Read off
+    # the finished report, not the rows before settlement, where nothing has a
+    # settlement id yet and every refund looks unsettled.
+    for t in ds.pg:
+        if (t.type in ("refund", "adjustment") and not t.settlement_id
+                and not t.on_hold and t.entity_id not in gt.exceptions):
+            gt.flag(t.entity_id, ExceptionCode.AWAITING_SETTLEMENT,
+                    "No payout has netted this yet.")
     rng.shuffle(ds.pg)
 
     # --- bank statement ------------------------------------------------------

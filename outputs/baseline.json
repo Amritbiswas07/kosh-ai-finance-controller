@@ -1,0 +1,80 @@
+{
+  "records": 347,
+  "configurations": [
+    {
+      "name": "exact identifier only (a spreadsheet)",
+      "true_links": 173,
+      "links_found": 145,
+      "links_missed": 28,
+      "recall": 0.8382,
+      "unlinked_value_paise": 36206984,
+      "per_leg": {
+        "invoice_to_payment": {
+          "tp": 115,
+          "fp": 0,
+          "fn": 11,
+          "precision": 1.0,
+          "recall": 0.9127,
+          "f1": 0.9544,
+          "support": 126
+        },
+        "settlement_to_bank": {
+          "tp": 30,
+          "fp": 0,
+          "fn": 11,
+          "precision": 1.0,
+          "recall": 0.7317,
+          "f1": 0.8451,
+          "support": 41
+        },
+        "invoice_to_bank": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 6,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 6
+        }
+      }
+    },
+    {
+      "name": "deterministic tiers",
+      "true_links": 173,
+      "links_found": 170,
+      "links_missed": 3,
+      "recall": 0.9827,
+      "unlinked_value_paise": 1793307,
+      "per_leg": {
+        "invoice_to_payment": {
+          "tp": 126,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 126
+        },
+        "settlement_to_bank": {
+          "tp": 41,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 41
+        },
+        "invoice_to_bank": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 3,
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.6667,
+          "support": 6
+        }
+      }
+    }
+  ],
+  "value_recovered_vs_spreadsheet_paise": 34413677
+}

@@ -1,6 +1,6 @@
 {
   "seed": 20260824,
-  "generated_at": "2026-08-26T03:02:07",
+  "generated_at": "2026-08-26T03:22:11",
   "counts": {
     "erp_invoices": 135,
     "pg_transactions": 151,
@@ -26,13 +26,14 @@
     "tds_deduction": 3,
     "short_payment": 3,
     "overpayment": 2,
-    "part_payment": 3
+    "part_payment": 3,
+    "unsettled_refund": 2
   },
-  "injected_total": 67,
-  "ground_truth_exceptions": 64,
+  "injected_total": 69,
+  "ground_truth_exceptions": 69,
   "true_links": {
     "invoice_to_payment": 126,
-    "payment_to_batch": 141,
+    "payment_to_batch": 140,
     "batch_to_bank": 41,
     "invoice_to_bank": 6
   }
